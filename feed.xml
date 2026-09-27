@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel>
+  <title>Chinese Room — AI research</title>
+  <link>https://chineseroom.io/</link>
+  <description>Independent research into how AI models work on the inside.</description>
+  <language>en-gb</language>
+  <item><title>AI, a Lego robot and a Rubik's cube</title><link>https://chineseroom.io/#article/mindcuber</link><guid>https://chineseroom.io/#article/mindcuber</guid><pubDate>Sat, 26 Sep 2026 09:00:00 +0000</pubDate><description>Building and training a neural network to solve a Rubik's cube, then handing the answer to a Lego Mindstorms robot.</description></item>
+  <item><title>How easy is it to make AI dangerous? Very easy.</title><link>https://chineseroom.io/#article/abliteration</link><guid>https://chineseroom.io/#article/abliteration</guid><pubDate>Sat, 15 Aug 2026 09:00:00 +0000</pubDate><description>A journey inside an open-weight LLM to find how refusal manifests itself.</description></item>
+  <item><title>NVFP4 quantization of Mixtral 8×7B</title><link>https://chineseroom.io/#article/nvfp4</link><guid>https://chineseroom.io/#article/nvfp4</guid><pubDate>Mon, 15 Jun 2026 09:00:00 +0000</pubDate><description>LLM quantization explained and demonstrated on a mixture-of-experts model.</description></item>
+  <item><title>Building a multi-agent workflow in Haskell</title><link>https://chineseroom.io/#article/haskell</link><guid>https://chineseroom.io/#article/haskell</guid><pubDate>Wed, 15 Apr 2026 09:00:00 +0000</pubDate><description>The benefits of strong type systems for agent workflows.</description></item>
+</channel></rss>
