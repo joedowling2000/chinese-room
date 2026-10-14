@@ -45,41 +45,71 @@ Maths.scene({
       ctx.globalAlpha=.1;ctx.fillStyle=k.INK;ctx.fill();ctx.globalAlpha=1;
       const circle=[];for(let i=0;i<=96;i++){const t=i/96*Math.PI*2;circle.push(T(Math.cos(t),Math.sin(t)));}
       stroke(ctx,circle,.75,1);
-      const o=T(0,0),I=T(1,0),J=T(0,1);
-      arrow(ctx,o[0],o[1],I[0],I[1],1,1.8);arrow(ctx,o[0],o[1],J[0],J[1],1,1.8);
-      dot(ctx,I[0],I[1],4,1);dot(ctx,J[0],J[1],4,1);
-      label(ctx,'î',I[0]+10,I[1]-12,.95);label(ctx,'ĵ',J[0]+10,J[1]-12,.95);
+      const o=T(0,0),I=T(1,0),J=T(0,1),w0=k.world;
+      k.tint(ctx,w0.accent,()=>{arrow(ctx,o[0],o[1],I[0],I[1],1,1.8);dot(ctx,I[0],I[1],4,1);label(ctx,'î',I[0]+10,I[1]-12,.95);});
+      k.tint(ctx,w0.secondary,()=>{arrow(ctx,o[0],o[1],J[0],J[1],1,1.8);dot(ctx,J[0],J[1],4,1);label(ctx,'ĵ',J[0]+10,J[1]-12,.95);});
     }
 
     // Input (x, y) lands at world (ax + by, cx + dy) on the ground; h lifts it.
     function paintAbstract(s){
-      const {ctx}=s,[a,b,c,d]=shown;
+      const {ctx}=s,[a,b,c,d]=shown,ac=k.world.accent,se=k.world.secondary;
       const W=(x,y,h=0)=>[a*x+b*y,h,c*x+d*y];
       const feet=W(...me),eye=[feet[0],.55,feet[2]];
       const P=persp(s,eye,heading(look.yaw,look.pitch),[0,1,0],1.2);
       const horizon=[];
       for(let n=0;n<=160;n++){const t=n/160*Math.PI*2;horizon.push([eye[0]+80*Math.sin(t),0,eye[2]+80*Math.cos(t)]);}
-      pline(ctx,P,horizon,.3,.8,1e9);
+      k.tint(ctx,se,()=>pline(ctx,P,horizon,.3,.8,1e9));
       const L=16,ox=Math.round(me[0]),oy=Math.round(me[1]);
-      for(let i=-L;i<=L;i++){
-        const r1=[],r2=[];
-        for(let j=-L;j<=L;j+=.5){r1.push(W(ox+i,oy+j));r2.push(W(ox+j,oy+i));}
-        pline(ctx,P,r1,ox+i===0?.85:.4,.8,7);pline(ctx,P,r2,oy+i===0?.85:.4,.8,7);
+      k.tint(ctx,ac,()=>{
+        for(let i=-L;i<=L;i++){
+          const r1=[],r2=[];
+          for(let j=-L;j<=L;j+=.5){r1.push(W(ox+i,oy+j));r2.push(W(ox+j,oy+i));}
+          pline(ctx,P,r1,ox+i===0?.85:.36,.8,9);pline(ctx,P,r2,oy+i===0?.85:.36,.8,9);
+        }
+      });
+      // The lattice cathedral: every gate is built in input space and pushed
+      // through W, so a shear or a collapse rewrites the whole architecture.
+      for(let row=-8;row<=12;row+=2){
+        const gate=[W(-2.5,row,0),W(-2.5,row,3.2),W(2.5,row,3.2),W(2.5,row,0)];
+        k.tint(ctx,ac,()=>{
+          pline(ctx,P,[...gate,gate[0]],.7,1.2,16);
+          const beam=[];for(let n=0;n<=12;n++)beam.push(W(-2.5+5*n/12,row,2.8));
+          pline(ctx,P,beam,.55,.9,16);
+          const arch=[];for(let n=0;n<=16;n++){const u=n/16;arch.push(W(-2.5+5*u,row,3.2+Math.sin(u*Math.PI)*.7));}
+          pline(ctx,P,arch,.8,1,16);
+        });
+        k.surface(ctx,P,[W(-2.5,row,0),W(-2.5,row,3.2),W(-2.5,row+.25,3.2),W(-2.5,row+.25,0)],ac,.06);
+        k.surface(ctx,P,[W(2.5,row,0),W(2.5,row+.25,0),W(2.5,row+.25,3.2),W(2.5,row,3.2)],ac,.06);
+        k.beacon(ctx,P,W(0,row,3.9),se,.06,.8);
       }
+      // Ceiling ribs joining the gate tops.
+      k.tint(ctx,se,()=>[-2.5,2.5].forEach(x=>{
+        const rib=[];for(let row=-8;row<=12;row+=.5)rib.push(W(x,row,3.2));
+        pline(ctx,P,rib,.3,.7,16);
+      }));
       for(let i=-6;i<=6;i++)for(let j=-6;j<=6;j++){
         const x=ox+i,y=oy+j;
         if(Math.hypot(x-me[0],y-me[1])<.3)continue;
-        pline(ctx,P,[W(x,y),W(x,y,.15),W(x,y,.3),W(x,y,.45)],.75,1,7);
-        const p=pdot(ctx,P,W(x,y,.45),.03,.95,false,7);
-        if(p&&Math.hypot(x-me[0],y-me[1])<2.4)label(ctx,`(${x}, ${y})`,p[0],p[1]-13,.75*Math.exp(-p[2]/7),'center');
+        k.tint(ctx,se,()=>{
+          pline(ctx,P,[W(x,y),W(x,y,.15),W(x,y,.3),W(x,y,.45)],.75,1,7);
+          const p=pdot(ctx,P,W(x,y,.45),.03,.95,false,7);
+          if(p&&Math.hypot(x-me[0],y-me[1])<2.4)label(ctx,`(${x}, ${y})`,p[0],p[1]-13,.75*Math.exp(-p[2]/7),'center');
+        });
       }
+      // Your unit neighbourhood: a filled tile and a ring, plus a light that
+      // travels the true transformed circle around you.
+      k.surface(ctx,P,[W(me[0],me[1],.002),W(me[0]+1,me[1],.002),W(me[0]+1,me[1]+1,.002),W(me[0],me[1]+1,.002)],ac,.08);
       const ring=[];
       for(let n=0;n<=96;n++){const t=n/96*Math.PI*2;ring.push(W(me[0]+Math.cos(t),me[1]+Math.sin(t),.005));}
-      pline(ctx,P,ring,.85,1.3,1e9);
-      [[1,0,'î'],[0,1,'ĵ']].forEach(([dx,dy,name])=>{
-        const ray=[];for(let n=0;n<=20;n++)ray.push(W(me[0]+dx*n/20,me[1]+dy*n/20,.01));
-        pline(ctx,P,ray,1,2.2,1e9);
-        const p=P(...ray[20]);if(p)label(ctx,name,p[0]+8,p[1]-12,1);
+      k.tint(ctx,ac,()=>pline(ctx,P,ring,.85,1.3,1e9));
+      const ta=s.time*.4;
+      k.beacon(ctx,P,W(me[0]+Math.cos(ta),me[1]+Math.sin(ta),.02),se,.09,1);
+      [[1,0,'î',ac],[0,1,'ĵ',se]].forEach(([dx,dy,name,col])=>{
+        k.tint(ctx,col,()=>{
+          const ray=[];for(let n=0;n<=20;n++)ray.push(W(me[0]+dx*n/20,me[1]+dy*n/20,.01));
+          pline(ctx,P,ray,1,2.2,1e9);
+          const p=P(...ray[20]);if(p)label(ctx,name,p[0]+8,p[1]-12,1);
+        });
       });
     }
 
@@ -130,9 +160,10 @@ Maths.scene({
 
     return {
       onMode:sync,
+      resetView(){walk.stop();me=[0,0];goal=[0,0];look.yaw=.6;look.pitch=-.32;s.camera=null;sync();},
       onKey(key){
         const m={ArrowRight:[1,0],d:[1,0],ArrowLeft:[-1,0],a:[-1,0],ArrowUp:[0,1],w:[0,1],ArrowDown:[0,-1],s:[0,-1]}[key];
-        if(m){step(...m);return true;}
+        if(m){step(m[0]*.25,m[1]*.25);return true;}
         if(key==='q'||key==='e'){look.yaw+=key==='e'?.25:-.25;s.draw();return true;}
         return false;
       }

@@ -57,21 +57,48 @@ Maths.scene({
     // The sheet is drawn 2.2 times life size so that you stand well clear of the creases.
     const big=(x,y,p)=>lift(x,y,p).map(c=>c*2.2);
     function paintAbstract(s){
-      const {ctx}=s,p=params(),you=big(me[0],me[1],p),fold=clamp(p.t-1,0,1);
+      const {ctx}=s,p=params(),you=big(me[0],me[1],p),fold=clamp(p.t-1,0,1),ac=k.world.accent,se=k.world.secondary;
       const P=persp(s,[you[0],you[1]+.45,you[2]],heading(look.yaw,look.pitch),[0,1,0],1.25);
+      // The membrane itself: low-alpha tiles laid over the same mapped sheet.
+      for(let ix=0;ix<12;ix++)for(let iy=0;iy<12;iy++){
+        const x=-3+ix*.5,y=-3+iy*.5,inner=Math.hypot(x+.25,y+.25)<1.1;
+        k.surface(ctx,P,[big(x,y,p),big(x+.5,y,p),big(x+.5,y+.5,p),big(x,y+.5,p)],inner?ac:se,inner?.05:.035);
+      }
       for(let i=-24;i<=24;i++){
         const v=i/8,a=[],b=[];
         for(let j=0;j<=96;j++){const q=-3+j/16;a.push(big(v,q,p));b.push(big(q,v,p));}
-        pline(ctx,P,a,i===0?.85:.36,.7,10);pline(ctx,P,b,i===0?.85:.36,.7,10);
+        const al=i===0?.85:.36;
+        k.tint(ctx,i%4?ac:se,()=>{pline(ctx,P,a,al,.7,10);pline(ctx,P,b,al,.7,10);});
+      }
+      // Ribs rise off the floor wherever the activation has lifted the sheet.
+      if(fold>0)for(let i=-10;i<=10;i++)for(let j=-10;j<=10;j++){
+        const q=big(i/4,j/4,p);
+        if(q[1]>.06)k.tint(ctx,ac,()=>pline(ctx,P,[[q[0],0,q[2]],q],.5*Math.min(1,fold),.7,10));
       }
       // The creases: the two axes everything is pressed against, and the corner where the walls meet.
       if(fold>0)[[1,0,0],[0,0,1],[0,1,0]].forEach(([x,y,z])=>{
         const c=[];for(let n=0;n<=40;n++)c.push([x*n/4,y*n/4,z*n/4]);
-        pline(ctx,P,c,.95*fold,1.4,14);
+        k.tint(ctx,se,()=>pline(ctx,P,c,.95*fold,1.4,14));
+      });
+      // Tracers sliding along real input rows through the map.
+      for(let i=0;i<5;i++){
+        const row=-2+i,t=((s.time*.12)+i*.2)%1,q=big(-3+6*t,row,p);
+        k.beacon(ctx,P,[q[0],q[1]+.03,q[2]],se,.05,.8);
+      }
+      // One input unit square, every edge sampled through the real map so the
+      // crease shows where the activation bends it.
+      k.tint(ctx,se,()=>{
+        const sq=[];
+        for(let n=0;n<=16;n++)sq.push(big(n/16,0,p));
+        for(let n=1;n<=16;n++)sq.push(big(1,n/16,p));
+        for(let n=1;n<=16;n++)sq.push(big(1-n/16,1,p));
+        for(let n=1;n<=16;n++)sq.push(big(0,1-n/16,p));
+        pline(ctx,P,sq,.9,1.4,14);
       });
       for(const [x,y,ring] of pts){
         const q=big(x,y,p);
-        pdot(ctx,P,[q[0],q[1]+.08,q[2]],ring?.07:.055,.95,!!ring,10);
+        if(ring)k.tint(ctx,se,()=>pdot(ctx,P,[q[0],q[1]+.08,q[2]],.07,.95,true,10));
+        else k.beacon(ctx,P,[q[0],q[1]+.08,q[2]],ac,.045,.9);
       }
     }
 
@@ -120,6 +147,7 @@ Maths.scene({
 
     return {
       onMode:update,
+      resetView(){me=[.6,.15];look.yaw=-2.36;look.pitch=-.06;s.camera=null;s.draw();},
       onKey(key){
         if(key==='ArrowUp'||key==='w'){walk(.18);return true;}
         if(key==='ArrowDown'||key==='s'){walk(-.18);return true;}

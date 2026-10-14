@@ -27,6 +27,13 @@ The site is hosted on Firebase Hosting in the `chineseroom-site` GCP project and
 
 The site includes browser-only interactive experiments and decorative mathematical artwork. No experiment makes a request to a hosted model or API. The research pages link to the original files in `articles/`.
 
+## The maths of AI
+
+- `http://localhost:8000/#maths` — seven interactive illustrations.
+- Each topic has a flat diagram and an **Abstract** first-person mode. Choose **Step inside →** on a topic or **Enter the experience** in the hero to go straight into the world.
+- Inside a world: drag to look around, use the on-screen pad or arrow keys / W A S D to move, follow the guide card (three short lessons per world), and jump between worlds with the numbered strip along the bottom. **Controls** opens the original sliders; **Pause motion** freezes all animation; **Exit** or `Esc` returns to the page.
+- Motion is never required: with `prefers-reduced-motion` the worlds start paused and every action snaps instead of animating.
+
 ## Interactive lab
 
 - `http://localhost:8000/#lab` — experiment index

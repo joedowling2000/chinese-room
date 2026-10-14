@@ -51,24 +51,56 @@ Maths.scene({
       dot(ctx,O[0],O[1],6,.95,true);label(ctx,'output',O[0]+10,O[1]+12,.7);
       arrow(ctx,Z[0],Z[1],Q[0],Q[1],1,1.8);dot(ctx,Q[0],Q[1],4.5,1);label(ctx,'q',Q[0]+10,Q[1]-12,.95);
     }
-    // You stand at the centre; the keys are pillars on the floor, taller and brighter the more you attend to them.
+    // You stand at the centre; the keys are lanterns on the floor, taller and
+    // brighter the more you attend to them. Floor arcs show the weights.
     function paintAbstract(s){
-      const {ctx}=s,S=2.4,eye=[0,.55,0],P=persp(s,eye,heading(look.yaw,look.pitch),[0,1,0],1.3);
-      for(const r of [1,2,3]){const c=[];for(let n=0;n<=120;n++){const t=n/120*Math.PI*2;c.push([r*S*Math.sin(t),0,r*S*Math.cos(t)]);}pline(ctx,P,c,.32,.7,12);}
-      for(let n=0;n<16;n++){const t=n/16*Math.PI*2,sp=[];for(let m=1;m<=24;m++)sp.push([m/8*S*Math.sin(t),0,m/8*S*Math.cos(t)]);pline(ctx,P,sp,.16,.6,12);}
+      const {ctx}=s,S=2.4,eye=[0,.55,0],ac=k.world.accent,se=k.world.secondary;
+      const P=persp(s,eye,heading(look.yaw,look.pitch),[0,1,0],1.3);
+      for(const r of [1,2,3]){const c=[];for(let n=0;n<=120;n++){const t=n/120*Math.PI*2;c.push([r*S*Math.sin(t),0,r*S*Math.cos(t)]);}pline(ctx,P,c,.22,.7,12);}
+      for(let n=0;n<16;n++){const t=n/16*Math.PI*2,sp=[];for(let m=1;m<=24;m++)sp.push([m/8*S*Math.sin(t),0,m/8*S*Math.cos(t)]);pline(ctx,P,sp,.12,.6,12);}
+      const top=weights.indexOf(Math.max(...weights));
+      // Floor: one contiguous ring of arcs, each segment's extent its weight.
+      let a0=-Math.PI/2;
+      keys.forEach((kk,i)=>{
+        const w=weights[i],a1=a0+w*Math.PI*2,arc=[];
+        const segs=Math.max(2,Math.round(w*140));
+        for(let n=0;n<=segs;n++){const t=a0+(a1-a0)*n/segs;arc.push([3.1*Math.sin(t),.005,3.1*Math.cos(t)]);}
+        k.tint(ctx,i===top?se:ac,()=>pline(ctx,P,arc,.3+.7*w,1.5,1e9));
+        for(let n=0;n<segs;n++)k.surface(ctx,P,[[0,.004,0],arc[n],arc[n+1]],i===top?se:ac,.05+.1*w);
+        a0=a1;
+      });
       const chest=V.add(eye,V.add(V.mul(heading(look.yaw),.3),[0,-.2,0]));
       keys.forEach((kk,i)=>{
-        const w=weights[i],x=kk.x*S,z=kk.y*S,h=1+1.8*w,col=[],thread=[];
-        for(let n=0;n<=8;n++)col.push([x,h*n/8,z]);
-        pline(ctx,P,col,.5+.5*w,1+2*w,14);
-        for(let n=0;n<=24;n++){const t=n/24;thread.push([lerp(chest[0],x,t),lerp(chest[1],h,t)+Math.sin(t*Math.PI)*.3,lerp(chest[2],z,t)]);}
-        pline(ctx,P,thread,.06+.9*w,.5+2.6*w,1e9);
-        const p=pdot(ctx,P,[x,h,z],.05+.05*w,.95,false,14);
-        if(p)label(ctx,`${kk.t} · ${Math.round(w*100)}%`,p[0],p[1]-16,.9,'center');
+        const w=weights[i],x=kk.x*S,z=kk.y*S,h=1+1.8*w,col=i===top?se:ac,rr=.15+.6*w;
+        const colLine=[];for(let n=0;n<=8;n++)colLine.push([x,h*n/8,z]);
+        k.tint(ctx,col,()=>pline(ctx,P,colLine,.4+.4*w,.8,14));
+        // An open lantern: a horizontal square and a vertical diamond, floating
+        // at the pylon's top. Its size is the attention weight.
+        const sq=[];for(let n=0;n<=4;n++){const t=n/4*Math.PI*2+Math.PI/4;sq.push([x+rr*Math.cos(t),h,z+rr*Math.sin(t)]);}
+        const dm=[[x,h+rr*1.3,z],[x+rr,h,z],[x,h-rr*1.3,z],[x-rr,h,z],[x,h+rr*1.3,z]];
+        const halo=[];for(let n=0;n<=48;n++){const t=n/48*Math.PI*2;halo.push([x+rr*Math.cos(t),h,z+rr*Math.sin(t)]);}
+        k.tint(ctx,col,()=>{pline(ctx,P,halo,.5+.5*w,1.2,14);pline(ctx,P,dm,.5+.5*w,1.2,14);});
+        k.surface(ctx,P,[dm[0],dm[1],dm[4],dm[3]],col,.045);
+        k.surface(ctx,P,[dm[1],dm[2],dm[3],dm[0]],col,.045);
+        // Fine threads from your chest to the key — up to three, weight-bright.
+        const strandCount=1+Math.round(w*2);
+        for(let st=0;st<strandCount;st++){
+          const off=(st-(strandCount-1)/2)*.05,thread=[];
+          for(let n=0;n<=24;n++){const t=n/24;thread.push([lerp(chest[0],x,t)+off*Math.sign(z||1),lerp(chest[1],h,t)+Math.sin(t*Math.PI)*.3,lerp(chest[2],z,t)-off*Math.sign(x||1)]);}
+          k.tint(ctx,col,()=>pline(ctx,P,thread,.06+.85*w,.5+2*w,1e9));
+        }
+        const tp=(s.time*.22+i/8)%1;
+        k.beacon(ctx,P,[lerp(chest[0],x,tp),lerp(chest[1],h,tp)+Math.sin(tp*Math.PI)*.3,lerp(chest[2],z,tp)],col,.05,.4+.6*w);
+        // A vaulted rib from above your head out to the pylon — pure architecture.
+        const vault=[];for(let n=0;n<=20;n++){const t=n/20;vault.push([lerp(0,x,t),lerp(2.7,h,t)+Math.sin(t*Math.PI)*.4,lerp(0,z,t)]);}
+        pline(ctx,P,vault,.08,.6,16);
+        const p=k.beacon(ctx,P,[x,h,z],col,.06+.05*w,.95);
+        if(p)label(ctx,`${kk.t} · ${Math.round(w*100)}%`,p[0],p[1]-Math.max(14,rr*P.f/p[2])-8,.9,'center');
       });
       const o=keys.reduce((a,kk,i)=>[a[0]+weights[i]*kk.x*S,a[1]+weights[i]*kk.y*S],[0,0]),ring=[];
       for(let n=0;n<=48;n++){const t=n/48*Math.PI*2;ring.push([o[0]+.24*Math.sin(t),.01,o[1]+.24*Math.cos(t)]);}
-      pline(ctx,P,ring,1,1.5,1e9);
+      k.tint(ctx,ac,()=>pline(ctx,P,ring,1,1.5,1e9));
+      k.beacon(ctx,P,[o[0],.03,o[1]],ac,.12,.95);
       const po=P(o[0],.01,o[1]);
       if(po)label(ctx,'what you become',po[0],po[1]+18,.75,'center');
     }
@@ -107,6 +139,7 @@ Maths.scene({
 
     return {
       onMode(on){if(on)look.yaw=Math.atan2(q[0],q[1]);update();},
+      resetView(){look.yaw=Math.atan2(q[0],q[1]);look.pitch=-.12;s.camera=null;s.draw();},
       onKey(key){
         const turns={ArrowLeft:-.15,a:-.15,ArrowRight:.15,d:.15},leans={ArrowUp:.15,w:.15,ArrowDown:-.15,s:-.15};
         if(key in turns){aim(look.yaw+turns[key],lean());return true;}

@@ -57,20 +57,66 @@ Maths.scene({
     // The fast wheel spins you round the tunnel; the slow wheel carries you along it.
     function paintAbstract(s){
       const {ctx}=s,p=pos(),u=p*w1*ratio(),here=frame(p);
-      const F0=V.mul([-Math.sin(u),0,Math.cos(u)],back?-1:1),U=V.mul(here.nrm,-1),side=V.norm(V.cross(U,F0));
+      // Near the tunnel centre, looking into the bend so only the local tube
+      // is drawn — the far side of the torus stays out of view.
+      const sign=back?-1:1,U0=V.mul(here.nrm,-1);
+      const eye=V.add(here.pt,V.mul(U0,r*.82));
+      const target=[R*Math.cos(u+sign*.4),0,R*Math.sin(u+sign*.4)];
+      const F0=V.norm(V.sub(target,eye)),side=V.norm(V.cross(U0,F0)),U=V.cross(F0,side);
       const F=V.add(V.add(V.mul(F0,Math.cos(look.yaw)*Math.cos(look.pitch)),V.mul(side,Math.sin(look.yaw)*Math.cos(look.pitch))),V.mul(U,Math.sin(look.pitch)));
-      const P=persp(s,V.add(here.pt,V.mul(U,.2)),F,U,1.35);
-      for(let j=0;j<24;j++){const v=j/24*Math.PI*2,c=[];for(let i=0;i<=180;i++)c.push(T(i/180*Math.PI*2,v));pline(ctx,P,c,.34,.6,4);}
-      for(let j=0;j<90;j++){const a=j/90*Math.PI*2,c=[];for(let i=0;i<=28;i++)c.push(T(a,i/28*Math.PI*2));pline(ctx,P,c,.3,.6,4);}
+      const P=persp(s,eye,F,U,1.35),ac=k.world.accent,se=k.world.secondary;
+      // Longitudinal ribs, only around the local stretch of tunnel.
+      for(let j=0;j<24;j++){
+        const v=j/24*Math.PI*2,c=[];
+        for(let i=0;i<=108;i++)c.push(T(u-1.35+2.7*i/108,v));
+        k.tint(ctx,j%2?se:ac,()=>pline(ctx,P,c,.6,.9,4));
+      }
+      // Hoops around the tube; every fourth is a lit rib with a broad faint pass.
+      for(let j=-24;j<=24;j++){
+        const a=u+j*.055,c=[];
+        for(let i=0;i<=48;i++)c.push(T(a,i/48*Math.PI*2));
+        const strong=j%4===0;
+        k.tint(ctx,j%2?ac:se,()=>{
+          if(strong)pline(ctx,P,c,.08,5,4);
+          pline(ctx,P,c,strong?.9:.6,strong?1.4:.9,4);
+        });
+      }
+      // Translucent wall facets between nearby hoop pairs.
+      for(let jj=-20;jj<=20;jj+=2){
+        const a=u+jj*.055;
+        for(let seg=0;seg<12;seg++){
+          const v0=seg*Math.PI/6,v1=v0+Math.PI/6;
+          k.surface(ctx,P,[T(a,v0),T(a+.11,v0),T(a+.11,v1),T(a,v1)],seg%2?ac:se,.045);
+        }
+      }
       const done=[],ahead=[];
       for(let t=0;t<=120;t+=.05)(t<=p?done:ahead).push(above(t,-.015));
       done.push(above(p,-.015));ahead.unshift(above(p,-.015));
-      pline(ctx,P,ahead,.25,.8,4);pline(ctx,P,done,.95,1.6,6);
+      pline(ctx,P,ahead,.55,1.3,4);
+      k.tint(ctx,ac,()=>pline(ctx,P,done,.95,1.6,6));
+      // Packets of light riding the rail behind and ahead of you.
+      for(let i=0;i<3;i++){
+        const t=(s.time*7+i*40)%120;
+        k.beacon(ctx,P,above(t,-.015),i===0?se:ac,.06,.9);
+      }
       for(let n=0;n<=Math.min(120,Math.floor(p+1e-6));n++){
         const q=above(n,-.04);
-        pdot(ctx,P,q,.07,.18,false,6);
+        k.beacon(ctx,P,q,se,.05,.5);
         const pp=pdot(ctx,P,q,.028,1,false,6);
         if(pp&&pp[2]<2.2)label(ctx,String(n),pp[0],pp[1]-14,.85*Math.exp(-pp[2]/6),'center');
+      }
+      // Two phase dials under the title: the fast pair and the slow pair.
+      if(s.w>760){
+        const dials=[[p*w1,'fast',ac],[p*w1*ratio(),'slow',se]];
+        dials.forEach(([a,name,col],i)=>{
+          const cx2=48+i*74,cy2=176,r2=17;
+          ctx.globalAlpha=.5;ctx.strokeStyle=col;ctx.lineWidth=.8;
+          ctx.beginPath();ctx.arc(cx2,cy2,r2,0,Math.PI*2);ctx.stroke();
+          ctx.globalAlpha=.95;ctx.beginPath();ctx.moveTo(cx2,cy2);
+          ctx.lineTo(cx2+Math.cos(-a)*r2*.8,cy2+Math.sin(-a)*r2*.8);ctx.stroke();
+          ctx.globalAlpha=1;
+          label(ctx,name,cx2,cy2+r2+10,.7,'center');
+        });
       }
     }
 
@@ -123,6 +169,7 @@ Maths.scene({
         if(!on&&back)lookBack();
         look.yaw=0;look.pitch=0;update();
       },
+      resetView(){glide.stop();if(back)lookBack();look.yaw=0;look.pitch=0;s.camera=null;s.draw();},
       onKey(key){
         if(key==='ArrowUp'||key==='w'){hop(1);return true;}
         if(key==='ArrowDown'||key==='s'){hop(-1);return true;}

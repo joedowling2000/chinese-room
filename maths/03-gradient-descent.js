@@ -62,22 +62,54 @@ Maths.scene({
       dot(ctx,b[0],b[1],5.5,1);
     }
     function paintAbstract(s){
-      const {ctx}=s,feet=[ball[0],ground(...ball),ball[1]];
-      const P=persp(s,[feet[0],feet[1]+.16,feet[2]],heading(look.yaw,look.pitch),[0,1,0],1.25);
+      const {ctx}=s,feet=[ball[0],ground(...ball),ball[1]],ac=k.world.accent,se=k.world.secondary;
+      const P=persp(s,[feet[0],feet[1]+.24,feet[2]],heading(look.yaw,look.pitch),[0,1,0],1.25);
+      // Translucent terrain strips, warm in the hollows, cool on the heights,
+      // painted far to near so the valley reads as ground rather than fog.
+      const rows=[];
+      for(let i=0;i<26;i++){
+        const z0=-L+i*2*L/26,z1=z0+2*L/26,d=Math.abs((z0+z1)/2-ball[1]);
+        rows.push([d,z0,z1]);
+      }
+      rows.sort((a,b)=>b[0]-a[0]);
+      for(const [,z0,z1] of rows){
+        const g=(ground(ball[0],z0)+ground(ball[0],z1))/2;
+        for(let j=0;j<13;j++){
+          const x0=-L+j*2*L/13,x1=x0+2*L/13;
+          k.surface(ctx,P,[[x0,ground(x0,z0),z0],[x1,ground(x1,z0),z0],[x1,ground(x1,z1),z1],[x0,ground(x0,z1),z1]],g<.55?ac:se,.05);
+        }
+      }
       for(let i=0;i<=44;i++){
         const a=-L+i*2*L/44,r1=[],r2=[];
         for(let j=0;j<=88;j++){const b=-L+j*2*L/88;r1.push([a,ground(a,b),b]);r2.push([b,ground(b,a),a]);}
-        pline(ctx,P,r1,.6,.7,1.5);pline(ctx,P,r2,.6,.7,1.5);
+        k.tint(ctx,se,()=>{pline(ctx,P,r1,.5,.7,3.5);pline(ctx,P,r2,.5,.7,3.5);});
       }
-      trail.forEach(([x,z])=>pdot(ctx,P,[x,ground(x,z)+.004,z],.012,.9,false,3));
+      // A local direction field: short downhill shafts at sampled sites, each
+      // with a packet running along it. They only report the local slope.
+      for(let ix=0;ix<8;ix++)for(let iz=0;iz<8;iz++){
+        const sx=-L+.4+ix*(2*L-.8)/7,sz=-L+.4+iz*(2*L-.8)/7,[gx,gz]=grad(sx,sz),g=Math.hypot(gx,gz);
+        if(g<.05)continue;
+        const ux=-gx/g,uz=-gz/g,len=.22,t=((s.time*.5)+ix*.13+iz*.29)%1;
+        k.tint(ctx,ac,()=>pline(ctx,P,[[sx,ground(sx,sz)+.012,sz],[sx+ux*len,ground(sx+ux*len,sz+uz*len)+.012,sz+uz*len]],.5,.8,4));
+        const px=sx+ux*len*t,pz=sz+uz*len*t;
+        k.beacon(ctx,P,[px,ground(px,pz)+.02,pz],ac,.035,.7);
+      }
+      // The light trail: every step you have already taken.
+      const path=trail.slice(-80).map(([x,z])=>[x,ground(x,z)+.006,z]);
+      k.tint(ctx,se,()=>pline(ctx,P,path,.95,1.8,6));
+      path.forEach((q,i)=>{if(i%4===0)k.beacon(ctx,P,q,se,.03,.8);});
       // The only thing you can sense: an arrow at your feet pointing downhill, longer where it is steeper.
       const [gx,gz]=grad(...ball),g=Math.hypot(gx,gz);
       if(g>1e-4){
         const len=clamp(.25+g*.5,.25,.7),ux=-gx/g,uz=-gz/g,on=(x,z)=>[x,ground(x,z)+.01,z],shaft=[];
         for(let n=0;n<=12;n++)shaft.push(on(ball[0]+ux*len*n/12,ball[1]+uz*len*n/12));
         const bx=ball[0]+ux*len*.78,bz=ball[1]+uz*len*.78,w=len*.14;
-        pline(ctx,P,shaft,1,2,1e9);
-        pline(ctx,P,[on(bx-uz*w,bz+ux*w),shaft[12],on(bx+uz*w,bz-ux*w)],1,2,1e9);
+        k.tint(ctx,ac,()=>{
+          pline(ctx,P,shaft,1,2,1e9);
+          pline(ctx,P,[on(bx-uz*w,bz+ux*w),shaft[12],on(bx+uz*w,bz-ux*w)],1,2,1e9);
+        });
+        const t=(s.time*.8)%1;
+        k.beacon(ctx,P,on(ball[0]+ux*len*t,ball[1]+uz*len*t),ac,.05,.9);
       }
     }
 
@@ -129,6 +161,7 @@ Maths.scene({
 
     return {
       onMode(on){if(on&&status==='ready')faceDownhill();update();},
+      resetView(){faceDownhill();look.pitch=-.42;s.camera=null;s.draw();},
       onKey(key){
         if(key==='ArrowUp'||key==='w'){once();return true;}
         if(key==='r'){toggleRun();return true;}

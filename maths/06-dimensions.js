@@ -70,22 +70,37 @@ Maths.scene({
       label(ctx,'cos θ',x1,y0+38,.55,'right');
     }
     function paintAbstract(s){
-      const {ctx}=s,P=persp(s,[0,0,0],heading(look.yaw,look.pitch),[0,1,0],1.3),Rs=10;
+      const {ctx}=s,P=persp(s,[0,0,0],heading(look.yaw,look.pitch),[0,1,0],1.3),Rs=10,ac=k.world.accent,se=k.world.secondary;
       const at=(th,ph)=>[Rs*Math.sin(th)*Math.cos(ph),Rs*Math.cos(th),Rs*Math.sin(th)*Math.sin(ph)];
       const ring=(th,alpha,width,dashed)=>{
         const c=[];for(let n=0;n<=200;n++)c.push(at(th,n/200*Math.PI*2));
         if(dashed)ctx.setLineDash([3,5]);
         pline(ctx,P,c,alpha,width,1e9);ctx.setLineDash([]);
       };
-      ring(Math.PI/2,.6,1);
+      k.tint(ctx,ac,()=>ring(Math.PI/2,.6,1));
       ring(Math.acos(.1),.35,.7,true);ring(Math.acos(-.1),.35,.7,true);
       [Math.PI/6,Math.PI/3,2*Math.PI/3,5*Math.PI/6].forEach(th=>ring(th,.12,.6));
-      for(let m=0;m<12;m++){const ph=m/12*Math.PI*2+spin,c=[];for(let n=0;n<=60;n++)c.push(at(n/60*Math.PI,ph));pline(ctx,P,c,.07,.6,1e9);}
-      shown.theta.forEach((th,i)=>{const p=P(...at(th,phis[i]+spin));if(p)dot(ctx,p[0],p[1],sizes[i],glow[i]);});
+      for(let m=0;m<12;m++){const ph=m/12*Math.PI*2+spin,c=[];for(let n=0;n<=60;n++)c.push(at(n/60*Math.PI,ph));pline(ctx,P,c,.06,.6,1e9);}
+      // Meridians from your zenith down towards a few real sampled stars.
+      for(let i=0;i<12;i++){
+        const th=shown.theta[i],ph=phis[i]+spin,c=[];
+        for(let n=0;n<=40;n++)c.push(at(th*n/40,ph));
+        k.tint(ctx,th<Math.PI/2?ac:se,()=>pline(ctx,P,c,.18,.6,1e9));
+      }
+      // The stars: every sampled direction, warm above your horizon, cool below.
+      shown.theta.forEach((th,i)=>{
+        const upper=th<Math.PI/2,col=upper?ac:se;
+        const near=(Math.abs(th-Math.PI/2)<.09)?1.6:1;
+        ctx.mathsInk=col;
+        const p=P(...at(th,phis[i]+spin));
+        if(p){dot(ctx,p[0],p[1],sizes[i]*near,Math.min(1,glow[i]*near));}
+        if(i%97===0)k.beacon(ctx,P,at(th,phis[i]+spin),col,.04,.7);
+      });
+      ctx.mathsInk=null;
       const z=P(0,Rs,0);
-      if(z){dot(ctx,z[0],z[1],5,1);dot(ctx,z[0],z[1],11,.5,true);label(ctx,'you',z[0]+16,z[1],.95);}
+      if(z){k.beacon(ctx,P,[0,Rs,0],se,.3,1);dot(ctx,z[0],z[1],5,1);dot(ctx,z[0],z[1],11,.5,true);label(ctx,'you · your direction',z[0]+16,z[1],.95);}
       const h=P(...at(Math.PI/2,Math.PI/2-look.yaw));
-      if(h)label(ctx,'cos θ = 0 · at right angles to you',h[0],h[1]+16,.7,'center');
+      if(h)label(ctx,'90° · cosine 0',h[0],h[1]+16,.7,'center');
     }
 
     function update(animate){
@@ -116,6 +131,7 @@ Maths.scene({
         update(false);
         if(on){look.yaw=0;look.pitch=look.goal=.3;lastSpin=0;if(!k.reduced())drift.start();}
       },
+      resetView(){tilt.stop();spin=0;lastSpin=0;look.yaw=0;look.pitch=look.goal=.3;s.camera=null;s.draw();},
       onKey(key){
         if(key==='+'||key==='='){setDim(1);return true;}
         if(key==='-'||key==='_'){setDim(-1);return true;}

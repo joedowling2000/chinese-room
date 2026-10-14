@@ -20,7 +20,7 @@ Maths.scene({
   init(k){
     const {$,clamp,lerp,ease,stroke,dot,arrow,label,camera,persp,pline,pdot,V}=k;
     const d=V.norm([.408,.597,.691]),u=V.norm([-d[1],d[0],0]),v=V.cross(d,u);
-    const view={yaw:-.55,pitch:.65},look={yaw:0,pitch:-.35};
+    const view={yaw:-.55,pitch:.65},look={yaw:0,pitch:-1.05};
     const at=(a,b,c=0)=>V.add(V.add(V.mul(u,a),V.mul(v,b)),V.mul(d,c));
     const r=k.rng(23),pts=[];
     for(const side of [-1,1])for(let i=0;i<220;i++)pts.push({p:at(k.gauss(r)*.42,k.gauss(r)*.3,side*1.05+k.gauss(r)*.3),side});
@@ -49,20 +49,46 @@ Maths.scene({
     }
     // Up is r̂ itself. The plane at right angles to it is the floor everyone is pressed onto.
     function paintAbstract(s){
-      const {ctx}=s,level=V.add(V.mul(u,Math.cos(look.yaw)),V.mul(v,Math.sin(look.yaw)));
+      const {ctx}=s,level=V.add(V.mul(u,Math.cos(look.yaw)),V.mul(v,Math.sin(look.yaw))),a=A(),ac=k.world.accent,se=k.world.secondary;
       const P=persp(s,press(me),V.add(V.mul(level,Math.cos(look.pitch)),V.mul(d,Math.sin(look.pitch))),d,1.3);
-      if($('abl-plane').checked)for(let i=-12;i<=12;i++){
-        const t=i/2,l1=[],l2=[];
-        for(let j=-24;j<=24;j++){l1.push(at(t,j/4));l2.push(at(j/4,t));}
-        pline(ctx,P,l1,.35,.7,5);pline(ctx,P,l2,.35,.7,5);
+      if($('abl-plane').checked){
+        for(let i=-3;i<3;i++)for(let j=-3;j<3;j++){
+          const t0=i*.65,t1=t0+.65,b0=j*.65,b1=b0+.65;
+          k.surface(ctx,P,[at(t0,b0),at(t1,b0),at(t1,b1),at(t0,b1)],se,.045);
+        }
+        for(let i=-12;i<=12;i++){
+          const t=i/2,l1=[],l2=[];
+          for(let j=-24;j<=24;j++){l1.push(at(t,j/4));l2.push(at(j/4,t));}
+          k.tint(ctx,se,()=>{pline(ctx,P,l1,.3,.7,5);pline(ctx,P,l2,.3,.7,5);});
+        }
       }
       const axis=[];for(let n=-40;n<=40;n++)axis.push(V.mul(d,n/8));
-      pline(ctx,P,axis,.9,1.4,14);
+      k.tint(ctx,ac,()=>pline(ctx,P,axis,.9,1.4,14));
       const tip=P(...V.mul(d,4.6));if(tip)label(ctx,'r̂',tip[0]+10,tip[1],.9);
+      k.beacon(ctx,P,V.mul(d,2.2),ac,.1,.8);
       const shadow=V.sub(me,V.mul(d,V.dot(me,d))),ring=[];
       for(let n=0;n<=48;n++){const t=n/48*Math.PI*2;ring.push(V.add(shadow,V.add(V.mul(u,.18*Math.cos(t)),V.mul(v,.18*Math.sin(t)))));}
       pline(ctx,P,ring,.8,1.2,1e9);
-      pts.forEach(q=>{if(q!==self)pdot(ctx,P,press(q.p),q.side<0?.022:.028,.9,q.side>0,5);});
+      // Projection filaments: where each point is being pressed to.
+      if(a>0)pts.forEach((q,i)=>{if(i%10===0)k.tint(ctx,q.side<0?se:ac,()=>pline(ctx,P,[q.p,press(q.p)],.35*a,.6,8));});
+      // Illustrative ellipsoidal envelopes for both clouds; every vertex goes
+      // through press(), so they flatten honestly as α rises.
+      for(const side of[-1,1])for(let mer=0;mer<8;mer++){
+        const ph=mer*Math.PI/4,curve=[];
+        for(let j=0;j<=64;j++){const t=j/64*2*Math.PI;
+          curve.push(press(at(.7*Math.cos(t)*Math.cos(ph),.5*Math.cos(t)*Math.sin(ph),side*1.05+.42*Math.sin(t))));}
+        k.tint(ctx,side<0?se:ac,()=>pline(ctx,P,curve,.3,1,6));
+      }
+      // The clouds, depth sorted far to near; hollow lights above, solid below.
+      const proj=pts.map(q=>({q,p:P(...press(q.p))})).filter(o=>o.p).sort((m,n)=>n.p[2]-m.p[2]);
+      let near=0;
+      for(const {q,p} of proj){
+        if(q===self)continue;
+        ctx.mathsInk=q.side>0?ac:se;
+        dot(ctx,p[0],p[1],clamp((q.side<0?.022:.028)*P.f/p[2],.7,10),.9*Math.exp(-p[2]/5),q.side>0);
+        if(near<10&&p[2]<3){k.beacon(ctx,P,press(q.p),q.side>0?ac:se,.05,.6);near++;}
+      }
+      ctx.mathsInk=null;
     }
 
     function update(){
@@ -98,6 +124,7 @@ Maths.scene({
 
     return {
       onMode:update,
+      resetView(){me=[...self.p];look.yaw=0;look.pitch=-1.05;note='';s.camera=null;update();},
       onKey(key){
         const acts={ArrowUp:()=>drift(.25),w:()=>drift(.25),ArrowDown:()=>drift(-.25),s:()=>drift(-.25),
           ArrowLeft:()=>turnBy(-.2),a:()=>turnBy(-.2),ArrowRight:()=>turnBy(.2),d:()=>turnBy(.2),
