@@ -347,26 +347,173 @@ const models=[
   {name:'a2a-council',version:'v0.2',status:'EXPERIMENTAL',cls:'amber',desc:'Typed multi-agent workflow in Haskell, with agents communicating over A2A.',specs:[['Philosopher','Qwen 2.5 32B'],['CEO','Llama 3.1 70B'],['Runtime','Ollama'],['Language','Haskell']]},
   {name:'refusal-ablated',version:'128B',status:'NOT SERVED',cls:'quiet',desc:'Research artefact documented for transparency. Experimental weights are not distributed.',specs:[['Layers','88'],['d_model','12,288'],['Method','Ablation'],['Access','None']]}
 ];
-const nav=[['home','HOME'],['lab','LAB'],['research','RESEARCH'],['models','MODELS'],['about','ABOUT']];
+const nav=[['home','Home'],['research','Research'],['lab','Lab'],['maths','Maths'],['models','Models'],['about','About']];
 const app=document.querySelector('#app');
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function route(){const p=location.hash.slice(1).split('/');return {page:p[0]||'home',id:p[1]||''}}
 function href(to){return '#'+to}
-function row(a,detail=false){return `<a class="research-row ${detail?'index-table':''}" href="${href('article/'+a.id)}"><span class="number">${a.no}</span><span class="row-title">${detail?`<strong>${esc(a.title)}</strong><small>${esc(a.dek)}</small>`:esc(a.title)}</span><span class="topic">${esc(a.tag)}</span><span class="date">${a.date}</span>${detail?`<span class="read-time">${a.read}</span>`:''}</a>`}
-function teaser(m){return `<a class="model-teaser" href="#models"><span class="model-state"><span class="${m.cls}"><i></i>${m.status}</span><span>${m.version}</span></span><h3>${m.name}</h3><p>${esc(m.desc)}</p><span class="teaser-specs">${m.specs.slice(0,2).map(x=>`<span><small>${x[0]}</small>${x[1]}</span>`).join('')}</span></a>`}
-function home(){const f=articles[0];return `<div class="status-strip"><div class="status-inner"><span class="online"><i></i>Online</span><span>Research hardware · DGX Spark / GB10</span><span>Memory · 128 GB unified</span><span>Models · Research projects</span><span>Latest · ${f.date}</span></div></div><section class="hero hero-shell"><div class="hero-grid"><div><div class="hero-index">[00] Independent AI research</div><h1>Taking language models apart to see <em>how they think.</em></h1><p class="hero-copy">Refusal directions, 4-bit quantization, typed agents and a network that solves Rubik's cubes. Each experiment is written up in plain English, with the maths where it earns its place.</p><div class="actions"><a class="button primary" href="#lab/mindcuber">Try Mindcuber <span>→</span></a><a class="button" href="#research">Read the research</a></div></div><div><div class="attention-card"><div class="attention-head"><span>FIG.00 · SELF-ATTENTION · L12 H03</span><span>ILLUSTRATION</span></div><div class="attention-viz" id="attention-viz"><svg class="attn-lines" viewBox="0 0 600 300" preserveAspectRatio="none" aria-hidden="true"></svg><div class="token-row r1">${['The','room','answers','in','Chinese'].map((x,i)=>`<button class="attn-token" data-token="${i}">${x}</button>`).join('')}</div><div class="token-row r2">${['The','room','answers','in','Chinese'].map((x,i)=>`<button class="attn-token" data-token="${i}">${x}</button>`).join('')}</div><div class="token-row r3">${['The','room','answers','in','Chinese'].map((x,i)=>`<button class="attn-token" data-token="${i}">${x}</button>`).join('')}</div><div class="token-row r4">${['The','room','answers','in','Chinese'].map((x,i)=>`<button class="attn-token" data-token="${i}">${x}</button>`).join('')}</div></div></div><p class="attn-note">Hover a token to trace illustrative attention links across layers.</p></div></div></section>${Lab.invitation()}<section class="section"><div class="section-inner"><div class="section-heading"><div><div class="section-index">[01] Research</div><h2>Latest write-ups</h2></div><a class="text-link" href="#research">Full index →</a></div><a class="featured" href="${href('article/'+f.id)}"><div class="featured-copy"><div><div class="featured-label"><span class="new-label">New</span><span>${f.tag}</span></div><h3>${esc(f.title)}</h3><p>${esc(f.dek)}</p></div><div class="article-meta"><span>${f.date}</span><span>${f.read}</span><span class="read-link">Read →</span></div></div><div class="featured-img"><img src="/assets/beam-search.png" alt="Beam search training simulation"></div></a><div class="research-table"><div class="table-head"><span class="number">NO.</span><span class="title-col">TITLE</span><span class="topic">TOPIC</span><span class="date">DATE</span></div>${articles.slice(1).map(a=>row(a)).join('')}</div></div></section><section class="section model-band"><div class="section-inner"><div class="model-band-head"><div><div class="section-index">[02] Models</div><h2>Built on one machine.<br>Studied from the inside.</h2></div><p>Projects span reinforcement learning, model compression, interpretability and agent workflows. Research artifacts are linked where available.</p></div><div class="model-teasers">${models.map(teaser).join('')}</div></div></section><section class="name-section"><div class="name-inner"><div><div class="section-index">[03] The name</div><div class="hanzi" lang="zh">房间</div><div class="pinyin">fáng jiān — “room”</div></div><p class="name-copy">In 1980 John Searle imagined a person locked in a room, answering questions in Chinese by following a rulebook — fluent output, no understanding. A language model is that room with billions of rules. <span>This site is a notebook from inside it.</span></p></div></section>`}
-function research(){return `<section class="page"><div class="page-index">[01] Research · ${articles.length} entries</div><h1 class="page-title">Index</h1><p class="page-intro">Long-form write-ups of experiments on a DGX Spark. Theory first, kept readable, with the maths where it earns its place.</p><div class="filters">${['ALL',...new Set(articles.map(a=>a.tag))].map((x,i)=>`<button class="filter ${i===0?'active':''}" data-filter="${esc(x)}">${x}${i===0?` · ${articles.length}`:''}</button>`).join('')}</div><div class="research-table index-table" id="article-list">${articles.map(a=>row(a,true)).join('')}</div></section>`}
+function home(){
+  return Field.home(articles);
+}
+function research(){
+  return Field.research(articles);
+}
 function articleTable(table){return `<div class="article-table-wrap"><table class="article-table"><caption>${esc(table.caption)}</caption><thead><tr>${table.headers.map(h=>`<th scope="col">${esc(h)}</th>`).join('')}</tr></thead><tbody>${table.rows.map(row=>`<tr>${row.map((cell,i)=>i===0?`<th scope="row">${esc(cell)}</th>`:`<td>${esc(cell)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}
 function articleFigure(figure){return `<figure class="${figure.crop?`figure-crop figure-crop-${esc(figure.crop)}`:''}"><div><img src="/assets/${esc(figure.src)}" alt="${esc(figure.alt)}" loading="lazy"></div><figcaption>${esc(figure.caption)}</figcaption></figure>`}
 function articlePage(a){
   const i=articles.indexOf(a),next=articles[(i+1)%articles.length];
   const sections=a.sections.map((s,j)=>`<section id="section-${j}"><h2><small>§${String(j+1).padStart(2,'0')}</small>${esc(s.h)}</h2>${s.paras.map(p=>`<p>${esc(p)}</p>`).join('')}${s.table?articleTable(s.table):''}${s.code?`<pre><span>${esc(s.lang)}</span>\n${esc(s.code)}</pre>`:''}${s.figure?articleFigure(s.figure):''}${s.after?`<blockquote>${esc(s.after)}</blockquote>`:''}</section>`).join('');
-  return `<article class="page"><a class="text-link" href="#research">← Index</a><header class="article-head"><div class="article-kicker"><span>${a.no} / ${a.tag}</span><span>${a.date}</span><span>${a.read} read</span></div><h1>${esc(a.title)}</h1><p class="page-intro">${esc(a.dek)}</p><div class="article-actions"><a class="button primary" href="/articles/${a.file}" ${a.file.endsWith('.pdf')?'target="_blank" rel="noopener"':''}>${esc(a.fileLabel)} ↗</a><a class="button" href="/articles/${a.file}" download>Download source</a></div></header>${a.id==='mindcuber'||a.id==='nvfp4'?`<div class="article-lab-link"><a class="button" href="#lab/${a.id==='nvfp4'?'quantization':'mindcuber'}">Try the interactive experiment →</a></div>`:''}<div class="article-layout"><div class="prose">${sections}<a class="next-article" href="${href('article/'+next.id)}"><small>Next · ${next.no} · ${next.tag}</small><b>${esc(next.title)} →</b></a></div><aside class="toc"><h2>Contents</h2>${a.sections.map((s,j)=>`<a href="#section-${j}"><span>${String(j+1).padStart(2,'0')}</span>${esc(s.h)}</a>`).join('')}<a href="/articles/${a.file}" target="_blank" rel="noopener"><span>↗</span>Original research file</a></aside></div></article>`
+  return `<article class="page article-page"><a class="text-link" href="#research">← Index</a><header class="article-head"><div class="article-kicker"><span>${a.no} / ${a.tag}</span><span>${a.date}</span><span>${a.read} read</span></div><h1>${esc(a.title)}</h1><p class="page-intro">${esc(a.dek)}</p><div class="article-actions"><a class="button primary" href="/articles/${a.file}" ${a.file.endsWith('.pdf')?'target="_blank" rel="noopener"':''}>${esc(a.fileLabel)} ↗</a><a class="button" href="/articles/${a.file}" download>Download source</a></div></header>${a.id==='mindcuber'||a.id==='nvfp4'?`<div class="article-lab-link"><a class="button" href="#lab/${a.id==='nvfp4'?'quantization':'mindcuber'}">Try the interactive experiment →</a></div>`:''}<div class="article-layout"><div class="prose">${sections}<a class="next-article" href="${href('article/'+next.id)}"><small>Next · ${next.no} · ${next.tag}</small><b>${esc(next.title)} →</b></a></div><aside class="toc"><h2>Contents</h2>${a.sections.map((s,j)=>`<a href="#section-${j}"><span>${String(j+1).padStart(2,'0')}</span>${esc(s.h)}</a>`).join('')}<a href="/articles/${a.file}" target="_blank" rel="noopener"><span>↗</span>Original research file</a></aside></div></article>`
 }
-function modelsPage(){return `<section class="page"><div class="page-index">[02] Models · research registry</div><h1 class="page-title">Registry</h1><p class="page-intro">A catalogue of experiments and research artifacts. No hosted inference API is currently connected to this site.</p><div class="model-registry">${models.map(m=>`<article class="model-item"><div class="model-state"><span class="${m.cls}"><i></i>${m.status}</span><span>${m.version}</span></div><h3>${m.name}</h3><p>${esc(m.desc)}</p><div class="model-specs">${m.specs.map(s=>`<span><small>${s[0]}</small>${s[1]}</span>`).join('')}</div></article>`).join('')}</div><div class="lab-next"><div><h2>Explore Mindcuber</h2><p>Turn the cube, step through a scramble reversal and inspect the reported training results.</p></div><a class="button primary" href="#lab/mindcuber">Open the experiment →</a></div></section>`}
-function aboutPage(){return `<section class="page"><div class="page-index">[03] About</div><h1 class="page-title">Inside the room.</h1><div class="about-grid"><div class="about-visual" lang="zh">房间</div><div class="about-copy"><h2>An enthusiast, one machine, a lot of side quests.</h2><p>I'm Joe, an independent researcher exploring how AI models work on the inside. The long-running plan is to build and train an LLM from scratch; the projects here are side quests that turned out to be worth the detour.</p><p>Each experiment becomes an article that keeps the theory readable and, where appropriate, links to the research artifacts.</p><div class="setup-grid">${[['Hardware','NVIDIA DGX Spark · GB10 · 128 GB'],['Long project','An LLM built and trained from scratch'],['Interests','Interpretability, quantization, RL, agents'],['Contact','hello@chineseroom.io']].map(x=>`<div class="setup"><small>${x[0]}</small><b>${x[1]==='hello@chineseroom.io'?`<a href="mailto:${x[1]}">${x[1]}</a>`:x[1]}</b></div>`).join('')}</div></div></div></section>`}
-function render(){const r=route();document.querySelectorAll('.topbar nav .nav-link,.mobile-menu .nav-link').forEach(x=>x.classList.toggle('active',x.dataset.page===(r.page==='article'?'research':r.page)));if(r.page==='article'){const a=articles.find(x=>x.id===r.id)||articles[0];app.innerHTML=articlePage(a);document.title=`${a.title} — Chinese Room`}else if(r.page==='lab'){app.innerHTML=Lab.page(r.id);document.title=(r.id==='mindcuber'?'Mindcuber lab':r.id==='quantization'?'Quantization lab':'The lab')+' — Chinese Room'}else if(r.page==='research'){app.innerHTML=research();document.title='Research Index — Chinese Room'}else if(r.page==='models'){app.innerHTML=modelsPage();document.title='Model Registry — Chinese Room'}else if(r.page==='about'){app.innerHTML=aboutPage();document.title='About — Chinese Room'}else{app.innerHTML=home();document.title='Chinese Room — Independent AI research'}window.scrollTo(0,0);wirePage();Lab.wire(r.page==='lab'?r.id:null)}
-function wirePage(){document.querySelectorAll('[data-filter]').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('active',x===btn));const f=btn.dataset.filter;document.querySelector('#article-list').innerHTML=articles.filter(a=>f==='ALL'||a.tag===f).map(a=>row(a,true)).join('')}));document.querySelectorAll('.toc a[href^="#section-"]').forEach(link=>link.addEventListener('click',e=>{e.preventDefault();document.querySelector(link.getAttribute('href'))?.scrollIntoView({behavior:'smooth',block:'start'})}));const viz=document.querySelector('#attention-viz');if(viz){const svg=viz.querySelector('svg');const xs=[.1,.3,.5,.7,.9],ys=[.2,.43,.66,.87];for(let layer=0;layer<3;layer++)for(let i=0;i<5;i++){const k=(i+layer*2)%5;const p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d',`M ${xs[k]*600} ${ys[layer]*300} C ${xs[k]*600} ${ys[layer]*300+35}, ${xs[i]*600} ${ys[layer+1]*300-35}, ${xs[i]*600} ${ys[layer+1]*300}`);p.dataset.from=String(k);p.dataset.to=String(i);svg.append(p)}viz.querySelectorAll('.attn-token').forEach(b=>{const show=()=>{const t=b.dataset.token;viz.querySelectorAll('.attn-token').forEach(x=>x.classList.toggle('active',x.dataset.token===t));svg.querySelectorAll('path').forEach(p=>p.classList.toggle('active',p.dataset.from===t||p.dataset.to===t))};b.addEventListener('mouseenter',show);b.addEventListener('focus',show);b.addEventListener('mouseleave',()=>{if(!viz.contains(document.activeElement)){viz.querySelectorAll('.attn-token').forEach(x=>x.classList.remove('active'));svg.querySelectorAll('path').forEach(p=>p.classList.remove('active'))}})});}}
-document.querySelector('#nav').innerHTML=nav.map((n,i)=>`<a class="nav-link" data-page="${n[0]}" href="#${n[0]}"><span>0${i}</span>${n[1]}</a>`).join('');document.querySelector('#mobile-menu').innerHTML=nav.map((n,i)=>`<a class="nav-link" data-page="${n[0]}" href="#${n[0]}"><span>0${i}</span>${n[1][0]+n[1].slice(1).toLowerCase()}</a>`).join('');
-document.querySelector('#menu-toggle').addEventListener('click',e=>{const m=document.querySelector('#mobile-menu'),open=m.hidden;m.hidden=!open;e.currentTarget.setAttribute('aria-expanded',String(open));e.currentTarget.setAttribute('aria-label',open?'Close menu':'Open menu')});document.querySelector('#mobile-menu').addEventListener('click',e=>{if(e.target.closest('a')){document.querySelector('#mobile-menu').hidden=true;document.querySelector('#menu-toggle').setAttribute('aria-expanded','false')}});window.addEventListener('hashchange',render);window.addEventListener('scroll',()=>{const a=articles.find(x=>location.hash===`#article/${x.id}`);if(a){const max=document.documentElement.scrollHeight-innerHeight;document.querySelector('#nav-sweep').style.width=`${max?Math.min(100,scrollY/max*100):0}%`;let active=0;a.sections.forEach((_,i)=>{const el=document.querySelector(`#section-${i}`);if(el&&el.getBoundingClientRect().top<140)active=i});document.querySelectorAll('.toc a').forEach((x,i)=>x.classList.toggle('active',i===active))}else document.querySelector('#nav-sweep').style.width='0%'},{passive:true});
-const dialog=document.querySelector('#search-dialog'),input=document.querySelector('#search-input'),results=document.querySelector('#search-results');function search(){const q=input.value.trim().toLowerCase();const items=[{kind:'LAB',label:'Mindcuber experiment',href:'#lab/mindcuber',text:'mindcuber cube scramble robot experiment lab'},{kind:'LAB',label:'Quantization playground',href:'#lab/quantization',text:'quantization precision weights memory nvfp4 int4 lab'},...articles.map(a=>({kind:'RESEARCH',label:a.title,href:`#article/${a.id}`,text:a.title+' '+a.tag+' '+a.dek})),{kind:'PAGE',label:'Research index',href:'#research',text:'research index articles'},{kind:'PAGE',label:'Model registry',href:'#models',text:'models console registry'},{kind:'PAGE',label:'About',href:'#about',text:'about joe'}].filter(x=>!q||x.text.toLowerCase().includes(q));results.innerHTML=items.length?items.map(x=>`<a class="search-result" href="${x.href}"><span>${esc(x.label)}</span><small>${x.kind}</small></a>`).join(''):'<div class="empty-state">No matches. The room has no rule for that.</div>';results.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>dialog.close()))}document.querySelector('#search-open').addEventListener('click',()=>{dialog.showModal();input.value='';search();input.focus()});input.addEventListener('input',search);document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();dialog.showModal();input.value='';search();input.focus()}if(e.key==='Escape'&&dialog.open)dialog.close()});render();
+function modelsPage(){return `<section class="page model-page"><div class="page-index">[02] Models · research registry</div><h1 class="page-title">Models & experiments.</h1><p class="page-intro">A catalogue of experiments and research artifacts. No hosted inference API is currently connected to this site.</p><div class="model-registry">${models.map(m=>`<article class="model-item"><div class="model-state"><span class="${m.cls}"><i></i>${m.status}</span><span>${m.version}</span></div><h3>${m.name}</h3><p>${esc(m.desc)}</p><div class="model-specs">${m.specs.map(s=>`<span><small>${s[0]}</small>${s[1]}</span>`).join('')}</div></article>`).join('')}</div><div class="lab-next"><div><h2>Explore Mindcuber</h2><p>Turn the cube, step through a scramble reversal and inspect the reported training results.</p></div><a class="button primary" href="#lab/mindcuber">Open the experiment →</a></div></section>`}
+function aboutPage(){return `<section class="page"><div class="page-index">[03] About</div><h1 class="page-title">Inside the room.</h1><div class="about-grid"><div class="about-visual">${Field.art('surface','dark',{alt:'A mathematical surface, drawn as a wire mesh'})}</div><div class="about-copy"><h2>An enthusiast, one machine, a lot of side quests.</h2><p>I'm Joe, an independent researcher exploring how AI models work on the inside. The long-running plan is to build and train an LLM from scratch; the projects here are side quests that turned out to be worth the detour.</p><p>Each experiment becomes an article that keeps the theory readable and, where appropriate, links to the research artifacts.</p><div class="setup-grid">${[['Hardware','NVIDIA DGX Spark · GB10 · 128 GB'],['Long project','An LLM built and trained from scratch'],['Interests','Interpretability, quantization, RL, agents'],['Contact','hello@chineseroom.io']].map(x=>`<div class="setup"><small>${x[0]}</small><b>${x[1]==='hello@chineseroom.io'?`<a href="mailto:${x[1]}">${x[1]}</a>`:x[1]}</b></div>`).join('')}</div></div></div></section>`}
+function render(initial=false){
+  const r = route();
+  let page = r.page;
+  if(!['home','research','article','lab','maths','models','about'].includes(page)) page = 'home';
+  document.body.dataset.page = page;
+  const navPage = page==='article' ? 'research' : page;
+  document.querySelectorAll('.topbar nav .nav-link,.mobile-menu .nav-link').forEach(x=>{
+    const on = x.dataset.page===navPage;
+    x.classList.toggle('active',on);
+    if(on) x.setAttribute('aria-current','page'); else x.removeAttribute('aria-current');
+  });
+  Lab.wire(null);
+  Maths.wire(false);
+  if(page==='article'){
+    const a = articles.find(x=>x.id===r.id)||articles[0];
+    app.innerHTML = articlePage(a);
+    document.title = `${a.title} — Chinese Room`;
+  }else if(page==='lab'){
+    app.innerHTML = Lab.page(r.id);
+    document.title = (r.id==='mindcuber'?'Mindcuber lab':r.id==='quantization'?'Quantization lab':'The lab')+' — Chinese Room';
+  }else if(page==='maths'){
+    app.innerHTML = Maths.page();
+    document.title = 'The Maths of AI — Chinese Room';
+  }else if(page==='research'){
+    app.innerHTML = research();
+    document.title = 'Research — Chinese Room';
+  }else if(page==='models'){
+    app.innerHTML = modelsPage();
+    document.title = 'Models — Chinese Room';
+  }else if(page==='about'){
+    app.innerHTML = aboutPage();
+    document.title = 'About — Chinese Room';
+  }else{
+    app.innerHTML = home();
+    document.title = 'Chinese Room — Independent AI research';
+  }
+  Field.wire();
+  wirePage();
+  Lab.wire(page==='lab'?r.id:null);
+  Maths.wire(page==='maths');
+  document.querySelector('#nav-sweep').style.width = '0%';
+  closeMenu();
+  window.scrollTo({top:0,behavior:'instant'});
+  if(!initial) document.querySelector('#main').focus({preventScroll:true});
+  if(page==='maths'&&r.id) document.getElementById(`maths-${r.id}`)?.scrollIntoView({behavior:'instant'});
+}
+
+function wirePage(){
+  document.querySelectorAll('[data-filter]').forEach(btn=>btn.addEventListener('click',()=>{
+    const f = btn.dataset.filter;
+    document.querySelectorAll('[data-filter]').forEach(x=>{
+      const on = x===btn;
+      x.classList.toggle('active',on);
+      x.setAttribute('aria-pressed',String(on));
+    });
+    const list = articles.filter(a=>f==='ALL'||a.tag===f);
+    document.querySelector('#article-list').innerHTML = list.map(Field.card).join('');
+    const count = document.querySelector('#research-count');
+    if(count) count.textContent = `${list.length} research note${list.length===1?'':'s'}`;
+  }));
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('.toc a[href^="#section-"]').forEach(link=>link.addEventListener('click',e=>{
+    e.preventDefault();
+    document.querySelector(link.getAttribute('href'))?.scrollIntoView({behavior:reduced?'auto':'smooth',block:'start'});
+  }));
+}
+
+const navEl = document.querySelector('#nav');
+const menuEl = document.querySelector('#mobile-menu');
+const menuToggle = document.querySelector('#menu-toggle');
+navEl.innerHTML = nav.map(n=>`<a class="nav-link" data-page="${n[0]}" href="#${n[0]}">${n[1]}</a>`).join('');
+menuEl.innerHTML = nav.map(n=>`<a class="nav-link" data-page="${n[0]}" href="#${n[0]}">${n[1]}</a>`).join('');
+
+function closeMenu(returnFocus=false){
+  if(menuEl.hidden) return;
+  menuEl.hidden = true;
+  menuToggle.setAttribute('aria-expanded','false');
+  menuToggle.setAttribute('aria-label','Open menu');
+  if(returnFocus) menuToggle.focus();
+}
+menuToggle.addEventListener('click',()=>{
+  const open = menuEl.hidden;
+  menuEl.hidden = !open;
+  menuToggle.setAttribute('aria-expanded',String(open));
+  menuToggle.setAttribute('aria-label',open?'Close menu':'Open menu');
+});
+menuEl.addEventListener('click',e=>{ if(e.target.closest('a')) closeMenu(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!menuEl.hidden) closeMenu(true); });
+document.addEventListener('pointerdown',e=>{ if(!menuEl.hidden&&!e.target.closest('.topbar')) closeMenu(); });
+addEventListener('resize',()=>{ if(innerWidth>1050) closeMenu(); });
+
+document.querySelector('.skip-link').addEventListener('click',e=>{
+  e.preventDefault();
+  const main = document.querySelector('#main');
+  main.focus({preventScroll:true});
+  main.scrollIntoView({behavior:'auto'});
+});
+
+addEventListener('hashchange',()=>render());
+addEventListener('scroll',()=>{
+  const a = articles.find(x=>location.hash===`#article/${x.id}`);
+  if(a){
+    const max = document.documentElement.scrollHeight-innerHeight;
+    document.querySelector('#nav-sweep').style.width = `${max?Math.min(100,scrollY/max*100):0}%`;
+    let active = 0;
+    a.sections.forEach((_,i)=>{
+      const el = document.querySelector(`#section-${i}`);
+      if(el&&el.getBoundingClientRect().top<140) active = i;
+    });
+    document.querySelectorAll('.toc a').forEach((x,i)=>x.classList.toggle('active',i===active));
+  }
+},{passive:true});
+
+const dialog = document.querySelector('#search-dialog');
+const input = document.querySelector('#search-input');
+const results = document.querySelector('#search-results');
+function search(){
+  const q = input.value.trim().toLowerCase();
+  const items = [
+    {kind:'LAB',label:'Mindcuber experiment',href:'#lab/mindcuber',text:'mindcuber cube scramble robot experiment lab'},
+    {kind:'LAB',label:'Quantization playground',href:'#lab/quantization',text:'quantization precision weights memory nvfp4 int4 lab'},
+    ...articles.map(a=>({kind:'RESEARCH',label:a.title,href:`#article/${a.id}`,text:a.title+' '+a.tag+' '+a.dek})),
+    {kind:'PAGE',label:'The Maths of AI',href:'#maths',text:'maths mathematics linear algebra matrix gradient descent attention softmax rope rotary torus dimensions superposition ablation'},
+    ...Maths.topics.map(t=>({kind:'MATHS',label:t.short,href:`#maths/${t.id}`,text:t.short+' '+t.tag+' '+t.title})),
+    {kind:'PAGE',label:'Research index',href:'#research',text:'research index articles'},
+    {kind:'PAGE',label:'Model registry',href:'#models',text:'models console registry'},
+    {kind:'PAGE',label:'About',href:'#about',text:'about joe'}
+  ].filter(x=>!q||x.text.toLowerCase().includes(q));
+  results.innerHTML = items.length
+    ? items.map(x=>`<a class="search-result" href="${x.href}"><span>${esc(x.label)}</span><small>${x.kind}</small></a>`).join('')
+    : '<div class="empty-state">No matches. The room has no rule for that.</div>';
+  results.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>dialog.close()));
+}
+function openSearch(){
+  if(!dialog.open) dialog.showModal();
+  input.value = '';
+  search();
+  input.focus();
+}
+document.querySelector('#search-open').addEventListener('click',openSearch);
+input.addEventListener('input',search);
+input.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){e.preventDefault();results.querySelector('a')?.click();}
+  if(e.key==='ArrowDown'){e.preventDefault();results.querySelector('a')?.focus();}
+});
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openSearch();}
+  if(e.key==='Escape'&&dialog.open)dialog.close();
+});
+render(true);

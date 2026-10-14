@@ -84,3 +84,27 @@ reviewed drafts into published article text is a separate editorial step.
   cancels pending frames and timers. Reduced-motion preferences skip rotation.
 - Added a rotating front/back camera, piece gaps, dark interiors and shading.
 - Code reviewed; browser verification and automated tests were not run.
+
+## Hosting preparation · 8 October 2026
+- Selected Firebase Hosting within the existing GCP project for this static site.
+  It provides HTTPS and custom-domain support without a continuously running
+  service. The project ID still needs to be identified before deployment.
+- Added `firebase.json` and `scripts/prepare-hosting.sh`. The generated `dist/`
+  contains only the web files, linked source articles and assets (7.6 MB).
+- Cloudflare is authoritative for `chineseroom.io`; its zone has Google domain
+  ownership verification but no A/AAAA/CNAME web records. DNS can be connected
+  after Firebase supplies the domain-specific records.
+- Local GCP CLI configuration names `admin@chineseroom.io` but its token has
+  expired. A refresh in the default browser selected a different Google account
+  and was rejected. The Firebase CLI is signed in to another unrelated account.
+- No GCP resources or DNS records were changed. Deployment waits for the
+  Chinese Room project ID and a fresh sign-in to its authorized account.
+
+## Deployed · 8 October 2026
+- Project `chineseroom-site` created in the chineseroom.io org (folder `chineseroom`),
+  Firebase attached on the free Spark plan with **no billing account**.
+- Added `scripts/deploy.py`: deploys `dist/` via the Firebase Hosting REST API using the
+  `gcloud` admin@chineseroom.io token, so no Firebase CLI login is needed or stored.
+- First release live at https://chineseroom-site.web.app (15 files; index verified).
+- Custom domains `chineseroom.io` and `www.chineseroom.io` (redirect) registered; the
+  Cloudflare DNS records (A, hosting-site TXT, www CNAME, ACME TXT) were added as DNS-only.

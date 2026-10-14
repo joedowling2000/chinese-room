@@ -1,23 +1,62 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#0e1013"><meta name="description" content="Independent AI research. Interpretability, quantization, reinforcement learning and agents, examined from the inside.">
-  <link rel="canonical" href="https://chineseroom.io/"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="alternate" type="application/rss+xml" title="Chinese Room" href="/feed.xml">
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css"><title>Chinese Room — Independent AI research</title>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#08090a">
+  <meta name="description" content="Independent AI research. Interpretability, quantization, reinforcement learning and agents, examined from the inside.">
+  <meta property="og:title" content="Chinese Room — Independent AI research">
+  <meta property="og:description" content="Interpretability, quantization, reinforcement learning and agents, examined from the inside.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://chineseroom.io/">
+  <link rel="canonical" href="https://chineseroom.io/">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="alternate" type="application/rss+xml" title="Chinese Room" href="/feed.xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/field.css">
+  <title>Chinese Room — Independent AI research</title>
 </head>
-<body>
+<body data-page="home">
   <a class="skip-link" href="#main">Skip to content</a>
-  <header class="topbar"><div class="topbar-inner">
-    <a class="brand" href="#home"><span class="brand-mark" lang="zh">房</span><span>chineseroom<small>/io</small></span></a>
-    <nav id="nav" aria-label="Main navigation"></nav>
-    <div class="top-actions"><button id="search-open" class="search-open"><span>Search</span><kbd>⌘K</kbd></button><a class="console-link" href="#models"><i></i> Console</a><button id="menu-toggle" class="menu-toggle" aria-expanded="false" aria-label="Open menu"><span></span><span></span></button></div>
-  </div><div class="nav-sweep" id="nav-sweep"></div></header>
-  <div id="mobile-menu" class="mobile-menu" hidden></div>
-  <main id="main" tabindex="-1"><div id="app"></div></main>
-  <footer class="site-footer"><div class="footer-inner"><a class="footer-brand" href="#home">房间 <small>fáng jiān · Chinese Room</small></a><div class="footer-about">A notebook from inside the room.<br>Independent AI research by Joe Dowling.</div><div class="footer-links"><a href="#lab">Lab</a><a href="#research">Research</a><a href="#models">Models</a><a href="#about">About</a><a href="/feed.xml">RSS</a><a href="mailto:hello@chineseroom.io">Email ↗</a></div><div class="copyright">© 2026 Chinese Room <span>·</span> chineseroom.io</div></div></footer>
-  <dialog id="search-dialog" class="search-dialog"><form method="dialog" class="search-box"><div class="search-input-row"><span>&gt;</span><input id="search-input" type="search" placeholder="Search articles, models, pages…" autocomplete="off"><button class="esc" value="close" aria-label="Close search">ESC</button></div><div id="search-results" class="search-results"></div><div class="search-help">↵ open <span>·</span> esc close</div></form></dialog>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#home" aria-label="Chinese Room home"><span class="field-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span>Chinese Room</span></a>
+      <nav id="nav" aria-label="Main navigation"></nav>
+      <div class="top-actions">
+        <button id="search-open" class="search-open" aria-label="Search the site"><span>Search</span><kbd>⌘K</kbd></button>
+        <a class="console-link" href="#lab">Enter the lab ↗</a>
+        <button id="menu-toggle" class="menu-toggle" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu"><span></span><span></span></button>
+      </div>
+    </div>
+    <div class="nav-sweep" id="nav-sweep" aria-hidden="true"></div>
+    <nav id="mobile-menu" class="mobile-menu" aria-label="Mobile navigation" hidden></nav>
+  </header>
+  <main id="main" tabindex="-1"><div id="app"><noscript><p class="noscript-note">This site uses JavaScript for research navigation and interactive experiments. You can download the original research files: <a href="/articles/mindcuber.docx">AI, a Lego robot and a Rubik's cube (.docx)</a> · <a href="/articles/abliteration.pdf">Abliteration (PDF)</a> · <a href="/articles/nvfp4-quantization-mixtral.pdf">NVFP4 quantization (PDF)</a> · <a href="/articles/multi-agent-haskell.pdf">Multi-agent Haskell (PDF)</a>.</p></noscript></div></main>
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <a class="brand" href="#home"><span class="field-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span>Chinese Room</span></a>
+      <p class="footer-about">Independent AI research<br>by Joe Dowling.</p>
+      <nav class="footer-links" aria-label="Footer"><a href="#research">Research</a><a href="#lab">Lab</a><a href="#maths">Maths</a><a href="#models">Models</a><a href="#about">About</a><a href="/feed.xml">RSS</a><a href="mailto:hello@chineseroom.io">Email ↗</a></nav>
+      <div class="copyright">© 2026 Chinese Room <span>·</span> chineseroom.io</div>
+    </div>
+  </footer>
+  <dialog id="search-dialog" class="search-dialog" aria-label="Search Chinese Room">
+    <form method="dialog" class="search-box">
+      <div class="search-input-row"><span aria-hidden="true">&gt;</span><label class="sr-only" for="search-input">Search the site</label><input id="search-input" type="search" placeholder="Search articles, models, pages…" autocomplete="off" aria-label="Search the site"><button type="submit" class="esc" value="close" aria-label="Close search">ESC</button></div>
+      <div id="search-results" class="search-results"></div>
+      <div class="search-help">↵ open <span>·</span> esc close</div>
+    </form>
+  </dialog>
   <script src="/lab.js" defer></script>
+  <script src="/field.js" defer></script>
+  <script src="/maths.js" defer></script>
+  <script src="/maths/01-linear-maps.js" defer></script>
+  <script src="/maths/02-folding.js" defer></script>
+  <script src="/maths/03-gradient-descent.js" defer></script>
+  <script src="/maths/04-attention.js" defer></script>
+  <script src="/maths/05-rotary.js" defer></script>
+  <script src="/maths/06-dimensions.js" defer></script>
+  <script src="/maths/07-ablation.js" defer></script>
   <script src="/app.js" defer></script>
-</body></html>
+</body>
+</html>
