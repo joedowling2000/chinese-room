@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" font-family="'SF Mono', 'Fira Code', 'Consolas', monospace">
+  <defs>
+    <linearGradient id="bezelGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a3a3c"/>
+      <stop offset="100%" stop-color="#1c1c1e"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softglow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <radialGradient id="bgGlow" cx="0.42" cy="0.48" r="0.5">
+      <stop offset="0%" stop-color="#1a1a3e" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#0a0a14" stop-opacity="1"/>
+    </radialGradient>
+  </defs>
+
+  <!-- MONITOR -->
+  <ellipse cx="450" cy="608" rx="120" ry="12" fill="#2c2c2e"/>
+  <rect x="430" y="555" width="40" height="55" rx="4" fill="url(#bezelGrad)"/>
+  <rect x="50" y="20" width="800" height="540" rx="16" fill="url(#bezelGrad)"/>
+  <!-- Dark screen with subtle radial glow behind cube -->
+  <rect x="70" y="40" width="760" height="500" rx="6" fill="url(#bgGlow)"/>
+  <circle cx="450" cy="30" r="3" fill="#48484a"/>
+
+  <!-- Minimal title bar -->
+  <rect x="70" y="40" width="760" height="24" rx="6" fill="#0d0d1a"/>
+  <rect x="70" y="56" width="760" height="8" fill="#0d0d1a"/>
+  <circle cx="90" cy="52" r="5" fill="#ff5f57"/>
+  <circle cx="106" cy="52" r="5" fill="#febc2e"/>
+  <circle cx="122" cy="52" r="5" fill="#28c840"/>
+  <text x="450" y="56" text-anchor="middle" fill="#4a4a6a" font-size="11">mindcuber-rl</text>
+
+  <!-- ==================== LARGE CENTRED ISOMETRIC CUBE ==================== -->
+  <!-- True isometric: cell=36, dx=31, dy=18 -->
+  <!-- Front vertex at origin, top goes up-back, sides go down-left/right -->
+  <g transform="translate(380, 300)">
+
+    <!-- Ambient glow behind cube -->
+    <ellipse cx="0" cy="0" rx="140" ry="80" fill="#3b82f6" opacity="0.04" filter="url(#softglow)"/>
+
+    <!-- ===== TOP FACE ===== -->
+    <polygon points="0,0 31,-18 0,-36 -31,-18" fill="#fbbf24" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="31,-18 62,-36 31,-54 0,-36" fill="#ffffff" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="62,-36 93,-54 62,-72 31,-54" fill="#3b82f6" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="-31,-18 0,-36 -31,-54 -62,-36" fill="#ef4444" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="0,-36 31,-54 0,-72 -31,-54" fill="#ffffff" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="31,-54 62,-72 31,-90 0,-72" fill="#22c55e" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="-62,-36 -31,-54 -62,-72 -93,-54" fill="#ffffff" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="-31,-54 0,-72 -31,-90 -62,-72" fill="#ff6b35" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="0,-72 31,-90 0,-108 -31,-90" fill="#ef4444" stroke="#0a0a14" stroke-width="2"/>
+
+    <!-- ===== LEFT FACE ===== -->
+    <polygon points="-93,-54 -62,-72 -62,-36 -93,-18" fill="#22c55e" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="-62,-72 -31,-90 -31,-54 -62,-36" fill="#ef4444" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="-31,-90 0,-108 0,-72 -31,-54" fill="#3b82f6" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="-93,-18 -62,-36 -62,0 -93,18" fill="#ff6b35" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="-62,-36 -31,-54 -31,-18 -62,0" fill="#22c55e" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="-31,-54 0,-72 0,-36 -31,-18" fill="#ffffff" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="-93,18 -62,0 -62,36 -93,54" fill="#fbbf24" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="-62,0 -31,-18 -31,18 -62,36" fill="#3b82f6" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="-31,-18 0,-36 0,0 -31,18" fill="#ef4444" stroke="#0a0a14" stroke-width="2"/>
+
+    <!-- ===== Right FACE ===== -->
+    <polygon points="93,-54 62,-72 62,-36 93,-18" fill="#ffffff" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="62,-72 31,-90 31,-54 62,-36" fill="#fbbf24" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="31,-90 0,-108 0,-72 31,-54" fill="#22c55e" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="93,-18 62,-36 62,0 93,18" fill="#ef4444" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="62,-36 31,-54 31,-18 62,0" fill="#ff6b35" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="31,-54 0,-72 0,-36 31,-18" fill="#ff6b35" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="93,18 62,0 62,36 93,54" fill="#3b82f6" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="62,0 31,-18 31,18 62,36" fill="#ffffff" stroke="#0a0a14" stroke-width="2"/>
+    <polygon points="31,-18 0,-36 0,0 31,18" fill="#fbbf24" stroke="#0a0a14" stroke-width="2"/>
+  </g>
+
+  <!-- ==================== FLOATING HUD ELEMENTS ==================== -->
+
+  <!-- Top-left: Model info -->
+  <g opacity="0.9">
+    <text x="95" y="90" fill="#4a4a6a" font-size="9">MODEL</text>
+    <text x="95" y="106" fill="#7c83a0" font-size="12">ADI v3</text>
+    <text x="95" y="122" fill="#4a4a6a" font-size="10">44.7M params</text>
+    <text x="95" y="136" fill="#4a4a6a" font-size="10">4 residual blocks</text>
+  </g>
+
+  <!-- Top-right: Training info -->
+  <g opacity="0.9">
+    <text x="790" y="90" text-anchor="end" fill="#4a4a6a" font-size="9">TRAINING</text>
+    <text x="790" y="106" text-anchor="end" fill="#7c83a0" font-size="12">Epoch 50 / 100</text>
+    <text x="790" y="122" text-anchor="end" fill="#4a4a6a" font-size="10">20M samples . 42 hours</text>
+    <text x="790" y="136" text-anchor="end" fill="#4a4a6a" font-size="10">Batch 1,024 . LR 1e-3</text>
+  </g>
+
+  <!-- Bottom-left: Solve rates as glowing badges -->
+  <g transform="translate(95, 440)">
+    <text x="0" y="0" fill="#4a4a6a" font-size="9">SOLVE RATE (BEAM WIDTH 1000)</text>
+
+    <!-- 5-move -->
+    <rect x="0" y="10" width="65" height="22" rx="4" fill="#22c55e" fill-opacity="0.15" stroke="#22c55e" stroke-opacity="0.3" stroke-width="0.5"/>
+    <text x="8" y="25" fill="#22c55e" font-size="10">5m 100%</text>
+
+    <!-- 10-move -->
+    <rect x="72" y="10" width="72" height="22" rx="4" fill="#22c55e" fill-opacity="0.15" stroke="#22c55e" stroke-opacity="0.3" stroke-width="0.5"/>
+    <text x="80" y="25" fill="#22c55e" font-size="10">10m 100%</text>
+
+    <!-- 15-move -->
+    <rect x="151" y="10" width="72" height="22" rx="4" fill="#60a5fa" fill-opacity="0.15" stroke="#60a5fa" stroke-opacity="0.3" stroke-width="0.5"/>
+    <text x="159" y="25" fill="#60a5fa" font-size="10">15m 99.0%</text>
+
+    <!-- 20-move -->
+    <rect x="230" y="10" width="72" height="22" rx="4" fill="#fbbf24" fill-opacity="0.15" stroke="#fbbf24" stroke-opacity="0.3" stroke-width="0.5"/>
+    <text x="238" y="25" fill="#fbbf24" font-size="10">20m 93.5%</text>
+
+    <!-- 25-move -->
+    <rect x="309" y="10" width="72" height="22" rx="4" fill="#f97316" fill-opacity="0.15" stroke="#f97316" stroke-opacity="0.3" stroke-width="0.5"/>
+    <text x="317" y="25" fill="#f97316" font-size="10">25m 87.0%</text>
+  </g>
+
+  <!-- Bottom: Solution + status -->
+  <g transform="translate(95, 490)">
+    <text x="0" y="0" fill="#4a4a6a" font-size="9">SOLUTION</text>
+    <text x="0" y="18" fill="#34d399" font-size="14" font-weight="bold" filter="url(#glow)">L F' U L2 U R2 D F B' R2 U R' U' B U B L' B' L U</text>
+    <text x="0" y="36" fill="#4a4a6a" font-size="10">26 moves</text>
+    <text x="80" y="36" fill="#fbbf24" font-size="10">4.41 seconds</text>
+    <text x="180" y="36" fill="#4a4a6a" font-size="10">scramble depth 20</text>
+
+    <!-- Pulsing solved indicator -->
+    <circle cx="365" cy="32" r="4" fill="#22c55e" filter="url(#glow)">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <text x="375" y="36" fill="#22c55e" font-size="10" font-weight="bold">SOLVED</text>
+  </g>
+
+  <!-- Bottom-right: Hardware badge -->
+  <g opacity="0.85">
+    <text x="790" y="510" text-anchor="end" fill="#4a4a6a" font-size="9">HARDWARE</text>
+    <text x="790" y="526" text-anchor="end" fill="#76b900" font-size="11" font-weight="bold">NVIDIA <tspan fill="#7c83a0" font-weight="normal">DGX Spark</tspan></text>
+    <text x="790" y="540" text-anchor="end" fill="#4a4a6a" font-size="10">GB10 GPU . 128GB Unified Memory</text>
+  </g>
+</svg>

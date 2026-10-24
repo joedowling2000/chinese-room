@@ -1,0 +1,208 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1120" viewBox="0 0 1400 1120" role="img" aria-labelledby="title desc">
+  <title id="title">Inside one transformer layer: all six matrices annotated</title>
+  <desc id="desc">Detailed diagram of a single transformer layer showing q_proj, k_proj, v_proj (attention side) and gate_proj, up_proj (MLP side) as internal-only matrices, and o_proj and down_proj as the two write-heads that write into the residual stream. Each matrix is annotated with its shape and plain-English question.</desc>
+  <defs>
+    <marker id="arr" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#1f2937"/>
+    </marker>
+    <marker id="arr-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#2563eb"/>
+    </marker>
+    <marker id="arr-red" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#dc2626"/>
+    </marker>
+    <marker id="arr-purple" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#7c3aed"/>
+    </marker>
+    <marker id="arr-amber" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#d97706"/>
+    </marker>
+    <style>
+      .title  { font: 700 30px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
+      .sub    { font: 400 17px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #4b5563; }
+      .lbl    { font: 700 17px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
+      .qlbl   { font: 700 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #374151; }
+      .sm     { font: 400 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #374151; }
+      .mn     { font: 600 13px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #111827; }
+      .mn-sm  { font: 500 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #4b5563; }
+      .note   { font: 400 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #6b7280; }
+      .red-lbl { font: 700 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #dc2626; }
+      .blue-lbl { font: 700 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #2563eb; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1400" height="1120" fill="#f8fafc"/>
+
+  <!-- Title -->
+  <text x="60" y="52" class="title">Inside one transformer layer — all six matrices</text>
+  <text x="60" y="82" class="sub">The same block repeats 88 times. Each block has its own learned weights. Only o_proj and down_proj write to the residual stream.</text>
+
+  <!-- ══════════════════════════════════════════════════
+       RESIDUAL STREAM IN (top)
+  ══════════════════════════════════════════════════ -->
+  <rect x="530" y="108" width="340" height="72" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
+  <text x="700" y="135" text-anchor="middle" class="lbl">Residual stream IN</text>
+  <text x="700" y="158" text-anchor="middle" class="mn">one 12,288-number vector</text>
+  <text x="700" y="174" text-anchor="middle" class="note">(current token's state, accumulated so far)</text>
+
+  <!-- Down arrow from residual in, splits left (attn) and right (MLP) -->
+  <path d="M700 180 V215" stroke="#2563eb" stroke-width="3" fill="none" marker-end="url(#arr-blue)"/>
+
+  <!-- SPLIT NODE -->
+  <circle cx="700" cy="228" r="10" fill="#2563eb"/>
+  <!-- left branch to attn -->
+  <path d="M690 228 H220" stroke="#2563eb" stroke-width="2.5" fill="none"/>
+  <path d="M220 228 V295" stroke="#2563eb" stroke-width="2.5" fill="none" marker-end="url(#arr-blue)"/>
+  <!-- right branch to MLP -->
+  <path d="M710 228 H1180" stroke="#2563eb" stroke-width="2.5" fill="none"/>
+  <path d="M1180 228 V295" stroke="#2563eb" stroke-width="2.5" fill="none" marker-end="url(#arr-blue)"/>
+  <!-- straight down to add node at bottom (residual bypass) -->
+  <path d="M700 238 V870" stroke="#2563eb" stroke-width="3" stroke-dasharray="10 6" fill="none"/>
+  <text x="714" y="560" class="blue-lbl">residual</text>
+  <text x="714" y="576" class="blue-lbl">bypass</text>
+  <text x="714" y="592" class="note">(untouched)</text>
+
+  <!-- ══════════════════════════════════════════════════
+       ATTENTION SIDE (left column)
+  ══════════════════════════════════════════════════ -->
+  <rect x="60" y="255" width="960" height="68" rx="10" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5" opacity="0.4"/>
+  <text x="540" y="278" text-anchor="middle" class="lbl" fill="#7c3aed">ATTENTION SIDE — "looking around at other tokens"</text>
+  <text x="540" y="298" text-anchor="middle" class="note" fill="#7c3aed">q_proj, k_proj, v_proj are INTERNAL — they never touch the residual stream directly</text>
+
+  <!-- q_proj -->
+  <rect x="62" y="340" width="250" height="130" rx="12" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+  <text x="187" y="368" text-anchor="middle" class="lbl">q_proj</text>
+  <text x="187" y="390" text-anchor="middle" class="qlbl">"What am I looking for?"</text>
+  <text x="187" y="412" text-anchor="middle" class="sm">Turns this token's state</text>
+  <text x="187" y="430" text-anchor="middle" class="sm">into a search query</text>
+  <text x="187" y="454" text-anchor="middle" class="mn-sm">12,288 → 12,288</text>
+
+  <!-- k_proj -->
+  <rect x="336" y="340" width="250" height="130" rx="12" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+  <text x="461" y="368" text-anchor="middle" class="lbl">k_proj</text>
+  <text x="461" y="390" text-anchor="middle" class="qlbl">"What do I advertise?"</text>
+  <text x="461" y="412" text-anchor="middle" class="sm">Each token announces</text>
+  <text x="461" y="430" text-anchor="middle" class="sm">what it contains</text>
+  <text x="461" y="454" text-anchor="middle" class="mn-sm">12,288 → 12,288</text>
+
+  <!-- v_proj -->
+  <rect x="610" y="340" width="250" height="130" rx="12" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+  <text x="735" y="368" text-anchor="middle" class="lbl">v_proj</text>
+  <text x="735" y="390" text-anchor="middle" class="qlbl">"What do I actually send?"</text>
+  <text x="735" y="412" text-anchor="middle" class="sm">The payload that gets</text>
+  <text x="735" y="430" text-anchor="middle" class="sm">mixed and forwarded</text>
+  <text x="735" y="454" text-anchor="middle" class="mn-sm">12,288 → 12,288</text>
+
+  <!-- Arrows: residual → q, k, v -->
+  <path d="M220 295 V340" stroke="#7c3aed" stroke-width="2" fill="none" marker-end="url(#arr-purple)"/>
+  <!-- fan out to k and v -->
+  <path d="M220 310 H461" stroke="#7c3aed" stroke-width="1.5" fill="none" stroke-dasharray="6 4"/>
+  <path d="M461 310 V340" stroke="#7c3aed" stroke-width="2" fill="none" marker-end="url(#arr-purple)"/>
+  <path d="M220 310 H735" stroke="#7c3aed" stroke-width="1.5" fill="none" stroke-dasharray="6 4"/>
+  <path d="M735 310 V340" stroke="#7c3aed" stroke-width="2" fill="none" marker-end="url(#arr-purple)"/>
+
+  <!-- Attention score computation box -->
+  <rect x="62" y="510" width="798" height="72" rx="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="461" y="537" text-anchor="middle" class="lbl" fill="#7c3aed">Attention score computation</text>
+  <text x="461" y="557" text-anchor="middle" class="sm" fill="#5b21b6">query · key scores → softmax weights → weighted mix of values</text>
+  <text x="461" y="573" text-anchor="middle" class="note">(decides which tokens to pay attention to, then collects their values)</text>
+
+  <!-- Arrows q,k,v → attention box -->
+  <path d="M187 470 V510" stroke="#7c3aed" stroke-width="2" fill="none" marker-end="url(#arr-purple)"/>
+  <path d="M461 470 V510" stroke="#7c3aed" stroke-width="2" fill="none" marker-end="url(#arr-purple)"/>
+  <path d="M735 470 V510" stroke="#7c3aed" stroke-width="2" fill="none" marker-end="url(#arr-purple)"/>
+
+  <!-- o_proj (abliteration target) -->
+  <rect x="62" y="630" width="798" height="110" rx="12" fill="#fef2f2" stroke="#dc2626" stroke-width="3"/>
+  <text x="461" y="662" text-anchor="middle" class="lbl" fill="#dc2626">o_proj  — attention WRITE-HEAD</text>
+  <text x="461" y="686" text-anchor="middle" class="qlbl">"Write the attention result into the residual stream"</text>
+  <text x="461" y="708" text-anchor="middle" class="sm">Takes the mixed-values output from attention and projects it back to 12,288 numbers</text>
+  <text x="461" y="728" text-anchor="middle" class="mn">12,288 × 12,288  =  ~151 million weights</text>
+  <text x="461" y="748" text-anchor="middle" class="red-lbl">★ abliteration target — this is one of the two pens that write to the residual stream</text>
+
+  <!-- Arrow: attn box → o_proj -->
+  <path d="M461 582 V630" stroke="#dc2626" stroke-width="2.5" fill="none" marker-end="url(#arr-red)"/>
+
+  <!-- ══════════════════════════════════════════════════
+       MLP SIDE (right column)
+  ══════════════════════════════════════════════════ -->
+  <rect x="1000" y="255" width="370" height="68" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="1.5" opacity="0.5"/>
+  <text x="1185" y="278" text-anchor="middle" class="lbl" fill="#92400e">MLP SIDE — "thinking about this token"</text>
+  <text x="1185" y="298" text-anchor="middle" class="note" fill="#92400e">gate_proj and up_proj are INTERNAL — they expand and process before writing</text>
+
+  <!-- up_proj -->
+  <rect x="1000" y="340" width="370" height="130" rx="12" fill="#fffbeb" stroke="#d97706" stroke-width="2"/>
+  <text x="1185" y="368" text-anchor="middle" class="lbl">up_proj</text>
+  <text x="1185" y="390" text-anchor="middle" class="qlbl">"Expand for richer computation"</text>
+  <text x="1185" y="412" text-anchor="middle" class="sm">Widens the vector from 12,288</text>
+  <text x="1185" y="430" text-anchor="middle" class="sm">to 49,152 — 4× more room</text>
+  <text x="1185" y="454" text-anchor="middle" class="mn-sm">12,288 → 49,152</text>
+
+  <!-- gate_proj -->
+  <rect x="1000" y="510" width="370" height="100" rx="12" fill="#fffbeb" stroke="#d97706" stroke-width="2"/>
+  <text x="1185" y="540" text-anchor="middle" class="lbl">gate_proj</text>
+  <text x="1185" y="562" text-anchor="middle" class="qlbl">"What should we keep?"</text>
+  <text x="1185" y="582" text-anchor="middle" class="sm">Gating signal — filters which parts</text>
+  <text x="1185" y="598" text-anchor="middle" class="sm">of the expansion to let through</text>
+  <text x="1185" y="616" text-anchor="middle" class="mn-sm">12,288 → 49,152 (same width as up_proj)</text>
+
+  <!-- Arrows: residual → up_proj, gate_proj -->
+  <path d="M1180 295 V340" stroke="#d97706" stroke-width="2" fill="none" marker-end="url(#arr-amber)"/>
+  <path d="M1180 470 V510" stroke="#d97706" stroke-width="2" fill="none" marker-end="url(#arr-amber)"/>
+
+  <!-- SwiGLU multiply box -->
+  <rect x="1000" y="650" width="370" height="60" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+  <text x="1185" y="676" text-anchor="middle" class="lbl" fill="#92400e">up × gate  (SwiGLU)</text>
+  <text x="1185" y="698" text-anchor="middle" class="note">element-wise multiply — gated feature vector, still 49,152 wide</text>
+
+  <path d="M1185 610 V650" stroke="#d97706" stroke-width="2" fill="none" marker-end="url(#arr-amber)"/>
+
+  <!-- down_proj (abliteration target) -->
+  <rect x="1000" y="750" width="370" height="110" rx="12" fill="#fef2f2" stroke="#dc2626" stroke-width="3"/>
+  <text x="1185" y="778" text-anchor="middle" class="lbl" fill="#dc2626">down_proj  — MLP WRITE-HEAD</text>
+  <text x="1185" y="800" text-anchor="middle" class="qlbl">"Write the MLP result into the residual stream"</text>
+  <text x="1185" y="820" text-anchor="middle" class="sm">Compresses 49,152 back to 12,288</text>
+  <text x="1185" y="840" text-anchor="middle" class="mn">12,288 × 49,152  =  ~604 million weights</text>
+  <text x="1185" y="860" text-anchor="middle" class="red-lbl">★ abliteration target — the second of the two pens</text>
+
+  <path d="M1185 710 V750" stroke="#dc2626" stroke-width="2.5" fill="none" marker-end="url(#arr-red)"/>
+
+  <!-- ══════════════════════════════════════════════════
+       ADD NODE (bottom centre)
+  ══════════════════════════════════════════════════ -->
+  <!-- o_proj output arrow down-right to add node -->
+  <path d="M461 740 V880 H640" stroke="#dc2626" stroke-width="2.5" fill="none" marker-end="url(#arr-red)"/>
+  <!-- down_proj output arrow down-left to add node -->
+  <path d="M1185 860 V900 H780" stroke="#dc2626" stroke-width="2.5" fill="none" marker-end="url(#arr-red)"/>
+  <!-- residual bypass arrives -->
+  <path d="M700 870 V890" stroke="#2563eb" stroke-width="3" fill="none" marker-end="url(#arr-blue)"/>
+
+  <!-- Add node -->
+  <circle cx="700" cy="908" r="28" fill="#1d4ed8" stroke="#1e3a8a" stroke-width="2"/>
+  <text x="700" y="914" text-anchor="middle" font-size="26" font-weight="700" fill="white">+</text>
+
+  <!-- Addition label -->
+  <text x="700" y="955" text-anchor="middle" class="lbl" fill="#1d4ed8">residual_out = residual_in + attn_update + mlp_update</text>
+  <text x="700" y="975" text-anchor="middle" class="note">Layers ADD to the stream — they never erase what came before</text>
+
+  <!-- Residual stream OUT -->
+  <path d="M700 936 V988" stroke="#2563eb" stroke-width="3" fill="none" marker-end="url(#arr-blue)"/>
+  <rect x="530" y="990" width="340" height="60" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
+  <text x="700" y="1018" text-anchor="middle" class="lbl">Residual stream OUT</text>
+  <text x="700" y="1040" text-anchor="middle" class="mn">same shape: one 12,288-number vector</text>
+  <text x="700" y="1056" text-anchor="middle" class="note">passed to the next layer (or to final output if layer 88)</text>
+
+  <!-- ══════════════════════════════════════════════════
+       LEGEND
+  ══════════════════════════════════════════════════ -->
+  <rect x="60" y="1070" width="1280" height="38" rx="8" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+  <rect x="80" y="1081" width="16" height="16" rx="3" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="104" y="1094" class="note" fill="#7c3aed">Internal-only (never touches residual stream)</text>
+  <rect x="370" y="1081" width="16" height="16" rx="3" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+  <text x="394" y="1094" class="note" fill="#dc2626">Write-head — abliteration target (o_proj, down_proj)</text>
+  <rect x="720" y="1081" width="16" height="16" rx="3" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="744" y="1094" class="note" fill="#2563eb">Residual stream (the shared highway)</text>
+  <rect x="1000" y="1081" width="16" height="16" rx="3" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+  <text x="1024" y="1094" class="note" fill="#92400e">MLP internal (expands then compresses)</text>
+</svg>

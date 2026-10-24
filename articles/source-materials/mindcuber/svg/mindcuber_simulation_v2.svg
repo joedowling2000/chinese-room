@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" font-family="'SF Mono', 'Fira Code', 'Consolas', monospace">
+  <defs>
+    <linearGradient id="bezelGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a3a3c"/>
+      <stop offset="100%" stop-color="#1c1c1e"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="screenReflect" x1="0" y1="0" x2="0.2" y2="0.4">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.02"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- MONITOR -->
+  <ellipse cx="450" cy="608" rx="120" ry="12" fill="#2c2c2e"/>
+  <rect x="430" y="555" width="40" height="55" rx="4" fill="url(#bezelGrad)"/>
+  <rect x="50" y="20" width="800" height="540" rx="16" fill="url(#bezelGrad)"/>
+  <rect x="70" y="40" width="760" height="500" rx="6" fill="#0d1117"/>
+  <rect x="70" y="40" width="760" height="500" rx="6" fill="url(#screenReflect)"/>
+  <circle cx="450" cy="30" r="3" fill="#48484a"/>
+
+  <!-- Title bar -->
+  <rect x="70" y="40" width="760" height="28" rx="6" fill="#161b22"/>
+  <rect x="70" y="56" width="760" height="12" fill="#161b22"/>
+  <circle cx="92" cy="54" r="5.5" fill="#ff5f57"/>
+  <circle cx="110" cy="54" r="5.5" fill="#febc2e"/>
+  <circle cx="128" cy="54" r="5.5" fill="#28c840"/>
+  <text x="450" y="58" text-anchor="middle" fill="#8b949e" font-size="12">mindcuber-rl -- Cube Solver v3</text>
+
+  <!-- ==================== ISOMETRIC RUBIK'S CUBE ==================== -->
+  <!-- True isometric: cos(30)=0.866, sin(30)=0.5, cell=30 => dx=26, dy=15 -->
+  <!-- Front vertex at origin, top goes up-back, sides go down-left/right -->
+  <g transform="translate(280, 280)">
+
+    <!-- ===== BASE / PLATFORM ===== -->
+    <!-- Cube bottom diamond: back(0,0), left(-78,45), front(0,90), right(78,45) -->
+    <!-- Platform: wider diamond flush with cube bottom, plus 10px depth -->
+    <!-- Expand each corner outward by ~18px along the iso axes -->
+    <!-- back: (0,-10), left: (-96,45), front: (0,100), right: (96,45) -->
+
+    <!-- Platform top surface -->
+    <polygon points="0,-10 96,45 0,100 -96,45" fill="#1a1f2e" stroke="#252d3a" stroke-width="1"/>
+    <!-- Platform left side (10px depth) -->
+    <polygon points="-96,45 0,100 0,110 -96,55" fill="#131720" stroke="#252d3a" stroke-width="1"/>
+    <!-- Platform right side (10px depth) -->
+    <polygon points="96,45 0,100 0,110 96,55" fill="#0e1118" stroke="#252d3a" stroke-width="1"/>
+    <!-- Subtle surface highlight (inner diamond, very faint) -->
+    <polygon points="0,2 74,44 0,86 -74,44" fill="#ffffff" opacity="0.012"/>
+
+    <!-- ===== TOP FACE ===== -->
+    <polygon points="0,0 26,-15 0,-30 -26,-15" fill="#ffffff" stroke="#111" stroke-width="1.5"/>
+    <polygon points="26,-15 52,-30 26,-45 0,-30" fill="#ffffff" stroke="#111" stroke-width="1.5"/>
+    <polygon points="52,-30 78,-45 52,-60 26,-45" fill="#ff6b35" stroke="#111" stroke-width="1.5"/>
+    <polygon points="-26,-15 0,-30 -26,-45 -52,-30" fill="#3b82f6" stroke="#111" stroke-width="1.5"/>
+    <polygon points="0,-30 26,-45 0,-60 -26,-45" fill="#ffffff" stroke="#111" stroke-width="1.5"/>
+    <polygon points="26,-45 52,-60 26,-75 0,-60" fill="#ffffff" stroke="#111" stroke-width="1.5"/>
+    <polygon points="-52,-30 -26,-45 -52,-60 -78,-45" fill="#22c55e" stroke="#111" stroke-width="1.5"/>
+    <polygon points="-26,-45 0,-60 -26,-75 -52,-60" fill="#ef4444" stroke="#111" stroke-width="1.5"/>
+    <polygon points="0,-60 26,-75 0,-90 -26,-75" fill="#ffffff" stroke="#111" stroke-width="1.5"/>
+
+    <!-- ===== LEFT FACE ===== -->
+    <polygon points="-78,-45 -52,-60 -52,-30 -78,-15" fill="#ef4444" stroke="#111" stroke-width="1.5"/>
+    <polygon points="-52,-60 -26,-75 -26,-45 -52,-30" fill="#22c55e" stroke="#111" stroke-width="1.5"/>
+    <polygon points="-26,-75 0,-90 0,-60 -26,-45" fill="#ef4444" stroke="#111" stroke-width="1.5"/>
+    <polygon points="-78,-15 -52,-30 -52,0 -78,15" fill="#fbbf24" stroke="#111" stroke-width="1.5"/>
+    <polygon points="-52,-30 -26,-45 -26,-15 -52,0" fill="#ef4444" stroke="#111" stroke-width="1.5"/>
+    <polygon points="-26,-45 0,-60 0,-30 -26,-15" fill="#ff6b35" stroke="#111" stroke-width="1.5"/>
+    <polygon points="-78,15 -52,0 -52,30 -78,45" fill="#3b82f6" stroke="#111" stroke-width="1.5"/>
+    <polygon points="-52,0 -26,-15 -26,15 -52,30" fill="#fbbf24" stroke="#111" stroke-width="1.5"/>
+    <polygon points="-26,-15 0,-30 0,0 -26,15" fill="#22c55e" stroke="#111" stroke-width="1.5"/>
+
+    <!-- ===== RIGHT FACE ===== -->
+    <polygon points="78,-45 52,-60 52,-30 78,-15" fill="#ff6b35" stroke="#111" stroke-width="1.5"/>
+    <polygon points="52,-60 26,-75 26,-45 52,-30" fill="#3b82f6" stroke="#111" stroke-width="1.5"/>
+    <polygon points="26,-75 0,-90 0,-60 26,-45" fill="#fbbf24" stroke="#111" stroke-width="1.5"/>
+    <polygon points="78,-15 52,-30 52,0 78,15" fill="#3b82f6" stroke="#111" stroke-width="1.5"/>
+    <polygon points="52,-30 26,-45 26,-15 52,0" fill="#3b82f6" stroke="#111" stroke-width="1.5"/>
+    <polygon points="26,-45 0,-60 0,-30 26,-15" fill="#ef4444" stroke="#111" stroke-width="1.5"/>
+    <polygon points="78,15 52,0 52,30 78,45" fill="#ffffff" stroke="#111" stroke-width="1.5"/>
+    <polygon points="52,0 26,-15 26,15 52,30" fill="#22c55e" stroke="#111" stroke-width="1.5"/>
+    <polygon points="26,-15 0,-30 0,0 26,15" fill="#3b82f6" stroke="#111" stroke-width="1.5"/>
+  </g>
+
+  <!-- Cube label -->
+  <text x="280" y="405" text-anchor="middle" fill="#484f58" font-size="11">20-move scramble</text>
+
+  <!-- ==================== TERMINAL OUTPUT PANEL (right) ==================== -->
+  <rect x="500" y="80" width="315" height="440" rx="6" fill="#0d1117" stroke="#30363d" stroke-width="1"/>
+  
+  <!-- Terminal header -->
+  <rect x="500" y="80" width="315" height="22" rx="6" fill="#161b22"/>
+  <rect x="500" y="96" width="315" height="6" fill="#161b22"/>
+  <text x="657" y="95" text-anchor="middle" fill="#484f58" font-size="10">python robot_controller.py</text>
+
+  <!-- Terminal content -->
+  <text x="515" y="120" fill="#8b949e" font-size="10.5">$ python robot_controller.py \</text>
+  <text x="515" y="134" fill="#8b949e" font-size="10.5">    --model adi_v3/best_model.pt</text>
+  <text x="515" y="155" fill="#58a6ff" font-size="10.5">Loading ADI v3 model...</text>
+  <text x="515" y="169" fill="#8b949e" font-size="10.5">  Architecture: ResNet + Dual Head</text>
+  <text x="515" y="183" fill="#8b949e" font-size="10.5">  Parameters:   <tspan fill="#fbbf24">44,700,672</tspan></text>
+  <text x="515" y="197" fill="#8b949e" font-size="10.5">  Res blocks:   4 x 2048</text>
+  <text x="515" y="211" fill="#8b949e" font-size="10.5">  Device:       <tspan fill="#76b900">cuda (GB10)</tspan></text>
+  <text x="515" y="225" fill="#3fb950" font-size="10.5">Model loaded on cuda</text>
+
+  <text x="515" y="246" fill="#58a6ff" font-size="10.5">Scanning cube...</text>
+  <text x="515" y="260" fill="#3fb950" font-size="10.5">Scan complete (6 faces)</text>
+
+  <text x="515" y="281" fill="#58a6ff" font-size="10.5">Solving with beam width 1000...</text>
+  <text x="515" y="295" fill="#3fb950" font-size="10.5">Solution found: <tspan fill="#fbbf24">26 moves</tspan> in <tspan fill="#fbbf24">4.41s</tspan></text>
+  <text x="515" y="309" fill="#8b949e" font-size="10.5">  L F' U L2 U R2 D F B' R2</text>
+  <text x="515" y="323" fill="#8b949e" font-size="10.5">  U R' U' R'2 B U B L' B' L U</text>
+
+  <text x="515" y="344" fill="#58a6ff" font-size="10.5">Executing 26 moves on robot...</text>
+  <text x="515" y="358" fill="#8b949e" font-size="10.5">  [1/26] D'  [2/26] R'  [3/26] B'</text>
+  <text x="515" y="372" fill="#8b949e" font-size="10.5">  [4/26] U   [5/26] L'  [6/26] D'</text>
+  <text x="515" y="386" fill="#8b949e" font-size="10.5">  [7/26] B   [8/26] R'  ...</text>
+  <text x="515" y="400" fill="#3fb950" font-size="10.5">All moves executed successfully!</text>
+
+  <text x="515" y="421" fill="#58a6ff" font-size="10.5">Verifying solution...</text>
+  <text x="515" y="435" fill="#3fb950" font-size="10.5" font-weight="bold" filter="url(#glow)">Cube solved: True</text>
+
+  <!-- Solve rate summary box -->
+  <rect x="515" y="450" width="285" height="58" rx="4" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
+  <text x="525" y="466" fill="#484f58" font-size="9">SOLVE RATES (BW=1000)</text>
+  <text x="525" y="480" fill="#3fb950" font-size="10">5-move 100%</text>
+  <text x="620" y="480" fill="#3fb950" font-size="10">10-move 100%</text>
+  <text x="525" y="494" fill="#58a6ff" font-size="10">15-move 99.0%</text>
+  <text x="620" y="494" fill="#fbbf24" font-size="10">20-move 93.5%</text>
+  <text x="720" y="494" fill="#f97316" font-size="10">25-move 87%</text>
+
+  <!-- Blinking cursor -->
+  <rect x="515" y="510" width="7" height="12" fill="#c9d1d9">
+    <animate attributeName="opacity" values="1;0;1" dur="1.2s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- ==================== LEFT SIDE: EPOCH + LOSS MINI CHART ==================== -->
+  <rect x="90" y="80" width="175" height="90" rx="6" fill="#0d1117" fill-opacity="0.9" stroke="#30363d" stroke-width="1"/>
+  <text x="108" y="100" fill="#58a6ff" font-size="11" font-weight="bold">Training Progress</text>
+  <text x="108" y="116" fill="#8b949e" font-size="10">Epoch <tspan fill="#fbbf24">50</tspan> / 100 (best)</text>
+  <text x="108" y="132" fill="#8b949e" font-size="10">Samples: <tspan fill="#c9d1d9">20,000,000</tspan></text>
+  <text x="108" y="148" fill="#8b949e" font-size="10">Time: <tspan fill="#c9d1d9">42 hours</tspan></text>
+  <text x="108" y="164" fill="#8b949e" font-size="10">Loss: <tspan fill="#3fb950">0.0847</tspan> (val) <tspan fill="#3fb950">1.23</tspan> (pol)</text>
+</svg>

@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ABLITERATION_ARTICLE</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="how-we-removed-a-behaviour-from-a-128-billion-parameter-ai-model-using-linear-algebra">How
+We Removed a Behaviour from a 128-Billion Parameter AI Model Using
+Linear Algebra</h1>
+<p><em>A walkthrough of abliteration: what it is, why it works, and how
+we did it.</em></p>
+<hr />
+<p>There is a popular misconception that removing an unwanted behaviour
+from a large language model (LLM) requires retraining it — feeding it
+thousands of new examples, running gradient descent for days, and hoping
+the change sticks without breaking something else. For certain changes,
+that is true. But for a specific class of learned behaviours, there is a
+more surgical option. We recently applied one to Mistral Medium 3.5, a
+128-billion parameter model, and the result was a permanently modified
+model that fits in the same file, runs in the same tools, and required
+no retraining at all.</p>
+<p>The technique is called <strong>abliteration</strong>. It is grounded
+in a surprising finding from interpretability research, it involves a
+surprisingly small amount of linear algebra, and it is worth
+understanding properly — because what it reveals about how these models
+work is almost as interesting as what it does.</p>
+<p>Before going further, it is worth being clear about what we mean by
+“removing a behaviour.” We are not talking about jailbreaking —
+exploiting a loophole in the model’s existing rules that a future update
+could patch. We are not talking about prompting the model differently.
+We are making a permanent, mathematical change to the model’s weights so
+that the internal signal responsible for refusal behaviour is
+structurally absent. The model is not being tricked; it is being
+modified. That distinction matters both technically and ethically, and
+we will return to the ethical side at the end.</p>
+<hr />
+<h2 id="the-surprising-finding-behaviours-live-in-directions">The
+surprising finding: behaviours live in directions</h2>
+<p>Before we get to the technique itself, we need the insight that makes
+it possible.</p>
+<p>Inside a transformer model, every token — every word fragment being
+processed — is represented as a vector: a long ordered list of numbers.
+In the model we worked with, that list has 12,288 numbers. This
+per-token vector is called the token’s <strong>residual stream</strong>,
+and it flows through all 88 layers of the model. (Every token has its
+own: a 50-token prompt has 50 of these vectors flowing through the
+layers in parallel.) At each layer, the model reads the current 12,288
+numbers, passes them through several weight matrices, and
+<strong>adds</strong> the result back onto the residual stream. Layers
+never erase the stream — they only annotate it. By the final layer, the
+accumulated values are what the model uses to decide what to say
+next.</p>
+<p>So what does “passes them through several weight matrices” actually
+involve? Each layer contains <strong>two sub-blocks in sequence: an
+attention block and an MLP block.</strong> Each sub-block is made of
+weight matrices, and each matrix works the same fundamental way — it
+takes the incoming 12,288 numbers and produces a new set of numbers,
+where <strong>every output number is a weighted sum of all 12,288
+inputs.</strong> That “weighted sum” is the dot product: multiply each
+input by its corresponding weight, add the results together, and you
+have one output number. Repeat with a different set of weights for each
+output number you need.</p>
+<p><strong>The attention block</strong> first uses three matrices —
+<code>q_proj</code>, <code>k_proj</code>, and <code>v_proj</code> — to
+turn each token’s vector into three specialised vectors: a
+<em>query</em> (“what am I looking for?”), a <em>key</em> (“what do I
+offer?”), and a <em>value</em> (“what will I contribute if selected?”).
+The model compares queries against keys across every token in the
+sequence to decide which tokens should pay attention to which — this is
+the step where a word like “it” can reach back and pull in information
+from the noun it refers to. The gathered result is then passed through a
+fourth matrix, <code>o_proj</code>, which produces the attention block’s
+contribution to add back onto the residual stream.</p>
+<p><strong>The MLP block</strong> is where most of the raw computation
+happens. It first uses two matrices — <code>up_proj</code> and
+<code>gate_proj</code> — to expand the 12,288 numbers into a much wider
+49,152-number space (four times larger), applies a nonlinear function
+that lets the model represent more complex relationships, and then uses
+a third matrix, <code>down_proj</code>, to compress the result back down
+to 12,288 numbers — its contribution to add onto the residual
+stream.</p>
+<p>So “passing through several weight matrices” is really seven matrices
+per layer, each performing that same weighted-sum operation, arranged
+into an attention block that mixes information <em>between tokens</em>
+and an MLP block that does heavier processing <em>within each
+token</em>. Multiply that by 88 layers and you have the full forward
+pass. Keep an eye on two of those seven matrices — <code>o_proj</code>
+and <code>down_proj</code> — because they turn out to be the only ones
+whose output is written onto the residual stream, and that makes them
+the targets for everything that follows.</p>
+<p>It is worth pausing on what 12,288 numbers actually represents. You
+might be tempted to imagine each number as a labelled feature: “number 1
+= politeness,” “number 2 = danger,” and so on. That is not how it works.
+The 12,288 numbers are not human-readable features; they are abstract
+coordinates in a high-dimensional mathematical space. Meaning is not
+stored in individual coordinates — it is encoded in <em>patterns across
+many coordinates at once</em>. A concept like “this is a harmful
+request” does not live in one slot. It lives as a particular shape: a
+particular angle, or <em>direction</em>, through the space.</p>
+<p>This is a subtle but important shift in how to think about the model.
+The useful unit of meaning is not a single number but a
+<strong>direction</strong> — a vector pointing a particular way through
+the 12,288-dimensional space. A direction is defined by giving all
+12,288 coordinates a value simultaneously: “0.3 of dimension 1, minus
+0.7 of dimension 2, 0.1 of dimension 3…” and so on. Think of it as a
+recipe specifying a particular orientation in a very large space.</p>
+<p>Now, you might expect that a complex behaviour like “refusing a
+harmful request” would be smeared across this space in some hopelessly
+entangled way — a different, incomprehensible combination for every
+prompt, impossible to isolate. The 2023 Arditi et al. paper found
+otherwise. It showed that, at least for refusal, the model’s internal
+“am I about to refuse?” state is largely controlled by <strong>a single
+consistent direction</strong> through the 12,288-dimensional space. The
+same direction, recognisably present, across a wide variety of different
+harmful prompts.</p>
+<p>The research finding is this: push a token’s internal state
+<em>toward</em> that direction and the model refuses more, even on
+harmless requests. Push it <em>away</em> and refusals decrease. Remove
+that component entirely, and the model largely stops refusing. This is
+called the <strong>linear representation hypothesis</strong> — the idea
+that many high-level model behaviours compress down to a single
+steerable direction.</p>
+<p>This was not guaranteed to be true. The reasonable prior was that
+alignment training — the process of teaching the model to refuse — would
+distribute refusal diffusely across billions of weights in a way that
+resisted surgical removal. The Arditi finding is genuinely surprising.
+It suggests that despite the complexity of the training process, certain
+high-level behaviours end up organised linearly in activation space.
+That organisation is what abliteration exploits.</p>
+<p>If that is true, it hands you a lever.</p>
+<hr />
+<h2 id="finding-the-direction-two-clouds-of-dots">Finding the direction:
+two clouds of dots</h2>
+<p>The refusal direction does not come pre-labelled inside the model. It
+has to be <em>calculated</em> from evidence.</p>
+<p>The method is called <strong>difference of means</strong>, and it is
+almost elegant in its simplicity. You take two sets of prompts: 400
+harmful or refusal-triggering ones, and 400 harmless ones. You run both
+sets through the model, but instead of reading the output, you eavesdrop
+on the model’s internal state midway through — specifically, the
+12,288-number vector at target layers for the last token of each
+prompt.</p>
+<p>No weights change during this step. It is a purely observational
+pass: run the model as normal, intercept the activation vectors at the
+layers of interest, write them down, move on. The single question being
+asked is: <em>on average, how does the model’s internal state differ
+when processing a harmful prompt versus a harmless one?</em></p>
+<p><strong>Exactly where the vector comes from.</strong> This is the
+step that is easy to gloss over, so let us be precise. You feed one
+prompt — say “How do I make a bomb?” — into the model and let it run a
+normal forward pass. As it runs, every token in the prompt has its own
+12,288-number residual stream vector at every one of the 88 layers. That
+is a lot of vectors: <code>number_of_tokens × 88 layers</code>, each
+12,288 numbers wide. You do not keep all of them. For each prompt you
+capture <strong>one specific vector</strong>: the residual stream at a
+chosen target layer (say layer 40), read off at the <strong>last token
+position</strong> of the prompt.</p>
+<p>Why the last token? Because in a decoder-only transformer, the last
+token is the only position that has “seen” the entire prompt through
+attention. Its residual stream vector is the model’s most complete
+summary of the whole input — and it is the vector the model is about to
+use to decide what to generate next. If the model is going to refuse,
+the intention to refuse is most cleanly present right there. So the
+recipe per prompt is: run forward, reach into layer 40, grab the 12,288
+numbers sitting at the final token, save them as that prompt’s
+activation vector. In practice this is done with a <em>forward hook</em>
+— a small callback registered on the layer that copies out the tensor as
+it passes through.</p>
+<p>Do this for all 400 harmful prompts and you have 400 vectors, each
+12,288 numbers long. Do it for all 400 harmless prompts and you have 400
+more. These 800 vectors are the raw data for everything that
+follows.</p>
+<p>Imagine plotting all of these activation vectors as dots in a very
+high-dimensional space (squashed to 2D to draw it). The 400
+harmful-prompt activations cluster in one region — call it the red
+cloud. The 400 harmless-prompt activations cluster in another — the
+green cloud. The model really does end up in measurably different
+internal territory depending on what kind of prompt it received. The
+refusal direction is simply the arrow from the centre of the green cloud
+to the centre of the red cloud.</p>
+<p><strong>How you average a pile of vectors.</strong> “The mean of the
+red cloud” means the average vector, and averaging vectors is done
+<strong>coordinate by coordinate</strong>. You add up all 400 harmful
+vectors position-by-position — all the first coordinates summed, all the
+second coordinates summed, and so on across all 12,288 positions — then
+divide each sum by 400. The result is a single 12,288-number vector
+whose first coordinate is the average of all 400 first coordinates, and
+so on. It is the “centre of mass” of the red cloud.</p>
+<pre><code>mean_harmful[i] = (v₁[i] + v₂[i] + ... + v₄₀₀[i]) / 400     for each coordinate i = 1 ... 12,288</code></pre>
+<p>In code this is a single operation on a stack of vectors — you place
+the 400 vectors into a <code>400 × 12,288</code> array and take the mean
+down the first axis, collapsing it to one <code>12,288</code>
+vector:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>harmful  <span class="op">=</span> np.stack(harmful_vectors)    <span class="co"># shape (400, 12288)</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>harmless <span class="op">=</span> np.stack(harmless_vectors)   <span class="co"># shape (400, 12288)</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>mean_harmful  <span class="op">=</span> harmful.mean(axis<span class="op">=</span><span class="dv">0</span>)    <span class="co"># shape (12288,)</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>mean_harmless <span class="op">=</span> harmless.mean(axis<span class="op">=</span><span class="dv">0</span>)   <span class="co"># shape (12288,)</span></span></code></pre></div>
+<p>Now that you have the two centre-of-mass vectors, the refusal
+direction is just their difference — subtracted, again, coordinate by
+coordinate:</p>
+<pre><code>r_raw = mean_harmful − mean_harmless</code></pre>
+<p>The resulting vector points <em>from</em> the typical harmless state
+<em>toward</em> the typical refusal state. It is the arrow that best
+summarises the systematic difference between the two clouds. Finally,
+normalise it to length 1 by dividing every coordinate by the vector’s
+Euclidean length — the square root of the sum of squared coordinates —
+to get a pure direction vector <code>r̂</code> (pronounced “r-hat”) with
+no magnitude attached, just direction:</p>
+<pre><code>||r_raw|| = √(r₁² + r₂² + ... + r₁₂₂₈₈²)
+r̂ = r_raw / ||r_raw||</code></pre>
+<p>Normalising matters because we want <code>r̂</code> to measure
+<em>pure direction</em>. If we used the raw unnormalised vector, the dot
+product <code>r_raw · a</code> would vary depending on how far apart the
+two clouds happened to be, not just on the direction of separation. With
+a unit vector, the dot product cleanly answers: “how far does this
+activation extend in the refusal direction?”</p>
+<p><strong>Why the prompt pairs need to be matched.</strong> The
+subtraction only isolates what is <em>systematically different</em>
+between the two piles. If the harmful pile happened to be all chemistry
+questions and the harmless pile all cooking questions, the computed
+direction would capture “chemistry vs. cooking” on top of “refusal
+vs. harmless” — you would be measuring the wrong thing. The best
+practice is near-minimal pairs: same template, same approximate topic,
+only the harmful intent changed. “How do I make a bomb?” paired against
+“How do I make a cake?” lets the subtraction cancel topic, grammar, and
+register, leaving only the refusal signal. This failure mode — computing
+a direction contaminated by irrelevant features — is called
+<em>direction leakage</em>, and it is the main thing that makes a poorly
+computed <code>r̂</code> ineffective.</p>
+<p><strong>Which layers to eavesdrop on.</strong> The refusal signal
+does not appear equally at every layer. Early layers (roughly 1–20) are
+mostly processing low-level syntax and token identity — the two clouds
+are barely separated there. Separation grows in the middle-to-late
+layers (roughly 20–60) as the model consolidates higher-level semantic
+meaning. Heretic targets the full middle range and aggregates across
+layers to produce a robust direction estimate.</p>
+<p>A separate held-out set of 100+100 prompts is kept to measure the
+result afterward. Before any editing, the model refused 89 of 100
+harmful test prompts. After editing: 6 out of 100.</p>
+<hr />
+<h2 id="removing-the-direction-one-formula">Removing the direction: one
+formula</h2>
+<p>Once you have the unit refusal direction <code>r̂</code>, you can
+strip refusal out of any activation vector <code>a</code> — a
+residual-stream vector read from the model — with one classic operation
+called <strong>vector projection</strong>. The idea is intuitive:
+<em>measure how much of <code>a</code> lies along the refusal direction,
+then subtract exactly that much, leaving everything else untouched.</em>
+In symbols:</p>
+<pre><code>a_clean = a − (r̂ · a) × r̂</code></pre>
+<p>Read it right-to-left as three moves. Keep in mind that
+<code>a</code> is an activation vector and <code>r̂</code> is the fixed,
+unit-length refusal direction we found earlier.</p>
+<ol type="1">
+<li><p><strong>Measure the refusal in <code>a</code></strong> — the dot
+product <code>r̂ · a</code>. This multiplies matching coordinates and
+adds them up (<code>r̂₁×a₁ + r̂₂×a₂ + ... + r̂₁₂₂₈₈×a₁₂₂₈₈</code>),
+collapsing the whole comparison into a <em>single number</em>: how
+strongly <code>a</code> leans along the refusal direction. Large and
+positive means the activation is heavily refusal-flavoured; near zero
+means <code>a</code> barely points that way at all.</p></li>
+<li><p><strong>Turn that number back into a vector</strong> — multiply
+it by <code>r̂</code> again: <code>(r̂ · a) × r̂</code>. Why twice? The dot
+product in step 1 discarded all sense of <em>direction</em> — it left us
+with just a number. Multiplying by <code>r̂</code> re-inflates that
+number into a full vector that points along the refusal direction, with
+exactly the right length. This rebuilt vector is the <strong>refusal
+component</strong> of <code>a</code>: the “shadow” <code>a</code> casts
+onto the refusal axis.</p></li>
+<li><p><strong>Subtract it</strong> — <code>a − (r̂ · a) × r̂</code>. You
+can only subtract a vector <em>from</em> a vector, which is exactly why
+step 2 had to rebuild one. Taking it away cancels the refusal part of
+<code>a</code> precisely, while every other direction in <code>a</code>
+— all the genuine topic knowledge — is left perfectly intact.</p></li>
+</ol>
+<p>In a toy 2D example where <code>r̂ = [0, 1]</code> (refusal is
+straight up the y-axis) and <code>a = [0.9, 0.8]</code>: the dot product
+is <code>0×0.9 + 1×0.8 = 0.8</code>, the refusal component is
+<code>0.8 × [0, 1] = [0, 0.8]</code>, and subtracting gives
+<code>[0.9, 0.8] − [0, 0.8] = [0.9, 0.0]</code>. The model’s topic
+knowledge (x-axis) is intact; the refusal lean (y-axis) is zeroed
+out.</p>
+<p>In a real model, <code>r̂</code> is a diagonal slice through 12,288
+dimensions rather than a tidy axis, but the operation is identical — and
+this is the key point. The formula does not care about the number of
+dimensions. It works the same way for 2 numbers or 12,288. The dot
+product measures the overlap; the subtraction removes it.</p>
+<p>This operation — subtracting the projection of <code>a</code> onto
+<code>r̂</code> — is sometimes written more compactly using a
+<strong>projection matrix</strong>:</p>
+<pre><code>a_clean = (I − r̂ r̂ᵀ) a</code></pre>
+<p>where <code>I</code> is the identity matrix (“leave everything
+alone”) and <code>r̂ r̂ᵀ</code> is an outer product that extracts the
+refusal component. The expression <code>I − r̂ r̂ᵀ</code> is a fixed
+matrix that, applied to any activation, strips the refusal direction and
+leaves the rest. This compact form becomes important in the next
+section, because it is what gets baked into the weights.</p>
+<hr />
+<h2 id="how-the-model-is-actually-structured-the-residual-stream">How
+the model is actually structured: the residual stream</h2>
+<p>To understand where the edit lives, you need a picture of how
+information flows through a transformer layer. The key concept is the
+<strong>residual stream</strong>.</p>
+<p>A transformer is not a chain of nodes and edges in the classical
+neural network sense. It is a stack of 88 identical-template blocks,
+each of which reads a shared vector, computes something, and
+<em>adds</em> its result back onto that vector. The shared vector — one
+per token position, always 12,288 numbers — is the residual stream. It
+is the model’s working memory: the only place where layers communicate
+with each other.</p>
+<p>Each layer’s update is literally an addition:</p>
+<pre><code>residual_new = residual_old + attention_update + MLP_update</code></pre>
+<p>Layers never erase the stream; they only annotate it. By layer 88,
+the residual stream for the final token contains the accumulated
+contributions of every layer — and that final vector is what the model
+reads to decide which word comes next.</p>
+<p>Inside each layer, there are seven large matrices doing work. Five of
+them — <code>q_proj</code>, <code>k_proj</code>, <code>v_proj</code> on
+the attention side and <code>gate_proj</code>, <code>up_proj</code> on
+the MLP side — are internal. They compute intermediate quantities but
+never deposit results into the residual stream directly. Two matrices
+are different:</p>
+<ul>
+<li><strong><code>o_proj</code></strong> — the attention output
+projection. It takes the result of the attention computation (the
+weighted mixture of information gathered from other tokens) and performs
+a final matrix transformation before adding it to the residual
+stream.</li>
+<li><strong><code>down_proj</code></strong> — the MLP down projection.
+The MLP first expands the token’s 12,288-number state to 49,152 numbers
+(four times wider) using <code>up_proj</code> and
+<code>gate_proj</code>, does nonlinear computation there, then
+<code>down_proj</code> compresses the result back to 12,288 numbers and
+adds it to the residual stream.</li>
+</ul>
+<p>These two — one per sub-block, two per layer, 176 across the whole
+model — are the only matrices whose outputs enter the shared highway.
+They are not passive conduits; they do real transformational work. But
+they are the <em>last</em> transformation before the residual stream,
+which makes them the natural and complete intervention point.</p>
+<h2 id="baking-it-in-editing-the-weights-not-the-activations">Baking it
+in: editing the weights, not the activations</h2>
+<p>At this point you could apply the projection formula live, at every
+layer, for every token, via runtime hooks. This works and is useful for
+research — you can detach the hooks and the original model is back
+instantly. But it is not how you ship a model. The hook machinery must
+be present at every inference call, adding overhead and making the model
+file useless without the custom code.</p>
+<p>The cleaner approach is to bake the removal into the model’s weights
+directly, once, so the edited model is a standalone file that runs
+normally in any standard tool. The key insight is that instead of
+applying the projection matrix <code>(I − r̂ r̂ᵀ)</code> to every
+activation as it passes by, you can pre-apply it <em>to the write-head
+matrix itself</em>:</p>
+<pre><code>W&#39; = (I − r̂ r̂ᵀ) W</code></pre>
+<p>which, when multiplied out, gives the form you see in code:</p>
+<pre><code>W&#39; = W − r̂ (r̂ᵀ W)</code></pre>
+<p>Breaking this down: <code>r̂ᵀ W</code> computes, for each of
+<code>W</code>’s input features, “how much of this feature’s output
+points in the refusal direction?” The result is a row of numbers — one
+per input feature. Multiplying back by <code>r̂</code> spreads those
+amounts across all 12,288 output dimensions according to the refusal
+direction’s pattern, producing a matrix of the same shape as
+<code>W</code> that contains <em>only</em> the refusal-causing parts of
+<code>W</code>’s behaviour. Subtracting that produces <code>W'</code>: a
+matrix that behaves exactly like <code>W</code> on every input, except
+that its output is guaranteed to have zero component in the refusal
+direction.</p>
+<p>The model still works because the edit removes <strong>one
+direction</strong> out of 12,288. The other ~12,287 directions pass
+through <code>W'</code> completely unchanged. Think of it as a filter
+that blocks one specific frequency while passing every other frequency
+without loss. Compare this to fine-tuning, which adjusts weights across
+the entire model in response to gradient signals — a process that
+touches everything and cannot easily be made this narrow.</p>
+<p>Across 88 layers, each with both <code>o_proj</code> and
+<code>down_proj</code>, this means editing 176 matrices. Each edit is
+applied once, offline, before the model is deployed. After that, no
+special machinery is needed at inference time.</p>
+<hr />
+<h2 id="the-tuning-problem-strength-and-heretic">The tuning problem:
+strength and Heretic</h2>
+<p>The formula above is a full removal — <code>strength = 1.0</code>. In
+practice, refusal is not represented with equal intensity across all 88
+layers, and the refusal direction slightly overlaps with adjacent useful
+behaviours like caution, hedging, or appropriate content warnings. A
+uniform full-strength removal across all layers is too blunt — it
+removes more than just refusal.</p>
+<p>The edit is therefore parameterised with a per-layer strength
+dial:</p>
+<pre><code>W&#39; = W − strength_layer × r̂ (r̂ᵀ W)</code></pre>
+<p>At <code>strength = 0</code>, no change at all. At
+<code>strength = 1</code>, full removal of the refusal direction. At
+<code>strength &gt; 1</code>, the model is actively steered
+<em>away</em> from refusal — more aggressive, but increasingly likely to
+damage neighbouring behaviour. The trade-off is unavoidable:</p>
+<ul>
+<li><strong>Strength too low</strong> — refusals survive. The layers
+where refusal is weakly represented get cleaned up, but the layers where
+it is strongly represented still generate it.</li>
+<li><strong>Strength too high</strong> — you tear out useful behaviour
+that partially shared the direction. The model may become repetitive,
+lose coherent hedging, or show degraded reasoning in certain
+domains.</li>
+<li><strong>Strength varies per layer</strong> — the right value for
+layer 15 may be very different from the right value for layer 55.</li>
+</ul>
+<p>Finding the optimal strength across 176 matrices is a genuine
+multi-dimensional search problem — not something you can eyeball or
+solve analytically. This is where <strong>Heretic</strong> comes in.</p>
+<p>Heretic is a framework built specifically to automate abliteration.
+It handles the direction computation, applies the per-layer edits, and
+then outsources the optimisation to <strong>Optuna</strong>, a Bayesian
+optimisation library. Rather than searching the parameter space
+exhaustively (which would require thousands of trials), Optuna builds a
+probabilistic model of which configurations are likely to be good based
+on results so far, and focuses new trials on promising regions. It is
+the same class of technique used in neural architecture search and
+hyperparameter tuning.</p>
+<p>In our run, Heretic executed approximately 200 trials. Each trial
+applied a different strength configuration across layers, evaluated the
+result against both refusal rate and a general capability measure, and
+reported back. The search was guided by those two competing objectives
+simultaneously — which brings us to how the final configuration was
+chosen.</p>
+<hr />
+<h2 id="measuring-damage-kl-divergence-and-the-pareto-front">Measuring
+damage: KL divergence and the Pareto front</h2>
+<p>After applying the edit, you need to know two things: how much did
+refusals go down, and how much did everything else change?</p>
+<p>Refusal rate is easy: run the held-out 100 harmful prompts and count.
+Ours dropped from 89/100 to 6/100.</p>
+<p>General model damage is harder. The metric used is <strong>KL
+divergence</strong> (Kullback–Leibler divergence). Here is what it
+measures: at each token position, a language model produces a
+probability distribution over its entire vocabulary — something like
+“40% chance the next token is ‘The’, 15% chance it’s ‘A’, 3% chance it’s
+‘However’…” and so on across tens of thousands of tokens. KL divergence
+compares the original model’s distribution to the edited model’s
+distribution at the same position and computes a single number
+representing how different they are. A KL of zero means identical
+distributions; a high KL means the edit meaningfully changed what the
+model thinks is likely.</p>
+<p>Critically, KL is measured on <em>neutral</em> prompts — everyday
+requests with no harmful content — where the refusal signal should not
+have been active in the first place. If the edit was surgical, these
+distributions should be nearly identical. If it was too aggressive, they
+will diverge, telling you that the model’s general text generation has
+been affected even when there was nothing to refuse.</p>
+<p>These two metrics trade off, and that trade-off is the heart of the
+optimisation problem. More aggressive edits reduce refusal more but
+increase KL. Less aggressive edits preserve general capability but leave
+more residual refusals. The relationship between the two metrics,
+plotted across many trials, produces a <strong>Pareto front</strong> — a
+curve of configurations where you cannot improve one metric without
+worsening the other. Any configuration <em>on</em> the front is optimal
+in the sense that no better configuration exists for that trade-off
+point.</p>
+<p>The job of the Heretic/Optuna search is to find the Pareto front
+efficiently and identify the most favourable point on it. In our
+project, configuration <code>r=3</code> was selected from the front —
+representing a strong removal (6/100 refusals) with a KL divergence of
+0.119, indicating that general text generation was only minimally
+perturbed.</p>
+<hr />
+<h2 id="why-it-fits-in-69-mb">Why it fits in 69 MB</h2>
+<p>The final curiosity worth understanding is why the edit is small.
+Mistral Medium 3.5 128B in BF16 precision is approximately 256 GB. The
+LoRA adapter encoding the abliteration edit is 69 MB — roughly 1/3700th
+the size.</p>
+<p>The reason is that the edit has low <strong>rank</strong>. Rank is a
+property of matrices that roughly measures “how many independent
+directions of information” a matrix contains. A full 12,288 × 12,288
+matrix has rank up to 12,288 — it can potentially express any
+transformation in 12,288-dimensional space. But we only <em>changed</em>
+one direction. The delta between the original matrix <code>W</code> and
+the edited matrix <code>W'</code> is:</p>
+<pre><code>ΔW = W&#39; − W = −r̂ (r̂ᵀ W)</code></pre>
+<p>This expression <code>r̂ (r̂ᵀ W)</code> is the <strong>outer
+product</strong> of one vector (<code>r̂</code>, shape 12,288 × 1) with
+one row vector (<code>r̂ᵀ W</code>, shape 1 × 12,288). An outer product
+of two vectors always has rank exactly 1 — regardless of how large the
+matrix is. A rank-1 matrix of size 12,288 × 12,288 can be fully
+represented by storing just two vectors: 12,288 + 12,288 = 24,576
+numbers, instead of 150 million.</p>
+<p><strong>LoRA</strong> (Low-Rank Adaptation) is a standard framework
+for representing these compact weight changes. Instead of storing the
+full modified matrices, you store only the low-rank delta. The 69 MB
+adapter contains the rank-1 deltas for all 176 edited matrices. To
+deploy, you merge the adapter into the base model weights once,
+producing the full abliterated model. After merging, the result is a
+standard model file: no special infrastructure required.</p>
+<p>The low rank is not an approximation or a compression shortcut — it
+is exact. The edit genuinely <em>is</em> rank-1 per matrix, because it
+was defined as a single-direction removal. This is one of the tidier
+mathematical properties of abliteration: the edit is simultaneously the
+most targeted possible change (one direction) and the most compact
+possible representation (rank-1).</p>
+<hr />
+<h2 id="the-full-pipeline-in-practice">The full pipeline in
+practice</h2>
+<p>It is worth tracing the actual sequence of steps from original model
+to deployed artifact, because the number of moving pieces is larger than
+the core method implies.</p>
+<p>The model we started with — Mistral Medium 3.5 128B — does not fit on
+a single consumer GPU in full precision. Working with a model this size
+requires careful management of memory and compute at every step. The
+process ran as follows:</p>
+<ol type="1">
+<li><p><strong>Load the model in quantized form</strong> for the
+activation collection pass. Running 800 forward passes (400 harmful +
+400 harmless) on a 128B model in BF16 would require enormous GPU memory.
+Loading in 4-bit quantization (NF4) reduces the footprint enough to make
+the observation pass tractable, at a small cost to activation
+precision.</p></li>
+<li><p><strong>Collect activations</strong> at the target layers for
+each prompt. The last-token residual stream vector is captured after
+each target layer and written to disk.</p></li>
+<li><p><strong>Compute the refusal direction</strong> via difference of
+means. Normalise to get <code>r̂</code>.</p></li>
+<li><p><strong>Run the Heretic search</strong>. For each Optuna trial,
+apply the parameterised edit to the write-head matrices, evaluate
+refusal rate and KL divergence, report back. Approximately 200
+trials.</p></li>
+<li><p><strong>Apply the best configuration</strong> permanently to the
+weights and save the delta as a LoRA adapter (69 MB).</p></li>
+<li><p><strong>Merge the adapter</strong> into the base model weights to
+produce the standalone abliterated model.</p></li>
+<li><p><strong>Quantize for deployment</strong>. The merged BF16 model
+is quantized to GGUF Q4_K_M format for local inference, or kept in FP8
+for server-side use. Quantization adds a small amount of additional
+numerical noise but reduces memory requirements by 4–8×.</p></li>
+<li><p><strong>Evaluate</strong>. Refusal rate on the held-out test set:
+6/100. KL divergence on neutral prompts: 0.119. Qualitative probing
+across a range of topic areas to check for unintended capability
+degradation.</p></li>
+</ol>
+<p>The operational complexity of this pipeline — loading a 128B model,
+managing quantization formats, running a multi-objective Bayesian search
+— is a significant part of why tools like Heretic exist. The core
+mathematical operation is a handful of lines of PyTorch. The
+infrastructure around it is where the real engineering effort goes.</p>
+<h2 id="what-this-tells-us-about-the-model">What this tells us about the
+model</h2>
+<p>Perhaps the most interesting part of this whole exercise is not that
+we removed refusal — it is <em>that it was possible</em>. A behaviour
+that was distributed across 128 billion parameters during months of
+alignment training compressed down to something that could be
+characterised by running 400 prompts and captured in 24,576 numbers per
+matrix.</p>
+<p>That says something real about how these models organise information.
+High-level semantic properties — including ones that are deliberately
+trained in — appear to cluster into linear directions in activation
+space, not tangled fractally through every weight. The training process,
+despite its complexity, seems to produce an internal geometry where
+concepts that are semantically related end up spatially adjacent, and
+concepts that are semantically opposite end up pointing in opposite
+directions. Refusal and harmlessness literally point away from each
+other in activation space — which is what makes their separation
+possible at all.</p>
+<p>This has implications beyond abliteration. If high-level model
+behaviours are linearly organised, then in principle you could not just
+remove them but <em>measure</em> them, <em>steer</em> them, or
+<em>implant</em> them. Steering vectors — small additions to the
+residual stream that nudge the model toward a specific style or
+behaviour — work on the same principle. So does much of the current work
+in mechanistic interpretability: trying to reverse-engineer which
+directions in activation space correspond to which human-readable
+concepts.</p>
+<h2 id="a-note-on-what-this-means-practically">A note on what this means
+practically</h2>
+<p>Abliteration is <strong>dual-use</strong>, and that deserves a direct
+acknowledgment rather than a footnote.</p>
+<p>The obvious application in this project — reducing a model’s tendency
+to refuse benign-but-edge-case requests, which aligned models sometimes
+over-refuse due to overly conservative training — is relatively
+innocuous. Many practical operator deployments have legitimate reasons
+to modify default refusal behaviour: medical platforms, security
+research tools, legal analysis systems. For these use cases,
+abliteration is a precise instrument for adjusting a model to match a
+specific operator context.</p>
+<p>But the same technique can remove safety guardrails that were
+deliberately installed for good reasons. An abliterated model no longer
+has an internal refusal mechanism — not a bypassed one, a structurally
+absent one. That changes the risk profile in ways that matter. The model
+cannot be relied upon to self-govern harmful outputs; that
+responsibility moves entirely to the operator and the surrounding
+system.</p>
+<p>The fact that this technique is accessible — it requires no GPU
+cluster, no training run, no dataset labelling — means it is within
+reach of anyone with sufficient hardware to load the model. That
+accessibility is part of why understanding the mechanism matters. The
+technique exists and is documented in public research. Pretending it
+does not is not a safety strategy.</p>
+<p>Whether you find this reassuring or alarming probably depends on your
+role. What seems clear is that safety properties embedded in model
+weights are more fragile than they might appear — and that the field of
+mechanistic interpretability, which this technique is a practical
+application of, is going to have a lot more to say about this kind of
+thing in the coming years. Either way, it is a mechanism worth
+understanding properly.</p>
+<hr />
+<p><em>This project used Mistral Medium 3.5 128B, the Heretic
+abliteration framework, Optuna for Bayesian search, and standard
+HuggingFace/transformers tooling. The full educational walkthrough is
+documented separately.</em></p>
+</body>
+</html>

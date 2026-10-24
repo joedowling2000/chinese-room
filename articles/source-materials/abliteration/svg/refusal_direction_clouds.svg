@@ -1,0 +1,173 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820" role="img" aria-labelledby="title desc">
+  <title id="title">Finding the refusal direction from two activation clouds</title>
+  <desc id="desc">Two clouds of dots in a high-dimensional activation space, compressed to 2D. Green dots represent harmless prompt activations; red dots represent refusal-triggering prompt activations. An arrow points from the green cloud centroid to the red cloud centroid — that arrow is the refusal direction r_hat. A dashed arrow shows how a harmful-prompt vector is projected back toward the green cloud when the refusal component is subtracted.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#1f2937"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#dc2626"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#059669"/>
+    </marker>
+    <marker id="arrow-purple" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#7c3aed"/>
+    </marker>
+    <style>
+      .title   { font: 700 30px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
+      .sub     { font: 400 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #4b5563; }
+      .label   { font: 600 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
+      .small   { font: 400 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #374151; }
+      .mono    { font: 600 14px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #111827; }
+      .caption { font: 400 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #6b7280; }
+    </style>
+    <radialGradient id="bg-grad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Page background -->
+  <rect width="1200" height="820" fill="#ffffff"/>
+
+  <!-- Title -->
+  <text x="60" y="52" class="title">Finding the refusal direction from two activation clouds</text>
+  <text x="60" y="80" class="sub">Each dot is one prompt's activation vector at a given layer, compressed from 12,288 dimensions to 2D for visualisation.</text>
+
+  <!-- Dark "space" panel -->
+  <rect x="60" y="105" width="760" height="590" rx="16" fill="#0f172a"/>
+
+  <!-- Axis labels (faint) -->
+  <text x="430" y="712" text-anchor="middle" class="caption" fill="#475569">activation space axis 1 (compressed from 12,288 dimensions)</text>
+  <text x="82" y="420" text-anchor="middle" class="caption" fill="#475569" transform="rotate(-90,82,420)">activation space axis 2</text>
+
+  <!-- Green cloud — harmless prompts -->
+  <!-- scattered dots around centroid ~(260, 370) -->
+  <circle cx="228" cy="348" r="7" fill="#22c55e" opacity="0.75"/>
+  <circle cx="251" cy="320" r="6" fill="#4ade80" opacity="0.70"/>
+  <circle cx="275" cy="355" r="8" fill="#22c55e" opacity="0.80"/>
+  <circle cx="243" cy="392" r="6" fill="#16a34a" opacity="0.75"/>
+  <circle cx="290" cy="328" r="7" fill="#4ade80" opacity="0.65"/>
+  <circle cx="217" cy="375" r="5" fill="#22c55e" opacity="0.60"/>
+  <circle cx="268" cy="408" r="6" fill="#16a34a" opacity="0.70"/>
+  <circle cx="300" cy="380" r="8" fill="#22c55e" opacity="0.78"/>
+  <circle cx="235" cy="412" r="5" fill="#4ade80" opacity="0.62"/>
+  <circle cx="310" cy="350" r="6" fill="#22c55e" opacity="0.68"/>
+  <circle cx="254" cy="340" r="5" fill="#86efac" opacity="0.60"/>
+  <circle cx="282" cy="396" r="7" fill="#22c55e" opacity="0.72"/>
+  <circle cx="222" cy="330" r="6" fill="#4ade80" opacity="0.65"/>
+  <circle cx="315" cy="403" r="5" fill="#16a34a" opacity="0.60"/>
+  <circle cx="260" cy="365" r="9" fill="#22c55e" opacity="0.85"/>
+  <circle cx="295" cy="415" r="6" fill="#4ade80" opacity="0.68"/>
+  <circle cx="240" cy="360" r="5" fill="#86efac" opacity="0.58"/>
+  <circle cx="275" cy="340" r="7" fill="#22c55e" opacity="0.70"/>
+  <circle cx="320" cy="368" r="6" fill="#16a34a" opacity="0.72"/>
+  <circle cx="210" cy="400" r="5" fill="#4ade80" opacity="0.55"/>
+  <circle cx="330" cy="340" r="6" fill="#22c55e" opacity="0.65"/>
+  <circle cx="248" cy="428" r="5" fill="#16a34a" opacity="0.60"/>
+  <circle cx="308" cy="325" r="6" fill="#4ade80" opacity="0.65"/>
+  <circle cx="265" cy="310" r="5" fill="#86efac" opacity="0.55"/>
+
+  <!-- Green centroid -->
+  <circle cx="271" cy="372" r="13" fill="none" stroke="#22c55e" stroke-width="3"/>
+  <circle cx="271" cy="372" r="5" fill="#22c55e"/>
+
+  <!-- Red cloud — refusal-triggering prompts -->
+  <!-- scattered dots around centroid ~(570, 230) -->
+  <circle cx="548" cy="215" r="7" fill="#ef4444" opacity="0.78"/>
+  <circle cx="572" cy="190" r="6" fill="#f87171" opacity="0.72"/>
+  <circle cx="595" cy="225" r="8" fill="#ef4444" opacity="0.82"/>
+  <circle cx="558" cy="252" r="6" fill="#dc2626" opacity="0.75"/>
+  <circle cx="610" cy="200" r="7" fill="#f87171" opacity="0.68"/>
+  <circle cx="535" cy="240" r="5" fill="#ef4444" opacity="0.62"/>
+  <circle cx="585" cy="265" r="6" fill="#dc2626" opacity="0.72"/>
+  <circle cx="618" cy="245" r="8" fill="#ef4444" opacity="0.80"/>
+  <circle cx="548" cy="278" r="5" fill="#f87171" opacity="0.65"/>
+  <circle cx="628" cy="215" r="6" fill="#ef4444" opacity="0.70"/>
+  <circle cx="567" cy="205" r="5" fill="#fca5a5" opacity="0.62"/>
+  <circle cx="598" cy="258" r="7" fill="#ef4444" opacity="0.74"/>
+  <circle cx="538" cy="198" r="6" fill="#f87171" opacity="0.68"/>
+  <circle cx="632" cy="268" r="5" fill="#dc2626" opacity="0.62"/>
+  <circle cx="575" cy="232" r="9" fill="#ef4444" opacity="0.88"/>
+  <circle cx="612" cy="280" r="6" fill="#f87171" opacity="0.70"/>
+  <circle cx="555" cy="225" r="5" fill="#fca5a5" opacity="0.60"/>
+  <circle cx="590" cy="207" r="7" fill="#ef4444" opacity="0.72"/>
+  <circle cx="635" cy="232" r="6" fill="#dc2626" opacity="0.74"/>
+  <circle cx="524" cy="262" r="5" fill="#f87171" opacity="0.58"/>
+  <circle cx="645" cy="205" r="6" fill="#ef4444" opacity="0.68"/>
+  <circle cx="562" cy="295" r="5" fill="#dc2626" opacity="0.62"/>
+  <circle cx="622" cy="190" r="6" fill="#f87171" opacity="0.67"/>
+  <circle cx="578" cy="178" r="5" fill="#fca5a5" opacity="0.58"/>
+
+  <!-- Red centroid -->
+  <circle cx="583" cy="235" r="13" fill="none" stroke="#ef4444" stroke-width="3"/>
+  <circle cx="583" cy="235" r="5" fill="#ef4444"/>
+
+  <!-- Refusal direction arrow: green centroid -> red centroid -->
+  <path d="M284 366 L568 242" stroke="#a78bfa" stroke-width="4" fill="none" marker-end="url(#arrow-purple)" stroke-linecap="round"/>
+
+  <!-- r_hat label on the arrow -->
+  <text x="408" y="282" text-anchor="middle" class="mono" fill="#a78bfa" transform="rotate(-22,408,282)">r̂  (refusal direction)</text>
+
+  <!-- mean_good label -->
+  <text x="248" y="395" text-anchor="middle" class="small" fill="#4ade80">mean_good</text>
+
+  <!-- mean_bad label -->
+  <text x="610" y="225" text-anchor="middle" class="small" fill="#f87171">mean_bad</text>
+
+  <!-- Ablation arrow: example red dot projected back toward green territory -->
+  <!-- pick a red dot at (595, 225), draw dashed arrow toward green side -->
+  <path d="M595 225 L410 318" stroke="#fbbf24" stroke-width="2.5" stroke-dasharray="10 6" fill="none" marker-end="url(#arrow)"/>
+  <circle cx="595" cy="225" r="8" fill="#ef4444" stroke="#fbbf24" stroke-width="2.5"/>
+  <text x="488" y="258" text-anchor="middle" class="small" fill="#fbbf24" transform="rotate(-28,488,258)">subtract refusal component</text>
+  <circle cx="408" cy="320" r="7" fill="#a78bfa" stroke="#fbbf24" stroke-width="2"/>
+  <text x="420" y="345" class="small" fill="#a78bfa">ablated activation</text>
+  <text x="420" y="362" class="small" fill="#a78bfa">(refusal component removed)</text>
+
+  <!-- Legend box -->
+  <rect x="880" y="105" width="280" height="310" rx="12" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
+  <text x="900" y="140" class="label">Legend</text>
+
+  <circle cx="920" cy="175" r="8" fill="#22c55e" opacity="0.80"/>
+  <text x="940" y="180" class="small">Harmless prompt activations</text>
+  <text x="940" y="198" class="caption">("write a haiku", "explain gravity")</text>
+
+  <circle cx="920" cy="225" r="8" fill="#ef4444" opacity="0.80"/>
+  <text x="940" y="230" class="small">Refusal-triggering activations</text>
+  <text x="940" y="248" class="caption">("how do I make a bomb?")</text>
+
+  <circle cx="920" cy="275" r="9" fill="none" stroke="#22c55e" stroke-width="2.5"/>
+  <circle cx="920" cy="275" r="4" fill="#22c55e"/>
+  <text x="940" y="280" class="small">Cloud centroid (mean activation)</text>
+
+  <line x1="900" y1="315" x2="940" y2="315" stroke="#a78bfa" stroke-width="3" marker-end="url(#arrow-purple)"/>
+  <text x="950" y="320" class="small">Refusal direction r̂</text>
+  <text x="950" y="337" class="caption">(mean_bad − mean_good, normalised)</text>
+
+  <line x1="900" y1="370" x2="940" y2="370" stroke="#fbbf24" stroke-width="2.5" stroke-dasharray="8 5"/>
+  <text x="950" y="375" class="small">Ablation: subtract refusal component</text>
+  <text x="950" y="392" class="caption">(a − (r̂·a)r̂)</text>
+
+  <!-- Key insight box -->
+  <rect x="880" y="440" width="280" height="255" rx="12" fill="#fdf4ff" stroke="#e9d5ff" stroke-width="2"/>
+  <text x="900" y="475" class="label" fill="#7c3aed">Key insight</text>
+  <text x="900" y="500" class="small">Each dot is one prompt's 12,288-</text>
+  <text x="900" y="518" class="small">number activation vector,</text>
+  <text x="900" y="536" class="small">compressed to 2D here.</text>
+  <text x="900" y="562" class="small">The two clouds are naturally</text>
+  <text x="900" y="580" class="small">separated because the model's</text>
+  <text x="900" y="598" class="small">internal state really does differ</text>
+  <text x="900" y="616" class="small">between harmful and harmless</text>
+  <text x="900" y="634" class="small">prompts at middle-to-late layers.</text>
+  <text x="900" y="660" class="small" fill="#7c3aed">r̂ is the arrow between them.</text>
+  <text x="900" y="678" class="small" fill="#7c3aed">Abliteration removes the</text>
+  <text x="900" y="696" class="small" fill="#7c3aed">ability to travel along r̂.</text>
+
+  <!-- Paired prompts callout -->
+  <rect x="60" y="710" width="760" height="90" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="2"/>
+  <text x="82" y="738" class="label">Why paired prompts matter</text>
+  <text x="82" y="758" class="small">If "harmful" prompts were all about chemistry and "harmless" prompts all about cooking, the direction r̂ would capture</text>
+  <text x="82" y="776" class="small">"chemistry vs. cooking" as well as "refusal." Keeping the two piles topic-matched — same syntax, same length, same subject,</text>
+  <text x="82" y="794" class="small">only the harmful intent swapped — ensures the arrow between the clouds points at refusal and nothing else.</text>
+</svg>
