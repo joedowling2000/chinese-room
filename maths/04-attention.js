@@ -3,20 +3,17 @@
 Maths.scene({
   id:'attention',no:'04',tag:'Attention',short:'Attention',mode:'2d',
   title:'Every token asks a question.',
-  body:['In attention, each token emits a query and every token offers a key. Their dot product scores how well they match, and softmax turns the scores into weights that add up to one. The output is the weighted average of the values; here the values are the keys themselves.',
-        'Temperature sharpens or flattens the choice. Inside a transformer it is fixed by the √d scaling; the same knob comes back when a model samples its next token.'],
-  why:'Attention is how a word finds the other words that change its meaning: which noun “it” refers to, or whether “bank” means a river or money. Without it, every token would be processed in isolation, as if the model read each word through a keyhole with no memory of the rest of the sentence. It is also why long prompts are expensive: every new token has to look back at every token before it.',
-  llm:{where:'This is the attention block — the mechanism that lets a token gather context from the words before it. A transformer runs many of these heads in parallel per layer, each with its own learned query, key and value matrices.',
-       role:'It is how “it” finds its noun and the main reason transformers beat bag-of-words models. The cost is quadratic: every new token has to look back at all the ones before it, which is why long contexts are expensive.'},
+  body:['In attention, each token emits a query — a learned projection used to score keys — and every token offers a key. Their dot product scores how well they match, and softmax turns the scores into weights that add up to one. The output is the weighted average of the values; here the values are the keys themselves.',
+        'The temperature control divides the scores before softmax. Standard scaled dot-product attention divides by √dₖ, where dₖ is the key width; this adjustable example is not the sampling-temperature setting used to select an output token.'],
+  llm:{where:'This is the attention block — the mechanism that lets a token gather context from the tokens before it. A transformer runs many of these heads in parallel per layer, each with its own learned query, key and value matrices.',
+       role:'It is how “it” finds its noun. Processing a whole prompt scores every token pair, so the pair count grows quadratically with sequence length; generating one additional token attends over the cached context.'},
   formula:'wᵢ = softmax(q·kᵢ / τ)  ·  output = Σ wᵢ vᵢ',
   caption:'Drag the query arrow',
   abstractCaption:'← → or A D, or drag: turn your head · ↑ ↓ or W S: lean in or back',
   label:'A query vector with attention arcs to eight token keys.',
   abstractLabel:'A first-person view from the centre of a ring of words, with threads that brighten towards the words you attend to.',
-  dream:{title:'You are the query.',text:[
-    'You are a word in the middle of a sentence, and you have a question.',
-    'Around you the other words stand in a ring, each holding up its key, and a thread runs from you to every one of them. Wherever you look is the question you are asking: turn your head and the threads brighten or fade, because a dot product only measures how closely two arrows point the same way.',
-    'Each step you take forward makes the question more insistent. On the floor, a glowing ring marks what you will become: a blend of everyone you listened to.']},
+  dream:{title:'What the scene represents',text:[
+    'The surrounding markers represent keys. Turning changes the query direction; leaning changes its length. Brighter connections receive more weight. The floor marker shows the weighted sum of values, which equal the keys in this example.']},
   controls:({slider,button,buttons})=>`${slider('att-temp','Temperature τ',.1,3,.05,1,'Temperature τ: how widely you listen')}
     <div class="ab-only">${buttons(button('att-left','↺ Look left'),button('att-in','↑ Lean in'),button('att-out','↓ Lean back'),button('att-right','Look right ↻'))}</div>
     <div class="maths-bars" id="att-bars" aria-label="Attention weights"></div>`,
@@ -104,7 +101,7 @@ Maths.scene({
       k.tint(ctx,ac,()=>pline(ctx,P,ring,1,1.5,1e9));
       k.beacon(ctx,P,[o[0],.03,o[1]],ac,.12,.95);
       const po=P(o[0],.01,o[1]);
-      if(po)label(ctx,'what you become',po[0],po[1]+18,.75,'center');
+      if(po)label(ctx,'weighted value sum',po[0],po[1]+18,.75,'center');
     }
 
     function update(){

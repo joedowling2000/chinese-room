@@ -4,20 +4,18 @@ Maths.scene({
   id:'linear-maps',no:'01',tag:'Vectors & matrices',short:'Linear maps',mode:'2d',
   title:'A matrix moves all of space at once.',
   body:['Almost everything inside a transformer is a matrix multiplication. A 2×2 matrix is simply a rule for where the two basis arrows, î and ĵ, land. Every other point follows along, so grid lines stay straight, parallel and evenly spaced.',
-        'The determinant says how much areas grow or shrink. At zero, the plane is flattened onto a line and information is lost for good.'],
-  why:'Most of an LLM’s billions of parameters are entries in matrices like this one, only thousands of rows wide. They turn each word into a query, a key and a value, mix information between layers and score every word in the vocabulary. Without them there would be nothing to learn: no way to move meaning from one place to another.',
-  llm:{where:'Every weight matrix in a transformer is one of these maps: the embedding that turns each word into a vector, the Q, K and V projections inside every attention head, the feed-forward layers, and the final unembedding that scores the whole vocabulary.',
-       role:'It is the model’s only way to move and mix information — change the entries and you change what the network can express. When the determinant hits zero the map throws information away, which is why trained weight matrices stay near full rank.'},
+        'The absolute value of the determinant gives the area scale. At zero, the plane collapses onto a line or a point and information is lost.'],
+  llm:{where:'Every weight matrix in a transformer is one of these maps: the embedding that turns each token into a vector, the Q, K and V projections inside every attention head, the feed-forward layers, and the final unembedding that scores the whole vocabulary.',
+       role:'A projection can discard information. The determinant illustrates that for this square matrix; rank is the more general concept used for rectangular matrices.'},
+  sources:[{label:'Hu et al., LoRA: Low-Rank Adaptation of Large Language Models (2021)',href:'https://arxiv.org/abs/2106.09685'}],
   formula:'[x′ y′] = [[a b] [c d]] · [x y]  ·  det = ad − bc',
   caption:'Drag the tips of î and ĵ',
   abstractCaption:'Arrow keys or W A S D: step along î and ĵ · Q E or drag: look around',
   label:'A grid transformed by a 2 by 2 matrix, with the unit circle mapped to an ellipse.',
   abstractLabel:'A first-person view across the transformed plane, with posts standing at whole-number addresses.',
-  dream:{title:'You are a point on the plane.',text:[
-    'You are a single point: two numbers and nothing else, standing on an endless sheet of graph paper.',
-    'Around you, posts mark every whole-numbered address, and a ring on the ground marks your unit neighbourhood. Somewhere overhead, a hand rewrites the matrix, and the whole world shears, stretches and turns at once, carrying you with it, because you are only ever where the matrix sends you.',
-    'Each step you take is a column of the matrix: step along î and you travel wherever î now points. Rewrite the rules until the determinant reaches zero, and the world folds into a single road.']},
-  controls:({slider,button,buttons,swap})=>`<p class="maths-subhead">${swap('Presets','Rewrite the rules')}</p>
+  dream:{title:'What the scene represents',text:[
+    'The posts mark input coordinates. The matrix transforms their positions and yours by the same rule. Compare a shear with a collapse: one changes the angles; the other makes distinct addresses share a destination.']},
+  controls:({slider,button,buttons,swap})=>`<p class="maths-subhead">${swap('Presets','Matrix presets')}</p>
     ${buttons(...[['identity','Identity'],['rotate','Rotate'],['shear','Shear'],['stretch','Stretch'],['flip','Reflect'],['collapse','Collapse']].map(([k,l])=>button('lm-'+k,l,undefined,`data-lm-preset="${k}"`)))}
     <div class="maths-grid2 flat-only">${slider('lm-a','a',-2,2,.05,1)}${slider('lm-b','b',-2,2,.05,.5)}${slider('lm-c','c',-2,2,.05,-.3)}${slider('lm-d','d',-2,2,.05,1.1)}</div>
     <div class="ab-only"><p class="maths-subhead">Walk</p>${buttons(button('lm-west','← Back along î'),button('lm-east','Along î →'),button('lm-south','↓ Back along ĵ'),button('lm-north','Along ĵ ↑'))}</div>`,
@@ -119,11 +117,11 @@ Maths.scene({
       ids.forEach((id,i)=>{$(id).value=M[i];$(id+'-out').value=M[i].toFixed(2);});
       const det=M[0]*M[3]-M[1]*M[2];
       if(!s.abstract){
-        k.readout(`det = ${det.toFixed(2)} · areas scale by ${Math.abs(det).toFixed(2)}×${Math.abs(det)<.03?' · the plane is flattened onto a line':det<0?' · orientation is flipped':''}`);
+        k.readout(`det = ${det.toFixed(2)} · areas scale by ${Math.abs(det).toFixed(2)}×${Math.abs(det)<.03?' · determinant near zero; area is strongly compressed':det<0?' · orientation is flipped':''}`);
         return;
       }
       const at=[M[0]*goal[0]+M[1]*goal[1],M[2]*goal[0]+M[3]*goal[1]];
-      k.readout(`your own address: (${goal[0]}, ${goal[1]}) · the world puts you at (${at[0].toFixed(2)}, ${at[1].toFixed(2)}) · ${Math.abs(det)<.03?'the world has folded into a single road, and different addresses are now the same place':`your unit square covers ${Math.abs(det).toFixed(2)} square units${det<0?', mirrored':''}`}`);
+      k.readout(`your own address: (${goal[0]}, ${goal[1]}) · the world puts you at (${at[0].toFixed(2)}, ${at[1].toFixed(2)}) · ${Math.abs(det)<.03?'determinant near zero; distinct inputs may map very close together':`your unit square covers ${Math.abs(det).toFixed(2)} square units${det<0?', mirrored':''}`}`);
     }
     function set(next,animate){
       M=next;sync();

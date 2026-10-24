@@ -5,21 +5,18 @@ Maths.scene({
   title:'Bend, then fold.',
   body:['Stack linear maps and you only ever get another linear map. Networks escape by applying a simple non-linear function after each one.',
         'ReLU keeps positive values and sets negative ones to zero, folding whole regions of space flat onto the axes. Layer after layer, those folds let a network carve space into whatever shapes the task needs. The two point clouds show what happens to an inner disc and an outer ring.'],
-  why:'Without a non-linear step, a hundred layers would collapse into one big matrix, and the model could only ever draw straight lines through meaning. It could not learn that “not bad” sits close to “good”, or that a word changes with the company it keeps. The feed-forward layers, where these activations live, hold most of a model’s parameters, and research suggests they store much of what it knows.',
-  llm:{where:'Inside every transformer block, right after attention, sits a feed-forward network — this layer, repeated dozens of times. Modern models mostly use GELU or a gated variant such as SwiGLU rather than plain ReLU, but the folding is the same idea.',
-       role:'The non-linearity is what stops the whole stack collapsing into a single matrix. These layers hold roughly two-thirds of a transformer’s parameters, and evidence suggests much of its factual knowledge is stored in them.'},
+  llm:{where:'Inside every transformer block, right after attention, sits a feed-forward network — this layer, repeated many times. Modern models mostly use GELU or a gated variant such as SwiGLU rather than plain ReLU, but the folding is the same idea.',
+       role:'The non-linearity is what stops a stack of feed-forward maps collapsing into a single map. Feed-forward layers often account for a large share of the parameters. GELU scales inputs smoothly and SwiGLU uses an input-dependent gate; neither is a guarantee against small gradients.'},
   formula:'h = ReLU(W·x + b) = max(0, W·x + b)',
   caption:'Step through one layer',
   abstractCaption:'↑ ↓ or W S: walk · ← → or A D: turn · F: fold or unfold · drag to look around',
   label:'A square grid passed through a rotation, a shift and an activation function.',
   abstractLabel:'A first-person view of a sheet of graph paper folding up into walls as the activation is applied.',
-  dream:{title:'You are a point inside the disc.',text:[
-    'You are one point of the inner disc, standing on a sheet of graph paper that is about to pass through one layer of a network.',
-    'Around you the grid runs to the horizon, and the points of the outer ring stand in a wide circle like a crowd. First the sheet turns and slides beneath your feet. Then the activation arrives: everything with a coordinate below zero lifts off the floor and folds up into walls, pressed flat against the axes.',
-    'Each step you take is a step across the input, and where the layer leaves you depends on which side of the crease you were standing.']},
+  dream:{title:'What the scene represents',text:[
+    'The sheet shows points passing through a linear transformation and an activation. In this view, height represents how much the activation changes the coordinates. It is a visual aid, not an extra output dimension of the layer.']},
   controls:({slider,button,buttons,swap})=>`${slider('fold-t','Layer progress',0,2,.01,0,'How far through the layer')}${slider('fold-theta','Rotation θ',-180,180,1,35,'Turn the sheet')}${slider('fold-bias','Bias b',-1.5,1.5,.05,.3,'Slide the sheet')}
-    <label class="maths-slider" for="fold-act"><span>${swap('Activation','What folds the world')}</span><select id="fold-act" class="maths-select"><option value="relu">ReLU</option><option value="leaky">Leaky ReLU</option><option value="gelu">GELU</option><option value="tanh">tanh</option></select></label>
-    ${buttons(button('fold-play','Play the layer','Let the layer happen'))}
+    <label class="maths-slider" for="fold-act"><span>${swap('Activation','Activation')}</span><select id="fold-act" class="maths-select"><option value="relu">ReLU</option><option value="leaky">Leaky ReLU</option><option value="gelu">GELU</option><option value="tanh">tanh</option></select></label>
+    ${buttons(button('fold-play','Play the layer','Apply the layer'))}
     <div class="ab-only"><p class="maths-subhead">Walk</p>${buttons(button('fold-left','↺ Turn left'),button('fold-fwd','↑ Step forward'),button('fold-back','↓ Step back'),button('fold-right','Turn right ↻'))}</div>`,
   init(k){
     const {$,clamp,lerp,stroke,dot,persp,pline,pdot,heading}=k;
@@ -109,7 +106,7 @@ Maths.scene({
       $('fold-t-out').value=p.t<.005?'input':p.t<=1?'linear '+Math.round(p.t*100)+'%':'activation '+Math.round((p.t-1)*100)+'%';
       $('fold-theta-out').value=$('fold-theta').value+'°';
       $('fold-bias-out').value=p.b.toFixed(2);
-      if(!play.playing)k.setText($('fold-play'),folded?'Rewind':'Play the layer',folded?'Unfold the world':'Let the layer happen');
+      if(!play.playing)k.setText($('fold-play'),folded?'Rewind':'Play the layer',folded?'Unfold':'Apply the layer');
       if(s.abstract){
         const you=lift(me[0],me[1],p),lifted=pts.filter(([x,y])=>lift(x,y,p)[1]>.02).length;
         k.readout(`${p.t<.005?'the layer has not started':p.t<=1?'the sheet is turning and sliding':`${names[key]} is folding the world`} · ${you[1]>.02?`you have been carried ${you[1].toFixed(2)} up a wall`:'you are still on the floor'} · ${lifted} of the ${pts.length} points have left the floor`);

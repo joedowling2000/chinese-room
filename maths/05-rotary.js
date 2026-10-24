@@ -3,23 +3,21 @@
 Maths.scene({
   id:'rotary',no:'05',tag:'Position',short:'Rotary positions',mode:'3d',
   title:'Position as rotation.',
-  body:['Attention on its own has no sense of word order. Rotary position embeddings (RoPE) add it by rotating pairs of dimensions in each query and key by an angle proportional to the token’s position, each pair at its own frequency.',
-        'Two pairs means two angles, so the combined state lives on a torus; the dots mark whole token positions. Because queries and keys are rotated the same way, their dot product depends only on how far apart the tokens are.'],
-  why:'Attention on its own treats a sentence as a bag of words: “dog bites man” and “man bites dog” would look identical. Position information restores the order. Because RoPE encodes the distance between words rather than where they sit, its frequencies can be stretched after training, which is one of the main ways models are extended to longer contexts than they were trained on.',
+  body:['Attention on its own has no sense of token order. Rotary position embeddings (RoPE) add it by rotating pairs of dimensions in each query and key by an angle proportional to the token’s position, each pair at its own frequency.',
+        'Two pairs means two angles, so the combined state lives on a torus; the dots mark whole token positions. For fixed query and key content, the positional contribution to their dot product depends on how far apart the tokens are.'],
   llm:{where:'Inside every attention head, just before the dot products are scored, the query and key vectors are rotated by RoPE — by an angle proportional to the token’s position, each coordinate pair at its own frequency. Llama, Mistral and most open models use it.',
-       role:'It gives attention a sense of word order without storing positions anywhere. And because it encodes distance rather than absolute place, stretching the frequencies is the standard trick for extending a trained model’s context window.'},
+       role:'It gives attention a sense of token order through rotations of query and key coordinates. Frequency scaling can support longer contexts, but the model’s quality at those lengths has to be tested; context extension is not automatic.'},
+  sources:[{label:'Su et al., RoFormer: Enhanced Transformer with Rotary Position Embedding',href:'https://arxiv.org/abs/2104.09864'}],
   formula:'(x₁, x₂) → R(p·ωᵢ)(x₁, x₂)  ·  ⟨R(mω)q, R(nω)k⟩ = ⟨q, R((n−m)ω)k⟩',
   caption:'Drag to rotate',
-  abstractCaption:'↑ ↓ or W S: next or previous word · R: ride or stop · B: look back · ← → or drag: look around',
+  abstractCaption:'↑ ↓ or W S: next or previous token · R: ride or stop · B: look back · ← → or drag: look around',
   label:'A wire-frame torus with the path traced by a rotary position embedding.',
-  abstractLabel:'A first-person ride through the inside of a torus, along a rail wound around the tunnel wall, with lamps marking earlier word positions.',
-  dream:{title:'You are a word on its way to its place.',text:[
-    'You are a word, and your place in the sentence is not written anywhere on you. It is how far you have been turned.',
-    'Around you runs a curved tunnel, the inside of a doughnut, with a rail wound around its wall. Two wheels carry you along it: a fast one that spins you round the tunnel and a slow one that carries you down it.',
-    'Each step you take is one word further into the sentence. Every word before you rode the same rail and stopped where it belongs: look back and you will see them strung down the tunnel like lamps. You never need to know your own number, only how many lamps lie between you and the word you are listening to.']},
-  controls:({slider,button,buttons})=>`${slider('rope-pos','Token position p',0,120,.1,30,'Your place in the sentence')}${slider('rope-ratio','Slow / fast frequency',.02,1,.01,.08,'Gear ratio: slow wheel ÷ fast wheel')}
+  abstractLabel:'A first-person ride through the inside of a torus, along a rail wound around the tunnel wall, with lamps marking earlier token positions.',
+  dream:{title:'What the scene represents',text:[
+    'The tunnel combines two rotating coordinate pairs. Moving along the rail changes their angles with token position. A real attention head can contain many such pairs.']},
+  controls:({slider,button,buttons})=>`${slider('rope-pos','Token position p',0,120,.1,30,'Token position')}${slider('rope-ratio','Slow / fast frequency',.02,1,.01,.08,'Ratio between two of the frequencies')}
     ${buttons(button('rope-play','Play','Ride on'))}
-    <div class="ab-only">${buttons(button('rope-prev','↓ Previous word'),button('rope-next','↑ Next word'),button('rope-back','Look back',undefined,'aria-pressed="false"'))}</div>`,
+    <div class="ab-only">${buttons(button('rope-prev','↓ Previous token'),button('rope-next','↑ Next token'),button('rope-back','Look back',undefined,'aria-pressed="false"'))}</div>`,
   init(k){
     const {$,clamp,lerp,stroke,dot,arrow,label,camera,depthLine,persp,pline,pdot,V}=k;
     const R=1.45,r=.58,w1=.5,view={yaw:-.55,pitch:.78},look={yaw:0,pitch:0};
@@ -128,7 +126,7 @@ Maths.scene({
       $('rope-ratio-out').value=g.toFixed(2);
       k.setText($('rope-play'),play.playing?'Pause':'Play',play.playing?'Stop':'Ride on');
       k.readout(s.abstract
-        ?`${onWord?`you are word ${n}`:`you are between words ${n} and ${n+1}`} · the fast wheel has turned you ${turns(p*w1)} times, the slow wheel ${turns(p*w1*g)} · ${onWord?n:n+1} lamps lie behind you${back?' · you are looking back':''}`
+        ?`${onWord?`you are token ${n}`:`you are between tokens ${n} and ${n+1}`} · the fast wheel has turned you ${turns(p*w1)} times, the slow wheel ${turns(p*w1*g)} · ${onWord?n:n+1} lamps lie behind you${back?' · you are looking back':''}`
         :`position ${p.toFixed(1)} · pair 1 has turned ${turns(p*w1)} times · pair 2 has turned ${turns(p*w1*g)} times`);
       s.draw();
     }

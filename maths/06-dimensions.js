@@ -4,19 +4,17 @@ Maths.scene({
   id:'dimensions',no:'06',tag:'Geometry',short:'High dimensions',mode:'2d',
   title:'Room for more than you’d think.',
   body:['In two dimensions only two directions can be at right angles. In thousands of dimensions almost any two random directions are nearly at right angles: their cosine similarity bunches tightly around zero, with a spread of about 1/√d.',
-        'That spare room is part of why models can store far more features than they have dimensions, a trick called superposition, at the cost of a little interference. 12,288 is the width of the model in the abliteration notes.'],
-  why:'A model has to represent millions of ideas, from names and facts to grammar and tone, using a few thousand numbers per word. Near-right angles are what make that possible: many features can share the same space with only a little crosstalk. They are also why single neurons are hard to interpret, because each one is shared by many features at once.',
-  llm:{where:'This is the residual stream — the wide vector each token carries through every layer of the network. It is 4,096 numbers across in a mid-size model, and 12,288 in the one examined in the abliteration note.',
-       role:'Near-orthogonality lets the stream hold far more features than it has dimensions — a packing trick called superposition. The same crowding is why single neurons are hard to interpret: each one is shared by many features at once.'},
+        'That geometry motivates how models could store more features than they have dimensions — superposition — though random directions do not demonstrate what a trained model actually stores. 12,288 is the width of the model in the abliteration notes.'],
+  llm:{where:'This is the residual stream — the vector at each token position that carries updates through the transformer blocks. It is 4,096 numbers across in a mid-size model, and 12,288 in the one examined in the abliteration note.',
+       role:'The random-direction geometry shown here motivates how many directions can coexist with limited overlap. Whether a model’s learned representations pack features this way is a separate question that the sampling here does not test.'},
+  sources:[{label:'Elhage et al., Toy Models of Superposition',href:'https://transformer-circuits.pub/2022/toy_model/'}],
   formula:'cos θ = u·v / (|u| |v|)  ·  spread ≈ 1/√d',
   caption:'Cosine similarity of 6,000 random pairs',
   abstractCaption:'+ and −: more or fewer dimensions · U: look up at yourself · H: the horizon · arrow keys or drag: look around',
   label:'A histogram of cosine similarities between random vectors.',
   abstractLabel:'A first-person view of a night sky in which other directions are stars, gathering on the horizon as dimensions grow.',
-  dream:{title:'You are one idea among thousands.',text:[
-    'You are one direction in a space with thousands of them. You stand at the centre of everything, and the point straight overhead is you.',
-    'Around you, every other idea the model knows hangs in the sky as a star, placed by how closely it points your way.',
-    'Each step you take adds dimensions, and the stars fall. In two or three dimensions they are scattered across the whole sky, some almost on top of you. In thousands they settle into a thin bright band on the horizon, all at right angles to you, so far apart that you can share one sky without colliding.']},
+  dream:{title:'What the scene represents',text:[
+    'Each star represents a sampled direction. Its angle from the point overhead corresponds to its similarity to the reference direction. The sky is a projection of those angles, not a picture of a model’s learned features.']},
   controls:({slider,button,buttons})=>`${slider('dim-k','Dimensions d',0,9,1,3,'Dimensions: how much room the sky has')}
     <div class="ab-only">${buttons(button('dim-less','− Fewer dimensions'),button('dim-more','More dimensions +'),button('dim-up','Look up at yourself'),button('dim-horizon','Look at the horizon'))}</div>`,
   init(k){

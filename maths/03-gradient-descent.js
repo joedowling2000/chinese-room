@@ -5,20 +5,18 @@ Maths.scene({
   title:'Roll downhill, one step at a time.',
   body:['Training is a search for weights that make the loss small. The gradient points uphill, so each step moves a little the other way.',
         'The learning rate sets the stride. Too small and progress crawls; too large and the ball overshoots and flies off. Momentum carries speed from step to step, which can roll it through small dips. A real model does this in billions of dimensions, not two.'],
-  why:'Every weight in an LLM starts out as a random number. Gradient descent, repeated over trillions of words, is what turns that noise into a model that can write. Without it, the network would stay exactly as random as the day it was made. Choose the learning rate badly and training crawls or blows up, which is why labs warm it up and then decay it on a careful schedule.',
-  llm:{where:'This is training, not inference — the loop that placed every weight in the model. A loss measured over billions of words, gradients found by backpropagation, and billions of small downhill steps like the one you are taking.',
-       role:'Nothing else teaches the model. Everything else on this page is architecture — the fixed landscape; descent is what carved every weight in it. Real optimisers add momentum and adaptive rates, but the step is the same.'},
+  llm:{where:'This is training, not inference — the loop that updates the model’s parameters using gradients computed on batches of tokens.',
+       role:'Training combines a loss objective, batches of tokens and an optimiser that uses gradients to update parameters. Momentum and adaptive per-parameter rates affect those updates; a finite step can increase the loss.'},
+  sources:[{label:'Loshchilov and Hutter, Decoupled Weight Decay Regularization',href:'https://arxiv.org/abs/1711.05101'}],
   formula:'θ ← θ − η ∇L(θ)  ·  momentum: v ← μv − η∇L, θ ← θ + v',
   caption:'Drag to rotate · click the surface to drop the ball',
-  abstractCaption:'↑ or W: one step · R: walk or stop · N: wake somewhere else · ← → or drag: look around',
+  abstractCaption:'↑ or W: one step · R: walk or stop · N: new starting point · ← → or drag: look around',
   label:'A wire-mesh loss surface with a ball descending it.',
   abstractLabel:'A first-person view across a foggy loss landscape, with an arrow at your feet pointing downhill.',
-  dream:{title:'You are the weights.',text:[
-    'You are a model’s weights, standing somewhere on a landscape made of your own mistakes. The height of the ground is the loss: high where you are wrong, low where you are right.',
-    'Around you a fog has come down. You cannot see the valley floor, only feel the slope under your feet: the arrow at your toes.',
-    'Each step you take is downhill. The learning rate is the length of your stride, and momentum is how much of your last step you carry into the next. Somewhere below, a hollow is waiting. Whether it is the deepest one, you will never know.']},
+  dream:{title:'What the scene represents',text:[
+    'Your position represents two trainable parameters. Ground height represents loss. The arrow points opposite the local gradient; the learning rate and momentum determine the update.']},
   controls:({slider,button,buttons})=>`${slider('gd-lr','Learning rate η',.02,1.6,.01,.15,'Stride length η')}${slider('gd-mu','Momentum μ',0,.95,.01,0,'Momentum μ: how much of your last step you keep')}
-    ${buttons(button('gd-run','Run','Walk downhill'),button('gd-step','Step','Take one step'),button('gd-new','New start','Wake somewhere else'))}`,
+    ${buttons(button('gd-run','Run','Walk downhill'),button('gd-step','Step','Take one step'),button('gd-new','New start','Choose a new starting point'))}`,
   init(k){
     const {$,clamp,stroke,dot,camera,depthLine,persp,pline,pdot,heading,turn}=k;
     const f=(x,z)=>.14*(x*x+z*z)+.32*Math.sin(1.6*x+.4)*Math.cos(1.3*z-.3)+.08*x;
@@ -118,19 +116,10 @@ Maths.scene({
     function update(){
       $('gd-lr-out').value=Number($('gd-lr').value).toFixed(2);
       $('gd-mu-out').value=Number($('gd-mu').value).toFixed(2);
-      k.setText($('gd-run'),run.playing?'Pause':'Run',run.playing?'Stop':'Walk downhill');
-      const loss=Math.max(0,f(...ball)-lo),global=loss<.02,[gx,gz]=grad(...ball);
-      if(s.abstract){
-        const text={ready:'you are standing still; take a step',running:'walking downhill',
-          settled:global?'the ground is flat in every direction. This is the deepest hollow on the map, though you cannot know that':'the ground is flat in every direction, but this is not the lowest point. Try more momentum, or wake somewhere else',
-          diverged:'your stride was too long: you leapt clean off the edge of the map',stopped:'still walking after 500 steps; lengthen your stride'}[status];
-        k.readout(`${steps} steps taken · the ground here is ${loss.toFixed(3)} high · slope under your feet ${Math.hypot(gx,gz).toFixed(3)} · ${text}`);
-      }else{
-        const text={ready:'click the surface or press Run',running:'descending',
-          settled:global?'settled in the global minimum':'stuck in a local minimum · try momentum or another start',
-          diverged:'diverged · the learning rate is too large',stopped:'still moving after 500 steps · try a larger learning rate'}[status];
-        k.readout(`step ${steps} · loss ${loss.toFixed(3)} · ${text}`);
-      }
+      k.setText($('gd-run'),run.playing?'Pause':'Run',run.playing?'Pause':'Run');
+      const loss=Math.max(0,f(...ball)-lo),[gx,gz]=grad(...ball);
+      const text={ready:'Ready; take a step',running:'Running',settled:'Small gradient; run stopped',diverged:'Left the plotted domain; try a smaller learning rate',stopped:'Step limit reached; run stopped'}[status];
+      k.readout(`Step ${steps} · loss ${loss.toFixed(3)} · gradient magnitude ${Math.hypot(gx,gz).toFixed(3)} · ${text}`);
       s.draw();
     }
 

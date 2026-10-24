@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"><channel>
-  <title>Chinese Room — AI research</title>
+  <title>Chinese Room — AI project notes</title>
   <link>https://chineseroom.io/</link>
-  <description>Independent research into how AI models work on the inside.</description>
+  <description>Joe Dowling’s notes on training networks, quantising language models and building agents.</description>
   <language>en-gb</language>
-  <item><title>AI, a Lego robot and a Rubik's cube</title><link>https://chineseroom.io/#article/mindcuber</link><guid>https://chineseroom.io/#article/mindcuber</guid><pubDate>Sat, 26 Sep 2026 09:00:00 +0000</pubDate><description>Building and training a neural network to solve a Rubik's cube, then handing the answer to a Lego Mindstorms robot.</description></item>
-  <item><title>How easy is it to make AI dangerous? Very easy.</title><link>https://chineseroom.io/#article/abliteration</link><guid>https://chineseroom.io/#article/abliteration</guid><pubDate>Sat, 15 Aug 2026 09:00:00 +0000</pubDate><description>A journey inside an open-weight LLM to find how refusal manifests itself.</description></item>
-  <item><title>NVFP4 quantization of Mixtral 8×7B</title><link>https://chineseroom.io/#article/nvfp4</link><guid>https://chineseroom.io/#article/nvfp4</guid><pubDate>Mon, 15 Jun 2026 09:00:00 +0000</pubDate><description>LLM quantization explained and demonstrated on a mixture-of-experts model.</description></item>
-  <item><title>Building a multi-agent workflow in Haskell</title><link>https://chineseroom.io/#article/haskell</link><guid>https://chineseroom.io/#article/haskell</guid><pubDate>Wed, 15 Apr 2026 09:00:00 +0000</pubDate><description>The benefits of strong type systems for agent workflows.</description></item>
+  <item><title>AI, a Lego robot and a Rubik's cube</title><link>https://chineseroom.io/#article/mindcuber</link><guid>https://chineseroom.io/#article/mindcuber</guid><pubDate>Sat, 26 Sep 2026 09:00:00 +0000</pubDate><description>I trained a network to suggest cube moves, used search to find solutions, and sent them to a Lego robot. The best checkpoint solved 37 of 100 test cubes scrambled with 20 moves.</description></item>
+  <item><title>Removing a refusal direction from an open-weight model</title><link>https://chineseroom.io/#article/abliteration</link><guid>https://chineseroom.io/#article/abliteration</guid><pubDate>Sat, 15 Aug 2026 09:00:00 +0000</pubDate><description>I tested whether removing a direction from a model’s internal activations reduced refusal. On the reported set of 100 harmful prompts, refusals fell from 100 to 6.</description></item>
+  <item><title>NVFP4 quantisation of Mixtral 8×7B</title><link>https://chineseroom.io/#article/nvfp4</link><guid>https://chineseroom.io/#article/nvfp4</guid><pubDate>Mon, 15 Jun 2026 09:00:00 +0000</pubDate><description>I quantised Mixtral on the DGX Spark. The weights got smaller, but software compatibility problems prevented inference tests of the quantised model.</description></item>
+  <item><title>Building a multi-agent workflow in Haskell</title><link>https://chineseroom.io/#article/haskell</link><guid>https://chineseroom.io/#article/haskell</guid><pubDate>Wed, 15 Apr 2026 09:00:00 +0000</pubDate><description>Three local models debate a topic through a Haskell program. The article covers message types, state and the host that introduced the wrong debate.</description></item>
 </channel></rss>

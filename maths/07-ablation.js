@@ -3,21 +3,19 @@
 Maths.scene({
   id:'ablation',no:'07',tag:'Interpretability',short:'Removing a direction',mode:'3d',
   title:'Delete one direction.',
-  body:['Some behaviours seem to be written along a single direction in a model’s activations. Projecting that direction out of every activation removes the component along it and leaves everything at right angles untouched.',
+  body:['Some behaviours seem to be written along a single direction in a model’s activations — internal vectors produced while the model processes a token. Projecting that direction out removes each activation’s component along it; components at right angles are unchanged, although downstream behaviour can still change.',
         'This is the core move in abliteration. Here, two clusters differ along one direction r̂; ablating it collapses both onto the same plane. <a class="text-link" href="#article/abliteration">Read the abliteration note ↗</a>'],
-  why:'If a behaviour such as refusing a request is carried by one direction, it can be measured, steered or switched off with a single line of linear algebra and no retraining. That makes this a powerful way to understand models, and also a warning: safety behaviour learned this way can be surprisingly easy to remove.',
-  llm:{where:'This happens inside the residual stream: find a direction that separates one behaviour from another — say, activations for requests the model refuses versus ones it answers — and subtract it from every activation.',
-       role:'It is the core move behind abliteration and steering vectors: evidence that some behaviours live in directions simple enough to delete with one line of linear algebra, no retraining required.'},
+  llm:{where:'Researchers identify a candidate direction in residual-stream activations, then subtract each activation’s projection onto that direction to test its effect.',
+       role:'Ablation removes the component along the chosen direction. Adding a fixed steering vector is a different intervention and does not recover the different amounts each point lost.'},
+  sources:[{label:'Arditi et al., Refusal in Language Models Is Mediated by a Single Direction (2024)',href:'https://proceedings.neurips.cc/paper_files/paper/2024/hash/f545448535dfde4f9786555403ab7c49-Abstract.html'}],
   formula:'x′ = x − α (x·r̂) r̂',
   caption:'Drag to rotate',
-  abstractCaption:'↑ ↓ or W S: drift · ← → or A D: turn · R F: rise or fall · X: forget or remember height · drag: look around',
+  abstractCaption:'↑ ↓ or W S: drift · ← → or A D: turn · R F: rise or fall · X: remove or restore the component · drag: look around',
   label:'Two clusters of points separated along one direction, and the plane at right angles to it.',
   abstractLabel:'A first-person view from inside a cloud of activations, with the removed direction as up and down.',
-  dream:{title:'You are an activation.',text:[
-    'You are an activation: one point in the cloud of thoughts a model has about a request it is going to refuse.',
-    'Around you drift hundreds like you. Far below hangs a second cloud, the thoughts about requests it simply answers, and the direction that tells the two apart runs straight through you. You feel it as up and down.',
-    'Each step you take moves you through the cloud, but ablation never pushes anyone sideways. It simply forgets height. As it takes hold, sky and ground are pressed together, and when it is complete everything you can see, you included, lies flat along a single horizon. Try to rise: there is no up any more.']},
-  controls:({slider,button,buttons,swap})=>`${slider('abl-alpha','Ablation strength α',0,1,.01,0,'How much height is forgotten α')}<label class="maths-check"><input type="checkbox" id="abl-plane" checked> ${swap('Show the plane','Show the plane you will be pressed onto')}</label>${buttons(button('abl-run','Ablate','Forget height'))}
+  dream:{title:'What the scene represents',text:[
+    'The two generated clouds differ mainly along the vertical direction. Increasing α removes more of each point’s component along that direction. The same projection is applied to your position.']},
+  controls:({slider,button,buttons,swap})=>`${slider('abl-alpha','Ablation strength α',0,1,.01,0,'Projection removal α')}<label class="maths-check"><input type="checkbox" id="abl-plane" checked> ${swap('Show the plane','Show the plane you will be pressed onto')}</label>${buttons(button('abl-run','Ablate','Remove the component'))}
     <div class="ab-only">${buttons(button('abl-left','↺ Turn left'),button('abl-fwd','↑ Drift forward'),button('abl-back','↓ Drift back'),button('abl-right','Turn right ↻'),button('abl-rise','Rise'),button('abl-fall','Fall'))}</div>`,
   init(k){
     const {$,clamp,lerp,ease,stroke,dot,arrow,label,camera,persp,pline,pdot,V}=k;
@@ -96,7 +94,7 @@ Maths.scene({
     function update(){
       const a=A(),h=V.dot(me,d);
       $('abl-alpha-out').value=a.toFixed(2);
-      k.setText($('abl-run'),a>=.999?'Restore':'Ablate',a>=.999?'Remember height':'Forget height');
+      k.setText($('abl-run'),a>=.999?'Restore':'Ablate',a>=.999?'Restore the original points':'Remove the component');
       k.readout(s.abstract
         ?`α = ${a.toFixed(2)} · your height above the plane: ${((1-a)*h).toFixed(2)} (it was ${h.toFixed(2)}) · the clouds are ${((1-a)*gap0).toFixed(2)} apart along r̂${note?' · '+note:''}`
         :`α = ${a.toFixed(2)} · gap between the clusters along r̂: ${((1-a)*gap0).toFixed(2)} (was ${gap0.toFixed(2)})`);

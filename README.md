@@ -30,7 +30,7 @@ The site includes browser-only interactive experiments and decorative mathematic
 ## The maths of AI
 
 - `http://localhost:8000/#maths` — seven interactive illustrations.
-- Each topic has a flat diagram and an **Abstract** first-person mode. Choose **Step inside →** on a topic or **Enter the experience** in the hero to go straight into the world.
+- Each topic has a flat diagram and a **First-person** mode. Choose **Step inside →** on a topic or **Start with linear maps** in the hero to go straight into the world.
 - Inside a world: drag to look around, use the on-screen pad or arrow keys / W A S D to move, follow the guide card (three short lessons per world), and jump between worlds with the numbered strip along the bottom. **Controls** opens the original sliders; **Pause motion** freezes all animation; **Exit** or `Esc` returns to the page.
 - Motion is never required: with `prefers-reduced-motion` the worlds start paused and every action snaps instead of animating.
 
@@ -40,18 +40,18 @@ The site includes browser-only interactive experiments and decorative mathematic
 - `http://localhost:8000/#lab/mindcuber` — cube simulation, custom/random scrambles, reversal playback, unfolded view and reported epoch-10 results
 - `http://localhost:8000/#lab/quantization` — synthetic weight rounding, block scales, outlier control, exact-value table and storage estimates
 
-Mindcuber currently demonstrates reversal of a known scramble. It does not run the trained model. Real solve recordings and robot video are pending source files. The results explorer uses the source article’s aggregate figures, not individual solve logs.
+Mindcuber currently demonstrates reversal of a known scramble. It does not run the trained model. The results explorer uses the source article’s aggregate figures, not individual solve logs.
 
-Quantization compares symmetric INT8/INT4 and E2M1 with an ideal scale. It does not emulate full NVFP4 scale encoding. The separate storage calculator includes NVFP4 block-scale overhead and states excluded costs.
+Quantisation compares symmetric INT8/INT4 and E2M1 with an ideal scale. It does not emulate full NVFP4 scale encoding. The separate storage calculator includes NVFP4 block-scale overhead and states excluded costs.
 
 See [PLAN.md](PLAN.md) for the implementation status, source requirements and follow-up work. Changes to static files are available immediately after refreshing the browser; no rebuild is needed for the local source preview.
 
 ## Project layout
 
 - `index.html`, `styles.css`, `field.css`, `app.js`, `field.js`: site shell, layout base, Field theme, and client-side navigation/content
-- `lab.js`: cube geometry, experiment pages and quantization calculations
-- `maths.js`: The Maths of AI page — page shell, shared canvas plumbing, first-person camera, full-screen and Abstract modes
-- `maths/*.js`: one file per Maths illustration (copy, flat view, Abstract scene and controls), registered with `Maths.scene`
+- `lab.js`: cube geometry, experiment pages and quantisation calculations
+- `maths.js`: The Maths of AI page — page shell, shared canvas plumbing, first-person camera, full-screen journey and diagram modes
+- `maths/*.js`: one file per Maths illustration (copy, flat view, first-person scene and controls), registered with `Maths.scene`
 - `scripts/generate-field-art.mjs`: regenerates the procedural SVG artwork in `assets/`
 - `PLAN.md`: interactive-site plan and progress
 - `assets/`: visual assets

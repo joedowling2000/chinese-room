@@ -12,7 +12,7 @@ const Field = (() => {
 
   function card(a, i=0){
     const tone = i%2 ? 'light' : 'dark';
-    return `<a class="field-card card-${tone}" href="#article/${esc(a.id)}"><span class="field-card-topic">${esc(a.tag)}</span><h3>${esc(a.title)}</h3><span class="field-card-art">${art(kinds[a.id]||'surface',tone)}</span><span class="field-card-bottom"><span class="field-card-action">Read the note ↗</span><small>${esc(a.read.toLowerCase())} read</small></span></a>`;
+    return `<a class="field-card card-${tone}" href="#article/${esc(a.id)}"><span class="field-card-topic">${esc(a.tag)}</span><h3>${esc(a.title)}</h3><p class="field-card-dek">${esc(a.dek)}</p><span class="field-card-art">${art(kinds[a.id]||'surface',tone)}</span><span class="field-card-bottom"><span class="field-card-action">Read the article ↗</span><small>${esc(a.read.toLowerCase())} read</small></span></a>`;
   }
 
   function railControls(id){
@@ -25,23 +25,23 @@ const Field = (() => {
   <div class="field-hero-art" aria-hidden="true">${art('stream','dark',{eager:true})}</div>
   <div class="field-hero-shade" aria-hidden="true"></div>
   <div class="field-hero-copy">
-    <p class="eyebrow">Independent AI research</p>
+    <p class="eyebrow">AI project notes</p>
     <h1>Inside the room</h1>
-    <p>Taking open models apart. Following the mathematics.<br>Finding out what’s really going on inside.</p>
-    <a class="pill light" href="#research">Explore the research <span>↗</span></a>
+    <p>I’m Joe Dowling. I’m learning how language models work by running experiments on a DGX Spark.<br>Here I write up the methods, results and things I couldn’t get working.</p>
+    <a class="pill light" href="#research">Read the project notes <span>↗</span></a>
   </div>
-  <div class="field-caption"><span>Chinese Room · Joe Dowling</span><span>The residual stream / Thirty-four layers, one river</span><a href="#research" data-scroll-target="field-research">Scroll to discover ↓</a></div>
+  <div class="field-caption"><span>Chinese Room · Joe Dowling</span><span>An illustration of a residual stream</span><a href="#research" data-scroll-target="field-research">View the projects ↓</a></div>
 </section>
 <section class="field-research section-dark" id="field-research">
-  <div class="section-head"><div><p class="eyebrow">Follow a question</p><h2>Four ways into the room.</h2></div><div class="section-head-side"><a class="text-link" href="#research">Full research index ↗</a>${railControls('field-rail')}</div></div>
+  <div class="section-head"><div><p class="eyebrow">Projects</p><h2>Recent experiments</h2></div><div class="section-head-side"><a class="text-link" href="#research">Full research index ↗</a>${railControls('field-rail')}</div></div>
   <div class="card-rail field-rail" id="field-rail" tabindex="0" aria-label="Research projects">${articles.map(card).join('')}${labCard}</div>
   <p class="rail-note">Scroll to explore ↔</p>
 </section>
 <section class="field-experiments section-dark" id="field-experiments">
-  <div class="field-exp-intro"><p class="eyebrow">Make the ideas tangible</p><h2>A little less abstract.</h2><p>Turn a cube. Round a weight.<br>Explore two experiments in your browser.</p></div>
+  <div class="field-exp-intro"><p class="eyebrow">The lab</p><h2>Interactive examples</h2><p>Undo a cube scramble, or compare what happens when weights are stored with fewer bits.</p></div>
   <div class="field-exp-links">
     <a class="experiment-link" href="#lab/mindcuber"><span class="exp-no">01</span> <span class="exp-name">Mindcuber</span> <span class="exp-arrow">↗</span></a>
-    <a class="experiment-link" href="#lab/quantization"><span class="exp-no">02</span> <span class="exp-name">Quantization</span> <span class="exp-arrow">↗</span></a>
+    <a class="experiment-link" href="#lab/quantization"><span class="exp-no">02</span> <span class="exp-name">Quantisation</span> <span class="exp-arrow">↗</span></a>
   </div>
 </section>`;
   }
@@ -50,8 +50,8 @@ const Field = (() => {
     const tags=['ALL',...new Set(articles.map(a=>a.tag))];
     return `<section class="page research-page">
   <p class="eyebrow">Research / The notebook</p>
-  <h1 class="page-title">Follow a question.</h1>
-  <p class="page-intro">Long-form write-ups of experiments on a DGX Spark. Theory first, kept readable, with the maths where it earns its place.</p>
+  <h1 class="page-title">Project notes.</h1>
+  <p class="page-intro">Notes from projects on the DGX Spark, with the code, calculations and results described in each article.</p>
   <div class="filters" role="group" aria-label="Filter research">${tags.map((x,i)=>`<button class="filter${i===0?' active':''}" data-filter="${esc(x)}" aria-pressed="${i===0}">${esc(x)}${i===0?` · ${articles.length}`:''}</button>`).join('')}</div>
   <div class="field-grid" id="article-list">${articles.map(card).join('')}</div>
   <p id="research-count" class="research-count" role="status">${articles.length} research notes</p>
