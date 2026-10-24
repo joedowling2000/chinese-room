@@ -6,6 +6,8 @@ Maths.scene({
   body:['In attention, each token emits a query and every token offers a key. Their dot product scores how well they match, and softmax turns the scores into weights that add up to one. The output is the weighted average of the values; here the values are the keys themselves.',
         'Temperature sharpens or flattens the choice. Inside a transformer it is fixed by the √d scaling; the same knob comes back when a model samples its next token.'],
   why:'Attention is how a word finds the other words that change its meaning: which noun “it” refers to, or whether “bank” means a river or money. Without it, every token would be processed in isolation, as if the model read each word through a keyhole with no memory of the rest of the sentence. It is also why long prompts are expensive: every new token has to look back at every token before it.',
+  llm:{where:'This is the attention block — the mechanism that lets a token gather context from the words before it. A transformer runs many of these heads in parallel per layer, each with its own learned query, key and value matrices.',
+       role:'It is how “it” finds its noun and the main reason transformers beat bag-of-words models. The cost is quadratic: every new token has to look back at all the ones before it, which is why long contexts are expensive.'},
   formula:'wᵢ = softmax(q·kᵢ / τ)  ·  output = Σ wᵢ vᵢ',
   caption:'Drag the query arrow',
   abstractCaption:'← → or A D, or drag: turn your head · ↑ ↓ or W S: lean in or back',

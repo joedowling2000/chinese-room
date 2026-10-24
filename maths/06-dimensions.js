@@ -6,6 +6,8 @@ Maths.scene({
   body:['In two dimensions only two directions can be at right angles. In thousands of dimensions almost any two random directions are nearly at right angles: their cosine similarity bunches tightly around zero, with a spread of about 1/√d.',
         'That spare room is part of why models can store far more features than they have dimensions, a trick called superposition, at the cost of a little interference. 12,288 is the width of the model in the abliteration notes.'],
   why:'A model has to represent millions of ideas, from names and facts to grammar and tone, using a few thousand numbers per word. Near-right angles are what make that possible: many features can share the same space with only a little crosstalk. They are also why single neurons are hard to interpret, because each one is shared by many features at once.',
+  llm:{where:'This is the residual stream — the wide vector each token carries through every layer of the network. It is 4,096 numbers across in a mid-size model, and 12,288 in the one examined in the abliteration note.',
+       role:'Near-orthogonality lets the stream hold far more features than it has dimensions — a packing trick called superposition. The same crowding is why single neurons are hard to interpret: each one is shared by many features at once.'},
   formula:'cos θ = u·v / (|u| |v|)  ·  spread ≈ 1/√d',
   caption:'Cosine similarity of 6,000 random pairs',
   abstractCaption:'+ and −: more or fewer dimensions · U: look up at yourself · H: the horizon · arrow keys or drag: look around',

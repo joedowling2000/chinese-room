@@ -12,9 +12,9 @@ const MathsJourney = (() => {
       dpad:{up:['ArrowUp','Along ĵ'],down:['ArrowDown','Back along ĵ'],left:['ArrowLeft','Back along î'],right:['ArrowRight','Along î']},
       hint:'Drag to look · arrows or W A S D to step along the basis',
       lessons:[
-        {title:'Every step is a vector.',text:'Walk across the lattice. The two columns of the matrix decide where a step along î or ĵ will take you.',tryLabel:'Restore the lattice',values:{},click:'lm-identity'},
-        {title:'One rule moves everything.',text:'Apply a shear. Parallel streets stay parallel, but their angles change. A matrix transforms every address by the same rule.',tryLabel:'Apply a shear',values:{},click:'lm-shear'},
-        {title:'A dimension can disappear.',text:'Collapse the plane. The determinant becomes zero: different starting points now share the same destination. That information cannot be recovered.',tryLabel:'Collapse space',values:{},click:'lm-collapse'}]},
+        {title:'Every step is a vector.',text:'Walk across the lattice. The two columns of the matrix decide where a step along î or ĵ will take you.',tryLabel:'Restore the lattice',values:{},click:'lm-identity',llm:'The embedding is the first matrix a token meets: it turns “cat” into the vector you are standing on.'},
+        {title:'One rule moves everything.',text:'Apply a shear. Parallel streets stay parallel, but their angles change. A matrix transforms every address by the same rule.',tryLabel:'Apply a shear',values:{},click:'lm-shear',llm:'The Q, K and V projections inside attention are learned matrices like this — a shear here changes what every token asks and answers.'},
+        {title:'A dimension can disappear.',text:'Collapse the plane. The determinant becomes zero: different starting points now share the same destination. That information cannot be recovered.',tryLabel:'Collapse space',values:{},click:'lm-collapse',llm:'Low-rank updates such as LoRA fine-tune models by adding small matrices that deliberately keep only a few directions.'}]},
     'folding':{
       name:'The folding garden',subtitle:'Stand on the threshold of a non-linearity.',
       accent:'#c1a1ff',secondary:'#8de8df',
@@ -24,9 +24,9 @@ const MathsJourney = (() => {
       dpad:{up:['ArrowUp','Step forward'],down:['ArrowDown','Step back'],left:['ArrowLeft','Turn left'],right:['ArrowRight','Turn right']},
       hint:'Drag to look · W S to walk · A D to turn · F to fold',
       lessons:[
-        {title:'Before the threshold.',text:'Two clouds share a flat sheet. Rotation and bias can move them, but a stack of linear operations is still one linear operation.',tryLabel:'Return to input',values:{'fold-t':0}},
-        {title:'Watch the negatives vanish.',text:'With ReLU, negative coordinates become zero. Here their lost magnitude rises into walls so you can see where information is discarded.',tryLabel:'Apply ReLU',values:{'fold-act':'relu','fold-t':1},click:'fold-play'},
-        {title:'Change the rule.',text:'Leaky ReLU keeps a small negative slope. Compare its compressed region with the complete flattening of ReLU.',tryLabel:'Try a leaky fold',values:{'fold-act':'leaky','fold-t':2}}]},
+        {title:'Before the threshold.',text:'Two clouds share a flat sheet. Rotation and bias can move them, but a stack of linear operations is still one linear operation.',tryLabel:'Return to input',values:{'fold-t':0},llm:'Without this layer, attention plus feed-forward would collapse into one matrix — the fold is what gives depth any meaning.'},
+        {title:'Watch the negatives vanish.',text:'With ReLU, negative coordinates become zero. Here their lost magnitude rises into walls so you can see where information is discarded.',tryLabel:'Apply ReLU',values:{'fold-act':'relu','fold-t':1},click:'fold-play',llm:'The feed-forward block runs in every transformer layer, right after attention. Its zero regions are where the network writes “off”.'},
+        {title:'Change the rule.',text:'Leaky ReLU keeps a small negative slope. Compare its compressed region with the complete flattening of ReLU.',tryLabel:'Try a leaky fold',values:{'fold-act':'leaky','fold-t':2},llm:'Real models swapped ReLU for GELU and SwiGLU — smoother folds that keep a gradient alive through the crease.'}]},
     'gradient-descent':{
       name:'The valley of error',subtitle:'Feel the slope. Find a way down.',
       accent:'#d9b68c',secondary:'#8de8df',
@@ -36,9 +36,9 @@ const MathsJourney = (() => {
       dpad:{up:['ArrowUp','Take a step'],left:['ArrowLeft','Turn left'],right:['ArrowRight','Turn right']},
       hint:'Drag to look · W to step · R to walk · ← → to turn',
       lessons:[
-        {title:'You can feel only the local slope.',text:'The arrow points opposite the gradient. A learning step moves the weights in that direction; the terrain is the loss, not a map the optimiser can inspect.',tryLabel:'Take one step',values:{},click:'gd-step'},
-        {title:'Carry a little momentum.',text:'Momentum carries part of the previous update into the next. It can accelerate a descent, but can also cause overshoot.',tryLabel:'Add momentum',values:{'gd-mu':0.7,'gd-lr':0.15}},
-        {title:'A longer stride is a gamble.',text:'Increase the learning rate, then walk. Large steps can skip a valley or leave the plotted domain. A low gradient does not prove a global minimum.',tryLabel:'Lengthen the stride',values:{'gd-lr':1.5}}]},
+        {title:'You can feel only the local slope.',text:'The arrow points opposite the gradient. A learning step moves the weights in that direction; the terrain is the loss, not a map the optimiser can inspect.',tryLabel:'Take one step',values:{},click:'gd-step',llm:'Backpropagation computes exactly the arrow at your feet — for billions of weights at once, from a single scalar loss.'},
+        {title:'Carry a little momentum.',text:'Momentum carries part of the previous update into the next. It can accelerate a descent, but can also cause overshoot.',tryLabel:'Add momentum',values:{'gd-mu':0.7,'gd-lr':0.15},llm:'Adam, the standard LLM optimiser, is momentum plus per-weight scaling — the same idea of carrying speed between steps.'},
+        {title:'A longer stride is a gamble.',text:'Increase the learning rate, then walk. Large steps can skip a valley or leave the plotted domain. A low gradient does not prove a global minimum.',tryLabel:'Lengthen the stride',values:{'gd-lr':1.5},llm:'Training schedules warm the rate up then decay it for exactly this reason: early steps need speed, late steps need to settle.'}]},
     'attention':{
       name:'The listening chamber',subtitle:'Your gaze is the query.',
       accent:'#8de8df',secondary:'#f0b77e',
@@ -48,9 +48,9 @@ const MathsJourney = (() => {
       dpad:{up:['ArrowUp','Lean in'],down:['ArrowDown','Lean back'],left:['ArrowLeft','Look left'],right:['ArrowRight','Look right']},
       hint:'Drag to look · A D to turn your question · W S to lean',
       lessons:[
-        {title:'Ask with your direction.',text:'Turn towards a word. The query–key dot products change, and softmax redistributes the threads of attention.',tryLabel:'Turn your question',values:{},click:'att-right'},
-        {title:'Listen narrowly.',text:'Lower temperature concentrates weight on the strongest matches. The output moves towards the values that receive more weight.',tryLabel:'Sharpen attention',values:{'att-temp':0.2}},
-        {title:'Become a mixture.',text:'Raise temperature to spread attention. The output is a weighted sum, not simply the word with the highest score.',tryLabel:'Listen widely',values:{'att-temp':2.5}}]},
+        {title:'Ask with your direction.',text:'Turn towards a word. The query–key dot products change, and softmax redistributes the threads of attention.',tryLabel:'Turn your question',values:{},click:'att-right',llm:'Each attention head learns its own Q and K matrices — the question you are asking is one head’s projection of the token.'},
+        {title:'Listen narrowly.',text:'Lower temperature concentrates weight on the strongest matches. The output moves towards the values that receive more weight.',tryLabel:'Sharpen attention',values:{'att-temp':0.2},llm:'The √d scaling inside softmax plays this role inside the model — it keeps the weights from saturating in high dimensions.'},
+        {title:'Become a mixture.',text:'Raise temperature to spread attention. The output is a weighted sum, not simply the word with the highest score.',tryLabel:'Listen widely',values:{'att-temp':2.5},llm:'Sampling uses the same knob: low temperature picks the obvious next word, high temperature flattens the odds.'}]},
     'rotary':{
       name:'The clockwork passage',subtitle:'Position is how far you have turned.',
       accent:'#acafff',secondary:'#8de8df',
@@ -60,9 +60,9 @@ const MathsJourney = (() => {
       dpad:{up:['ArrowUp','Next word'],down:['ArrowDown','Previous word'],left:['ArrowLeft','Turn left'],right:['ArrowRight','Turn right']},
       hint:'Drag to look · W S to change word · R to ride · B to look back',
       lessons:[
-        {title:'Two clocks, one position.',text:'Each word turns a fast pair and a slow pair of coordinates. Their combined angles trace this rail through a torus.',tryLabel:'Advance one word',values:{},click:'rope-next'},
-        {title:'Change the rhythm.',text:'Change the frequency ratio. The winding pattern changes because the two coordinate pairs accumulate phase at different rates.',tryLabel:'Change the gearing',values:{'rope-ratio':0.23}},
-        {title:'Distance survives rotation.',text:'Look back at previous positions. Applying the same rotation to a query and key preserves their dot product; their relative phase carries the distance.',tryLabel:'Look behind you',values:{},click:'rope-back'}]},
+        {title:'Two clocks, one position.',text:'Each word turns a fast pair and a slow pair of coordinates. Their combined angles trace this rail through a torus.',tryLabel:'Advance one word',values:{},click:'rope-next',llm:'RoPE rotates every query–key pair inside each attention head — dozens of pairs, not two, each at a different frequency.'},
+        {title:'Change the rhythm.',text:'Change the frequency ratio. The winding pattern changes because the two coordinate pairs accumulate phase at different rates.',tryLabel:'Change the gearing',values:{'rope-ratio':0.23},llm:'The frequency ratio is the “base” parameter; models such as Llama tune it to rebalance short- and long-range attention.'},
+        {title:'Distance survives rotation.',text:'Look back at previous positions. Applying the same rotation to a query and key preserves their dot product; their relative phase carries the distance.',tryLabel:'Look behind you',values:{},click:'rope-back',llm:'Because only relative angle matters, stretching the frequencies stretches usable context — the trick behind NTK-aware scaling.'}]},
     'dimensions':{
       name:'The horizon of almost',subtitle:'Watch room appear between ideas.',
       accent:'#b8bdff',secondary:'#8de8df',
@@ -73,9 +73,9 @@ const MathsJourney = (() => {
       dpad:{up:['ArrowUp','Tilt up'],down:['ArrowDown','Tilt down'],left:['ArrowLeft','Turn left'],right:['ArrowRight','Turn right']},
       hint:'Drag to look · arrows to turn · + − for dimensions',
       lessons:[
-        {title:'A crowded small sky.',text:'In two dimensions, random directions often point towards or away from you. Their cosine similarities spread widely.',tryLabel:'Start with two',values:{'dim-k':0}},
-        {title:'Almost perpendicular.',text:'Add dimensions. Cosine similarities concentrate near zero; the stars collect near the 90° horizon. Their azimuth is decorative.',tryLabel:'Open 1,000 dimensions',values:{'dim-k':7}},
-        {title:'Space is not perfect separation.',text:'The spread shrinks roughly as 1/√d. Near-orthogonality leaves room for many features, but shared representations can still interfere.',tryLabel:'Open 12,288 dimensions',values:{'dim-k':9}}]},
+        {title:'A crowded small sky.',text:'In two dimensions, random directions often point towards or away from you. Their cosine similarities spread widely.',tryLabel:'Start with two',values:{'dim-k':0},llm:'You are riding the residual stream — the wide vector each token carries, which every layer reads from and writes back to.'},
+        {title:'Almost perpendicular.',text:'Add dimensions. Cosine similarities concentrate near zero; the stars collect near the 90° horizon. Their azimuth is decorative.',tryLabel:'Open 1,000 dimensions',values:{'dim-k':7},llm:'Near-orthogonality enables superposition: the model packs far more features than it has dimensions into one stream.'},
+        {title:'Space is not perfect separation.',text:'The spread shrinks roughly as 1/√d. Near-orthogonality leaves room for many features, but shared representations can still interfere.',tryLabel:'Open 12,288 dimensions',values:{'dim-k':9},llm:'The crowding has a cost — interference between features is part of why single neurons respond to unrelated ideas.'}]},
     'ablation':{
       name:'The disappearing direction',subtitle:'What remains when up is forgotten?',
       accent:'#f0b77e',secondary:'#b8bdff',
@@ -85,9 +85,9 @@ const MathsJourney = (() => {
       dpad:{up:['ArrowUp','Drift forward'],down:['ArrowDown','Drift back'],left:['ArrowLeft','Turn left'],right:['ArrowRight','Turn right'],extra:[['r','Rise'],['f','Fall']]},
       hint:'Drag to look · W S to drift · R F rise and fall · X to ablate',
       lessons:[
-        {title:'One direction separates two clouds.',text:'Rise or fall through the activations. The direction r̂ is up in this world; it is the axis along which the two synthetic groups differ.',tryLabel:'Restore the direction',values:{'abl-alpha':0}},
-        {title:'Subtract the projection.',text:'Ablation subtracts α(x·r̂)r̂. Nothing moves sideways: only the component parallel to the chosen direction shrinks.',tryLabel:'Remove halfway',values:{'abl-alpha':0.5}},
-        {title:'There is no up left.',text:'At α = 1 every point lies on the perpendicular plane. Try rising now: motion along the removed direction has no visible effect.',tryLabel:'Forget height',values:{'abl-alpha':1}}]}
+        {title:'One direction separates two clouds.',text:'Rise or fall through the activations. The direction r̂ is up in this world; it is the axis along which the two synthetic groups differ.',tryLabel:'Restore the direction',values:{'abl-alpha':0},llm:'Interpretability research finds real directions like this in the residual stream — for refusal, sentiment, even specific concepts.'},
+        {title:'Subtract the projection.',text:'Ablation subtracts α(x·r̂)r̂. Nothing moves sideways: only the component parallel to the chosen direction shrinks.',tryLabel:'Remove halfway',values:{'abl-alpha':0.5},llm:'This subtraction, applied at every layer, is how abliteration removes a refusal behaviour without any retraining.'},
+        {title:'There is no up left.',text:'At α = 1 every point lies on the perpendicular plane. Try rising now: motion along the removed direction has no visible effect.',tryLabel:'Forget height',values:{'abl-alpha':1},llm:'Steering vectors run the same move backwards — add a direction to push the model towards a behaviour instead of deleting it.'}]}
   };
 
   const rgb = hex => [parseInt(hex.slice(1,3),16),parseInt(hex.slice(3,5),16),parseInt(hex.slice(5,7),16)];

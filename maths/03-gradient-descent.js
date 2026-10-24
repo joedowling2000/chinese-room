@@ -6,6 +6,8 @@ Maths.scene({
   body:['Training is a search for weights that make the loss small. The gradient points uphill, so each step moves a little the other way.',
         'The learning rate sets the stride. Too small and progress crawls; too large and the ball overshoots and flies off. Momentum carries speed from step to step, which can roll it through small dips. A real model does this in billions of dimensions, not two.'],
   why:'Every weight in an LLM starts out as a random number. Gradient descent, repeated over trillions of words, is what turns that noise into a model that can write. Without it, the network would stay exactly as random as the day it was made. Choose the learning rate badly and training crawls or blows up, which is why labs warm it up and then decay it on a careful schedule.',
+  llm:{where:'This is training, not inference — the loop that placed every weight in the model. A loss measured over billions of words, gradients found by backpropagation, and billions of small downhill steps like the one you are taking.',
+       role:'Nothing else teaches the model. Everything else on this page is architecture — the fixed landscape; descent is what carved every weight in it. Real optimisers add momentum and adaptive rates, but the step is the same.'},
   formula:'θ ← θ − η ∇L(θ)  ·  momentum: v ← μv − η∇L, θ ← θ + v',
   caption:'Drag to rotate · click the surface to drop the ball',
   abstractCaption:'↑ or W: one step · R: walk or stop · N: wake somewhere else · ← → or drag: look around',
@@ -135,11 +137,13 @@ Maths.scene({
     function toggleRun(){
       if(run.playing){run.stop();update();return;}
       if(status!=='ready'&&status!=='running')reset(...trail[0]);
+      if(k.reduced()){let n=0;while(step()&&++n<600);update();return;}
       run.start();update();
     }
     function once(){
       run.stop();
-      if(status==='ready'||status==='running')step();
+      if(status!=='ready'&&status!=='running')reset(...trail[0]);
+      step();
       update();
     }
     function wake(){run.stop();si=(si+1)%starts.length;reset(...starts[si]);update();}

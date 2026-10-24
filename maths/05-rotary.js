@@ -6,6 +6,8 @@ Maths.scene({
   body:['Attention on its own has no sense of word order. Rotary position embeddings (RoPE) add it by rotating pairs of dimensions in each query and key by an angle proportional to the token’s position, each pair at its own frequency.',
         'Two pairs means two angles, so the combined state lives on a torus; the dots mark whole token positions. Because queries and keys are rotated the same way, their dot product depends only on how far apart the tokens are.'],
   why:'Attention on its own treats a sentence as a bag of words: “dog bites man” and “man bites dog” would look identical. Position information restores the order. Because RoPE encodes the distance between words rather than where they sit, its frequencies can be stretched after training, which is one of the main ways models are extended to longer contexts than they were trained on.',
+  llm:{where:'Inside every attention head, just before the dot products are scored, the query and key vectors are rotated by RoPE — by an angle proportional to the token’s position, each coordinate pair at its own frequency. Llama, Mistral and most open models use it.',
+       role:'It gives attention a sense of word order without storing positions anywhere. And because it encodes distance rather than absolute place, stretching the frequencies is the standard trick for extending a trained model’s context window.'},
   formula:'(x₁, x₂) → R(p·ωᵢ)(x₁, x₂)  ·  ⟨R(mω)q, R(nω)k⟩ = ⟨q, R((n−m)ω)k⟩',
   caption:'Drag to rotate',
   abstractCaption:'↑ ↓ or W S: next or previous word · R: ride or stop · B: look back · ← → or drag: look around',
@@ -143,7 +145,9 @@ Maths.scene({
     });
     function ride(){
       if(play.playing){play.stop();update();return;}
-      glide.stop();last=0;play.start();update();
+      glide.stop();
+      if(k.reduced()){let p=pos()+6;if(p>120)p=0;$('rope-pos').value=p;update();return;}
+      last=0;play.start();update();
     }
     // One word at a time: glide to the next or previous whole position.
     function hop(d){

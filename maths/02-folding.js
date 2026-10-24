@@ -6,6 +6,8 @@ Maths.scene({
   body:['Stack linear maps and you only ever get another linear map. Networks escape by applying a simple non-linear function after each one.',
         'ReLU keeps positive values and sets negative ones to zero, folding whole regions of space flat onto the axes. Layer after layer, those folds let a network carve space into whatever shapes the task needs. The two point clouds show what happens to an inner disc and an outer ring.'],
   why:'Without a non-linear step, a hundred layers would collapse into one big matrix, and the model could only ever draw straight lines through meaning. It could not learn that “not bad” sits close to “good”, or that a word changes with the company it keeps. The feed-forward layers, where these activations live, hold most of a model’s parameters, and research suggests they store much of what it knows.',
+  llm:{where:'Inside every transformer block, right after attention, sits a feed-forward network — this layer, repeated dozens of times. Modern models mostly use GELU or a gated variant such as SwiGLU rather than plain ReLU, but the folding is the same idea.',
+       role:'The non-linearity is what stops the whole stack collapsing into a single matrix. These layers hold roughly two-thirds of a transformer’s parameters, and evidence suggests much of its factual knowledge is stored in them.'},
   formula:'h = ReLU(W·x + b) = max(0, W·x + b)',
   caption:'Step through one layer',
   abstractCaption:'↑ ↓ or W S: walk · ← → or A D: turn · F: fold or unfold · drag to look around',

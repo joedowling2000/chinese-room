@@ -63,6 +63,7 @@ const Maths = (() => {
     <p class="maths-kicker g-eyebrow"></p>
     <h4 class="g-title"></h4>
     <p class="g-text"></p>
+    <p class="g-llm"></p>
     <button type="button" class="maths-btn g-try"></button>
     <div class="g-nav">
       <button type="button" class="maths-topbtn g-prev" aria-label="Previous lesson">←</button>
@@ -98,12 +99,38 @@ const Maths = (() => {
 
   function topic(t){
     return `<section class="maths-topic" id="maths-${t.id}" aria-labelledby="maths-${t.id}-title">
-  <div class="maths-copy"><p class="eyebrow">${t.no} / ${t.tag}</p><h2 id="maths-${t.id}-title">${t.title}</h2>${t.body.map(p=>`<p>${p}</p>`).join('')}<div class="maths-why"><p class="maths-why-label">Why it matters</p><p>${t.why}</p></div><p class="maths-formula">${t.formula}</p></div>
+  <div class="maths-copy"><p class="eyebrow">${t.no} / ${t.tag}</p><h2 id="maths-${t.id}-title">${t.title}</h2>${t.body.map(p=>`<p>${p}</p>`).join('')}<div class="maths-why"><p class="maths-why-label">Why it matters</p><p>${t.why}</p></div><div class="maths-llm"><p class="maths-why-label">Inside an LLM</p><p><b>Where it lives</b>${t.llm.where}</p><p><b>What the model uses it for</b>${t.llm.role}</p></div><p class="maths-formula">${t.formula}</p></div>
   <figure class="maths-figure"><div class="maths-stagewrap"><canvas id="mx-${t.id}" class="${t.mode==='2d'?'is-2d':''}" tabindex="0" role="img" aria-label="${t.label}"></canvas><div class="maths-stagebtns"><button type="button" class="maths-full-open" aria-label="Open ${t.short} full screen"><span aria-hidden="true">⤢</span> Full screen</button><button type="button" class="maths-enter" aria-label="Step inside ${t.short}">Step inside →</button></div></div><figcaption>${swap(t.caption,t.abstractCaption)}</figcaption></figure>
   <div class="maths-fullbar"><div class="maths-fulltitle"><p class="eyebrow">${t.no} / ${t.tag}</p><p>${t.short}</p></div><div class="maths-buttons"><button type="button" class="maths-btn maths-abstract-toggle" aria-pressed="false">Abstract</button><button type="button" class="maths-btn maths-hide-ui" aria-pressed="false">Hide panels</button><button type="button" class="maths-btn maths-full-close">Exit full screen <span aria-hidden="true">✕</span></button></div></div>
   <div class="maths-dream"><p class="eyebrow">Abstract / ${t.no}</p><h3>${t.dream.title}</h3>${t.dream.text.map(p=>`<p>${p}</p>`).join('')}</div>
   <div class="maths-panel" id="mp-${t.id}" role="group" aria-label="Controls">${t.controls(ui)}<p class="maths-readout" id="mx-${t.id}-readout"></p></div>
   ${overlay(t)}
+</section>`;
+  }
+
+  // The anatomy map: every world is one stage of a real forward pass.
+  function pipeline(){
+    const chip=(id,name,sub)=>`<a class="mf-node" href="#maths/${id}" data-scroll-target="maths-${id}" data-stage="${id}"><b>${name}</b><span>${sub}</span></a>`;
+    const arrow=`<li class="mf-arrow" aria-hidden="true">→</li>`;
+    return `<section class="maths-map" id="maths-map" aria-label="How the seven ideas fit inside one forward pass">
+  <div class="maths-map-intro"><p class="eyebrow">One token’s journey</p><h2>Where each idea lives.</h2><p>Every world below is one stage of a real forward pass. Follow a token through the pipeline, then step inside whichever stage you want to feel from within.</p></div>
+  <ol class="maths-flow">
+    <li class="mf-end"><span class="mf-tag">input</span><b>a word</b></li>
+    ${arrow}
+    <li>${chip('linear-maps','Embed','word → vector · 01')}</li>
+    ${arrow}
+    <li class="mf-block"><p class="mf-block-label">transformer block · <span class="mf-depth"><button type="button" class="mf-depth-btn" data-depth="-1" aria-label="Fewer layers">−</button><b id="mf-depth">32</b><button type="button" class="mf-depth-btn" data-depth="1" aria-label="More layers">+</button> layers deep</span></p><div class="mf-block-row">${chip('attention','Attention','words listen · 04')}${chip('rotary','RoPE','position · 05')}${chip('folding','Feed-forward','the fold · 02')}</div></li>
+    ${arrow}
+    <li>${chip('linear-maps','Unembed','vector → scores · 01')}</li>
+    ${arrow}
+    <li class="mf-end"><span class="mf-tag">output</span><b>the next word</b></li>
+  </ol>
+  <ol class="maths-flow mf-side">
+    <li><p class="mf-side-label">around it</p></li>
+    <li>${chip('gradient-descent','Training','writes every weight · 03')}</li>
+    <li>${chip('dimensions','Residual stream','carries the token · 06')}</li>
+    <li>${chip('ablation','Interpretability','reads & edits the stream · 07')}</li>
+  </ol>
 </section>`;
   }
 
@@ -114,12 +141,13 @@ const Maths = (() => {
   <div class="maths-hero-copy">
     <p class="eyebrow">The maths of AI</p>
     <h1>Step inside the maths.</h1>
-    <p>Seven ideas. Seven worlds to step inside. Follow a vector, become a query, and watch a dimension disappear. Change the rules and feel what the mathematics does.</p>
+    <p>Seven ideas. Seven worlds to step inside. Together they are the anatomy of a large language model: the matrices that carry every token, the folds that give the network its shape, the descent that trains it, the attention that lets words listen to each other, and the directions a model can be made to forget.</p>
     <p class="maths-hero-actions"><button type="button" class="pill light maths-hero-enter" data-journey-enter="linear-maps">Enter the experience ↗</button> <a class="text-link" href="#maths" data-scroll-target="maths-index">or browse the seven ideas ↓</a></p>
     <p class="maths-hero-note">Interactive worlds · no installation · keyboard &amp; touch</p>
   </div>
 </section>
 <nav class="maths-index" id="maths-index" aria-label="Topics">${scenes.map(t=>`<a href="#maths/${t.id}" data-scroll-target="maths-${t.id}"><span>${t.no}</span>${t.short}</a>`).join('')}</nav>
+${pipeline()}
 <div class="maths-topics">${scenes.map(topic).join('')}</div>
 <section class="section-dark maths-outro">
   <div class="field-exp-intro"><p class="eyebrow">Keep going</p><h2>See the ideas at work.</h2><p>Every illustration here is a small synthetic example computed in your browser. No model is run.</p></div>
@@ -364,6 +392,9 @@ const Maths = (() => {
     sec.querySelector('.g-eyebrow').textContent=`0${i+1} / 0${w.lessons.length} · ${STEP_WORDS[i]}`;
     sec.querySelector('.g-title').textContent=L.title;
     sec.querySelector('.g-text').textContent=L.text;
+    const gl=sec.querySelector('.g-llm');
+    gl.textContent=`Inside an LLM — ${L.llm||def.llm.where}`;
+    gl.style.borderColor=worldOf(def).accent;
     const tryB=sec.querySelector('.g-try');
     tryB.textContent=(L.tryLabel?L.tryLabel+' →':'Try it →');
     tryB.hidden=!(L.tryLabel&&(L.click||Object.keys(L.values).length));
@@ -419,6 +450,7 @@ const Maths = (() => {
     sec.classList.remove('is-full','hide-ui','drawer-open','guide-off');
     sec.removeAttribute('role');sec.removeAttribute('aria-modal');sec.removeAttribute('aria-label');
     sec.querySelector('.maths-hide-ui').setAttribute('aria-pressed','false');
+    sec.querySelector('.maths-clear').setAttribute('aria-pressed','false');
     document.documentElement.classList.remove('maths-locked');
     inertOff(def.inertSaved);def.inertSaved=null;
     def.placeholder?.remove();def.placeholder=null;
@@ -478,7 +510,9 @@ const Maths = (() => {
       return;
     }
     if(!active.s.abstract||e.metaKey||e.ctrlKey||e.altKey)return;
-    if(e.target.closest?.('input,select,textarea,button,a,summary'))return;
+    // Only form fields own the movement keys; a focused button or link must not
+    // swallow them, or controls appear dead after any click.
+    if(e.target.closest?.('input,select,textarea'))return;
     const key=e.key.length===1?e.key.toLowerCase():e.key;
     if(e.repeat){if(HELD.has(key))e.preventDefault();return;}
     if(HELD.has(key)&&dispatchKey(active,key)){
@@ -579,6 +613,22 @@ const Maths = (() => {
       pv.addEventListener('click',()=>{if(pi>0)goWorld(scenes[pi-1].id);},{signal});
       nx.addEventListener('click',()=>{if(pi<scenes.length-1)goWorld(scenes[pi+1].id);},{signal});
     });
+    // "You are here": the pipeline chip matching the topic in view lights up.
+    const here=new Set();
+    const syncHere=()=>document.querySelectorAll('.mf-node[data-stage]').forEach(n=>n.classList.toggle('here',here.has(n.dataset.stage)));
+    const hereObs=new IntersectionObserver(es=>{
+      es.forEach(e=>{const id=e.target.id.slice(6);e.isIntersecting?here.add(id):here.delete(id);});
+      syncHere();
+    },{rootMargin:'-35% 0px -55% 0px'});
+    scenes.forEach(d=>hereObs.observe(section(d)));
+    disposers.push(()=>{hereObs.disconnect();here.clear();});
+    // Layer depth stepper on the transformer block chip.
+    const depthEl=$('mf-depth'),DEPTHS=[4,12,24,32,48,80,121];
+    let di=3;
+    document.querySelectorAll('[data-depth]').forEach(b=>b.addEventListener('click',()=>{
+      di=(di+Number(b.dataset.depth)+DEPTHS.length)%DEPTHS.length;
+      depthEl.textContent=DEPTHS[di];
+    },{signal}));
     document.querySelectorAll('[data-journey-enter]').forEach(b=>{
       b.addEventListener('click',()=>{
         const def=scenes.find(d=>d.id===b.dataset.journeyEnter);

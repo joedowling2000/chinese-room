@@ -6,6 +6,8 @@ Maths.scene({
   body:['Some behaviours seem to be written along a single direction in a model’s activations. Projecting that direction out of every activation removes the component along it and leaves everything at right angles untouched.',
         'This is the core move in abliteration. Here, two clusters differ along one direction r̂; ablating it collapses both onto the same plane. <a class="text-link" href="#article/abliteration">Read the abliteration note ↗</a>'],
   why:'If a behaviour such as refusing a request is carried by one direction, it can be measured, steered or switched off with a single line of linear algebra and no retraining. That makes this a powerful way to understand models, and also a warning: safety behaviour learned this way can be surprisingly easy to remove.',
+  llm:{where:'This happens inside the residual stream: find a direction that separates one behaviour from another — say, activations for requests the model refuses versus ones it answers — and subtract it from every activation.',
+       role:'It is the core move behind abliteration and steering vectors: evidence that some behaviours live in directions simple enough to delete with one line of linear algebra, no retraining required.'},
   formula:'x′ = x − α (x·r̂) r̂',
   caption:'Drag to rotate',
   abstractCaption:'↑ ↓ or W S: drift · ← → or A D: turn · R F: rise or fall · X: forget or remember height · drag: look around',

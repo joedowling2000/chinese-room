@@ -6,6 +6,8 @@ Maths.scene({
   body:['Almost everything inside a transformer is a matrix multiplication. A 2×2 matrix is simply a rule for where the two basis arrows, î and ĵ, land. Every other point follows along, so grid lines stay straight, parallel and evenly spaced.',
         'The determinant says how much areas grow or shrink. At zero, the plane is flattened onto a line and information is lost for good.'],
   why:'Most of an LLM’s billions of parameters are entries in matrices like this one, only thousands of rows wide. They turn each word into a query, a key and a value, mix information between layers and score every word in the vocabulary. Without them there would be nothing to learn: no way to move meaning from one place to another.',
+  llm:{where:'Every weight matrix in a transformer is one of these maps: the embedding that turns each word into a vector, the Q, K and V projections inside every attention head, the feed-forward layers, and the final unembedding that scores the whole vocabulary.',
+       role:'It is the model’s only way to move and mix information — change the entries and you change what the network can express. When the determinant hits zero the map throws information away, which is why trained weight matrices stay near full rank.'},
   formula:'[x′ y′] = [[a b] [c d]] · [x y]  ·  det = ad − bc',
   caption:'Drag the tips of î and ĵ',
   abstractCaption:'Arrow keys or W A S D: step along î and ĵ · Q E or drag: look around',
