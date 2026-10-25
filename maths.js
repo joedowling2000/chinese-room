@@ -101,7 +101,7 @@ const Maths = (() => {
   function topic(t){
     return `<section class="maths-topic" id="maths-${t.id}" aria-labelledby="maths-${t.id}-title">
   <div class="maths-copy"><p class="eyebrow">${t.no} / ${t.tag}</p><h2 id="maths-${t.id}-title">${t.title}</h2>${t.body.map(p=>`<p>${p}</p>`).join('')}<div class="maths-why"><p class="maths-why-label">Why it matters</p><p>${t.why}</p></div><div class="maths-llm"><p class="maths-why-label">Inside an LLM</p><p><b>Where it lives</b>${t.llm.where}</p><p><b>What the model uses it for</b>${t.llm.role}</p></div><p class="maths-formula">${t.formula}</p></div>
-  <figure class="maths-figure"><div class="maths-stagewrap"><canvas id="mx-${t.id}" class="${t.mode==='2d'?'is-2d':''}" tabindex="0" role="img" aria-label="${t.label}"></canvas><div class="maths-stagebtns"><button type="button" class="maths-full-open" aria-label="Open ${t.short} full screen"><span aria-hidden="true">⤢</span> Full screen</button><button type="button" class="maths-enter" aria-label="Play ${t.short}">Play instrument →</button></div></div><figcaption>${swap(t.caption,t.abstractCaption)}</figcaption></figure>
+  <figure class="maths-figure"><div class="maths-stagewrap"><canvas id="mx-${t.id}" class="${t.mode==='2d'?'is-2d':''}" tabindex="0" role="img" aria-label="${t.label}"></canvas><div class="maths-stagebtns"><button type="button" class="maths-full-open" aria-label="Open ${t.short} full screen"><span aria-hidden="true">⤢</span> Full screen</button><button type="button" class="maths-enter" aria-label="Step inside ${t.short}">Step inside →</button></div></div><figcaption>${swap(t.caption,t.abstractCaption)}</figcaption></figure>
   <div class="maths-fullbar"><div class="maths-fulltitle"><p class="eyebrow">${t.no} / ${t.tag}</p><p>${t.short}</p></div><div class="maths-buttons"><button type="button" class="maths-btn maths-abstract-toggle" aria-pressed="false">Play</button><button type="button" class="maths-btn maths-hide-ui" aria-pressed="false">Hide panels</button><button type="button" class="maths-btn maths-full-close">Exit full screen <span aria-hidden="true">✕</span></button></div></div>
   <div class="maths-dream"><p class="eyebrow">Abstract / ${t.no}</p><h3>${t.dream.title}</h3>${t.dream.text.map(p=>`<p>${p}</p>`).join('')}</div>
   <div class="maths-panel" id="mp-${t.id}" role="group" aria-label="Controls">${t.controls(ui)}<p class="maths-readout" id="mx-${t.id}-readout"></p></div>
@@ -142,8 +142,8 @@ const Maths = (() => {
   <div class="maths-hero-copy">
     <p class="eyebrow">The maths of AI</p>
     <h1>Step inside the maths.</h1>
-    <p>Seven ideas. Seven instruments to bring to life. Transform a constellation, fold a signal, tune an optimiser, weave an answer. Learn the mathematics of AI by making its rules work.</p>
-    <p class="maths-hero-actions"><button type="button" class="pill light maths-hero-enter" data-journey-enter="collection">Play the instruments ↗</button> <a class="text-link" href="#maths" data-scroll-target="maths-index">or browse the seven ideas ↓</a></p>
+    <p>Seven ideas, seven rooms inside a language model. Bend the space words live in, crease it into stained glass, weave attention, roll down a loss landscape. Each is an interactive artwork drawn by the mathematics it depicts.</p>
+    <p class="maths-hero-actions"><button type="button" class="pill light maths-hero-enter" data-journey-enter="collection">Step inside ↗</button> <a class="text-link" href="#maths" data-scroll-target="maths-index">or browse the seven ideas ↓</a></p>
     <p class="maths-hero-note">Seven mathematical games · no installation · keyboard &amp; touch</p>
   </div>
 </section>

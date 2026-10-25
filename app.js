@@ -381,7 +381,7 @@ function render(initial=false){
   });
   Lab.wire(null);
   Maths.wire(false);
-  FieldGames.wire(null);
+  Interiors.wire(null);
   if(page==='article'){
     const a = articles.find(x=>x.id===r.id)||articles[0];
     app.innerHTML = articlePage(a);
@@ -390,8 +390,8 @@ function render(initial=false){
     app.innerHTML = Lab.page(r.id);
     document.title = (r.id==='mindcuber'?'Mindcuber lab':r.id==='quantization'?'Quantization lab':'The lab')+' — Chinese Room';
   }else if(page==='maths'){
-    app.innerHTML = r.id==='play' ? FieldGames.page(location.hash.split('/')[2]) : Maths.page();
-    document.title = (r.id==='play'?(FieldGames.games.find(g=>g.id===location.hash.split('/')[2])?.title||'The Field Instruments'):'The Maths of AI')+' — Chinese Room';
+    app.innerHTML = r.id==='play' ? Interiors.page(location.hash.split('/')[2]) : Maths.page();
+    document.title = (r.id==='play'?(Interiors.games.find(g=>g.id===location.hash.split('/')[2])?.title||'Interiors'):'The Maths of AI')+' — Chinese Room';
   }else if(page==='research'){
     app.innerHTML = research();
     document.title = 'Research — Chinese Room';
@@ -409,19 +409,19 @@ function render(initial=false){
   wirePage();
   Lab.wire(page==='lab'?r.id:null);
   Maths.wire(page==='maths'&&r.id!=='play');
-  if(page==='maths'&&r.id==='play')FieldGames.wire(location.hash.split('/')[2]);
+  if(page==='maths'&&r.id==='play')Interiors.wire(location.hash.split('/')[2]);
   document.querySelector('#nav-sweep').style.width = '0%';
   closeMenu();
   const wasPlay = lastRoute === 'play';
   lastRoute = r.id === 'play' ? 'play' : page;
   window.scrollTo({top:0,behavior:'instant'});
   if(!initial){
-    if(page==='maths'&&r.id==='play'&&location.hash.split('/')[2]) document.getElementById('fi-stage')?.focus({preventScroll:true});
+    if(page==='maths'&&r.id==='play'&&location.hash.split('/')[2]) document.querySelector('.ir-over')?.focus({preventScroll:true});
     else if(!(page==='maths'&&r.id==='play')) document.querySelector('#main').focus({preventScroll:true});
   }
   if(page==='maths'&&r.id&&r.id!=='play') document.getElementById(`maths-${r.id}`)?.scrollIntoView({behavior:'instant'});
-  else if(page==='maths'&&!r.id&&wasPlay&&FieldGames.lastGame){
-    const topic = document.getElementById(`maths-${FieldGames.lastGame}`);
+  else if(page==='maths'&&!r.id&&wasPlay&&Interiors.lastGame){
+    const topic = document.getElementById(`maths-${Interiors.lastGame}`);
     topic?.scrollIntoView({behavior:'instant'});
     topic?.querySelector('.maths-enter')?.focus({preventScroll:true});
   }
@@ -504,7 +504,7 @@ function search(){
     ...articles.map(a=>({kind:'RESEARCH',label:a.title,href:`#article/${a.id}`,text:a.title+' '+a.tag+' '+a.dek})),
     {kind:'PAGE',label:'The Maths of AI',href:'#maths',text:'maths mathematics linear algebra matrix gradient descent attention softmax rope rotary torus dimensions superposition ablation'},
     ...Maths.topics.map(t=>({kind:'MATHS',label:t.short,href:`#maths/${t.id}`,text:t.short+' '+t.tag+' '+t.title})),
-    ...FieldGames.games.map(g=>({kind:'GAME',label:g.title,href:'#maths/play/'+g.id,text:g.title+' '+g.subtitle+' '+g.tag})),
+    ...Interiors.games.map(g=>({kind:'ART',label:g.title,href:'#maths/play/'+g.id,text:g.title+' '+g.caption+' '+g.concept})),
     {kind:'PAGE',label:'Research index',href:'#research',text:'research index articles'},
     {kind:'PAGE',label:'Model registry',href:'#models',text:'models console registry'},
     {kind:'PAGE',label:'About',href:'#about',text:'about joe'}

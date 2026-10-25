@@ -16,5 +16,5 @@ cp index.html app.js lab.js field.js maths.js styles.css field.css favicon.svg r
 cp articles/* "$output/articles/"
 cp assets/* "$output/assets/"
 cp maths/*.js "$output/maths/"
-cp -R maths-games "$output/maths-games"
+cp -R maths-art "$output/maths-art"
 printf 'Prepared static site in %s\n' "$output"

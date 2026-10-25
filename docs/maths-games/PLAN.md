@@ -80,3 +80,5 @@ Browser check at 1440×900 and 820×1180 (Chrome via automation): no console err
 ## 3. Progress log
 
 - **A — 25 Oct 2026.** Reviewed v1 docs and build; wrote this review, new DESIGN.md and RESEARCH.md addendum. FIXTURES.md (v1 puzzle witnesses) removed; it's in git history.
+- **B — 25 Oct 2026.** New `maths-art/host.js` + `interiors.css`: gallery with live posters, full-bleed two-canvas frame (base 2D/WebGL + 2D overlay), auto-fading chrome, guided discovery prompts with insight lines and progress dots, dock controls, live maths drawer, sound bus (off by default), keyboard (M/S/Esc/Space), reduced motion, ResizeObserver. `app.js`, `index.html`, `maths.js` copy and `prepare-hosting.sh` switched to `Interiors`/`maths-art`; old `maths-games/` removed.
+- **C — 25 Oct 2026.** *Lattice* done. Drag î/ĵ (snaps to quarters), 3,200 star-vectors leave light streaks while space moves, twin glowing lattices, word-stars with analogy parallelograms, hover a word for the column picture x·î + y·ĵ, live matrix and determinant (collapse seam in red, flipped square hatched), presets, breathe, add-a-layer. Checked in Chrome at 1440×900: drag, presets, collapse, prompts advance.
