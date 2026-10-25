@@ -1,4 +1,17 @@
-# Mathematical games — research and design direction
+# Research notes
+
+> **v2 note (25 Oct 2026).** The brief was clarified: the seven pieces are *interactive artworks*, not puzzle games — see [DESIGN.md](DESIGN.md) and the review in [PLAN.md](PLAN.md). The game-design precedents below (Opus Magnum, Euclidea, Parabox…) no longer drive the design; the mathematical source anchors and the "Synthesis" truthfulness rules still apply. Artistic precedents for v2:
+>
+> - **Joy Division / CP 1919 pulsar plot** (stacked ridgelines) → *Descent*'s loss landscape.
+> - **String art and Islamic geometric weaving** → *Loom*'s attention threads.
+> - **Stained glass / Voronoi windows**; the "linear regions" view of ReLU networks (Montúfar et al. 2014, *On the Number of Linear Regions of Deep Neural Networks*) → *Stained Glass*.
+> - **Antikythera mechanism, astrolabes, spirographs / harmonographs** → *Orrery*.
+> - **Thomson problem** (charges repelling on a sphere) and the polytopes in Elhage et al. 2022 → *Crowded Sky*.
+> - **Sol LeWitt wall drawings, moiré, 3Blue1Brown's grid-warping view of matrices** → *Lattice*.
+> - **Long-exposure light painting, volumetric smoke** → *Descent* trails, *Nullspace* cloud.
+> - **Searle's Chinese Room** (1980) → the framing: the viewer is inside the room, following rules.
+
+## v1 research (games framing, retained for reference)
 
 Research date: 25 October 2026. Status: source review and design synthesis, not a playtest report.
 
