@@ -153,7 +153,7 @@ const Interiors = (() => {
           <span class="ir-dots" aria-hidden="true"></span>
         </div>
       </div>
-      <div class="ir-dock ir-chrome">${(p.controls || []).map(control).join('')}</div>
+      ${(p.controls || []).length ? `<div class="ir-dock ir-chrome"><button type="button" class="ir-dock-toggle" data-host="dock" aria-expanded="true">Controls</button><div class="ir-dock-body">${p.controls.map(control).join('')}</div></div>` : ''}
       <aside class="ir-drawer" hidden aria-label="The maths">
         <button type="button" class="ir-drawer-close" data-host="maths" aria-label="Close the maths">✕</button>
         <p class="ir-drawer-kicker">${p.no} / ${esc(p.concept)}</p>
@@ -355,6 +355,7 @@ const Interiors = (() => {
       if (host) {
         if (host.dataset.host === 'maths') toggleDrawer();
         if (host.dataset.host === 'sound') toggleSound();
+        if (host.dataset.host === 'dock') toggleDock();
         return;
       }
       const el = e.target.closest('[data-ctl]'); if (!el || el.type === 'range') return;
@@ -375,6 +376,14 @@ const Interiors = (() => {
       if (open) renderLive();
       inst.drawer?.(open);
     }
+    const dock = $('.ir-dock');
+    function toggleDock(force) {
+      if (!dock) return;
+      const open = force ?? dock.classList.contains('ir-dock-closed');
+      dock.classList.toggle('ir-dock-closed', !open);
+      dock.querySelector('.ir-dock-toggle').setAttribute('aria-expanded', String(open));
+    }
+    if (innerHeight < 720 || innerWidth < 760) toggleDock(false);
     function toggleSound() {
       sound.on = !sound.on;
       root.querySelector('[data-host="sound"]').setAttribute('aria-pressed', String(sound.on));

@@ -26,6 +26,8 @@ body.ir-playing{background:#05060a;overflow:hidden}
 body.ir-playing main{min-height:100dvh}
 .ir-piece{position:fixed;inset:0;background:#05060a;color:#eef1f4;font-family:var(--sans);--ir-accent:#c9b8ff;overflow:hidden;user-select:none;-webkit-user-select:none}
 .ir-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.ir-canvas{transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.ir-piece.ir-drawer-open .ir-canvas{transform:translateX(calc(min(420px,92vw) / -2))}
 .ir-over{touch-action:none;cursor:crosshair;outline:none}
 .ir-over:focus-visible{box-shadow:inset 0 0 0 2px var(--ir-accent)}
 .ir-chrome{transition:opacity .9s ease}
@@ -49,6 +51,8 @@ body.ir-playing main{min-height:100dvh}
 .ir-caption>*{pointer-events:auto;position:relative}
 .ir-caption::before{content:'';position:absolute;left:-140px;bottom:-120px;width:calc(100% + 280px);height:calc(100% + 220px);background:radial-gradient(closest-side,rgba(5,6,10,.78),rgba(5,6,10,0));pointer-events:none}
 .ir-caption h1{font:400 clamp(44px,6vw,86px)/.9 var(--sans);letter-spacing:-.055em;margin:0 0 10px;text-shadow:0 2px 30px rgba(0,0,0,.6)}
+.ir-caption:has(.ir-insight:not([hidden])) h1{font-size:clamp(32px,3.6vw,48px)}
+.ir-caption h1{transition:font-size .6s ease}
 .ir-sub{font:17px/1.5 var(--sans);color:#d5dbe0;margin:0 0 16px;text-shadow:0 1px 14px rgba(0,0,0,.9)}
 .ir-guide{border-left:1px solid var(--ir-accent);padding:2px 0 2px 14px}
 .ir-prompt{font:13px/1.55 var(--mono);color:#f2f4f6;margin:0;text-shadow:0 1px 10px #000}
@@ -61,8 +65,14 @@ body.ir-playing main{min-height:100dvh}
 .ir-dots i.on{background:var(--ir-accent)}
 .ir-dots i.now{background:rgba(255,255,255,.55)}
 
-.ir-dock{position:absolute;z-index:2;right:22px;bottom:22px;display:flex;flex-direction:column;align-items:stretch;gap:10px;width:min(300px,calc(100vw - 44px));padding:14px;border-radius:14px;background:rgba(8,10,14,.5);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-.ir-dock:empty{display:none}
+.ir-dock{position:absolute;z-index:2;right:22px;bottom:22px;display:flex;flex-direction:column;align-items:stretch;gap:10px;width:min(272px,calc(100vw - 44px));padding:14px;border-radius:14px;background:rgba(8,10,14,.5);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.ir-dock-body{display:flex;flex-direction:column;align-items:stretch;gap:10px}
+.ir-dock-body>button{width:100%}
+.ir-piece .ir-dock-toggle{align-self:flex-end;min-height:30px;padding:4px 12px;font:10px var(--mono);letter-spacing:.12em;text-transform:uppercase;border-color:transparent;background:none}
+.ir-piece .ir-dock-toggle::after{content:' ▾'}
+.ir-dock.ir-dock-closed{width:auto;padding:6px}
+.ir-dock.ir-dock-closed .ir-dock-body{display:none}
+.ir-dock.ir-dock-closed .ir-dock-toggle::after{content:' ▸'}
 .ir-piece.ir-drawer-open .ir-dock{right:calc(min(420px,92vw) + 22px)}
 .ir-range{display:flex;flex-direction:column;gap:6px;font:11px var(--mono);color:#c5ccd3}
 .ir-range>span{display:flex;justify-content:space-between}
@@ -72,7 +82,6 @@ body.ir-playing main{min-height:100dvh}
 .ir-choice-label{font:11px var(--mono);color:#c5ccd3}
 .ir-choice>div{display:flex;flex-wrap:wrap;gap:5px}
 .ir-choice button{min-height:34px;padding:6px 11px;font-size:11px}
-.ir-dock>button{width:100%}
 
 .ir-drawer{position:absolute;top:0;right:0;bottom:0;width:min(420px,92vw);overflow-y:auto;padding:70px 28px 40px;background:rgba(6,7,11,.88);border-left:1px solid rgba(255,255,255,.08);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);user-select:text;-webkit-user-select:text}
 .ir-drawer-close{position:absolute;top:16px;right:18px}
@@ -111,9 +120,12 @@ body.ir-playing main{min-height:100dvh}
   .ir-top-actions button{padding:8px 11px}
   .ir-caption{left:16px;right:16px;top:64px;bottom:auto}
   .ir-caption h1{font-size:42px}
-  .ir-sub{font-size:14px;margin-bottom:10px}
-  .ir-dock{left:12px;right:12px;bottom:12px;width:auto;flex-direction:row;flex-wrap:wrap;padding:10px;gap:8px}
-  .ir-dock>*{flex:1 1 140px}
+  .ir-caption:has(.ir-insight:not([hidden])) h1{font-size:clamp(32px,3.6vw,48px)}
+.ir-caption h1{transition:font-size .6s ease}
+.ir-sub{font-size:14px;margin-bottom:10px}
+  .ir-dock{left:12px;right:12px;bottom:12px;width:auto;padding:10px;gap:8px}
+  .ir-dock.ir-dock-closed{left:auto}
+  .ir-dock-body{flex-direction:row;flex-wrap:wrap}.ir-dock-body>*{flex:1 1 140px}
   .ir-piece.ir-drawer-open .ir-dock{display:none}
   .ir-drawer{width:100vw}
 }
