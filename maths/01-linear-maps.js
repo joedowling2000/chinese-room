@@ -58,6 +58,8 @@ Maths.scene({
       const W=(x,y,h=0)=>[a*x+b*y,h,c*x+d*y];
       const feet=W(...me),eye=[feet[0],.55,feet[2]];
       const P=persp(s,eye,heading(look.yaw,look.pitch),[0,1,0],1.2);
+      const target=W(2,2,.1),mark=k.beacon(ctx,P,target,se,.3,1);
+      if(mark)label(ctx,'DELIVERY · (2, 2)',mark[0],mark[1]-20,1,'center');
       const horizon=[];
       for(let n=0;n<=160;n++){const t=n/160*Math.PI*2;horizon.push([eye[0]+80*Math.sin(t),0,eye[2]+80*Math.cos(t)]);}
       k.tint(ctx,se,()=>pline(ctx,P,horizon,.3,.8,1e9));
@@ -122,6 +124,7 @@ Maths.scene({
         k.readout(`det = ${det.toFixed(2)} · areas scale by ${Math.abs(det).toFixed(2)}×${Math.abs(det)<.03?' · the plane is flattened onto a line':det<0?' · orientation is flipped':''}`);
         return;
       }
+      k.challenge({x:goal[0],y:goal[1],det});
       const at=[M[0]*goal[0]+M[1]*goal[1],M[2]*goal[0]+M[3]*goal[1]];
       k.readout(`your own address: (${goal[0]}, ${goal[1]}) · the world puts you at (${at[0].toFixed(2)}, ${at[1].toFixed(2)}) · ${Math.abs(det)<.03?'the world has folded into a single road, and different addresses are now the same place':`your unit square covers ${Math.abs(det).toFixed(2)} square units${det<0?', mirrored':''}`}`);
     }

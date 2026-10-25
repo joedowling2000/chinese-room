@@ -10,7 +10,7 @@ Maths.scene({
        role:'Near-orthogonality lets the stream hold far more features than it has dimensions — a packing trick called superposition. The same crowding is why single neurons are hard to interpret: each one is shared by many features at once.'},
   formula:'cos θ = u·v / (|u| |v|)  ·  spread ≈ 1/√d',
   caption:'Cosine similarity of 6,000 random pairs',
-  abstractCaption:'+ and −: more or fewer dimensions · U: look up at yourself · H: the horizon · arrow keys or drag: look around',
+  abstractCaption:'+ and −: more or fewer dimensions · U: look up at yourself · H: the horizon · ↑ ↓: change dimensions · drag: look around',
   label:'A histogram of cosine similarities between random vectors.',
   abstractLabel:'A first-person view of a night sky in which other directions are stars, gathering on the horizon as dimensions grow.',
   dream:{title:'You are one idea among thousands.',text:[
@@ -110,6 +110,7 @@ Maths.scene({
       $('dim-k-out').value=d.toLocaleString('en-GB');
       let near=0,abs=0,deg=0;
       for(const c of v){if(Math.abs(c)<.1)near++;abs+=Math.abs(c);deg+=Math.asin(Math.min(1,Math.abs(c)));}
+      k.challenge({d,near:near/M});
       k.readout(s.abstract
         ?`${d.toLocaleString('en-GB')} dimensions · ${(near/M*100).toFixed(1)}% of the stars lie within 6° of your horizon · the typical star sits ${(deg/M*180/Math.PI).toFixed(1)}° above or below it`
         :`${(near/M*100).toFixed(1)}% of random pairs are within ±0.1 of a right angle · typical |cos θ| ≈ ${(abs/M).toFixed(3)} · 1/√d = ${(1/Math.sqrt(d)).toFixed(3)}`);
@@ -135,8 +136,8 @@ Maths.scene({
       },
       resetView(){tilt.stop();spin=0;lastSpin=0;look.yaw=0;look.pitch=look.goal=.3;s.camera=null;s.draw();},
       onKey(key){
-        if(key==='+'||key==='='){setDim(1);return true;}
-        if(key==='-'||key==='_'){setDim(-1);return true;}
+        if(key==='+'||key==='='||key==='ArrowUp'||key==='w'){setDim(1);return true;}
+        if(key==='-'||key==='_'||key==='ArrowDown'||key==='s'){setDim(-1);return true;}
         if(key==='u'){tiltTo(1.42);return true;}
         if(key==='h'){tiltTo(.12);return true;}
         const m={ArrowLeft:[-.2,0],a:[-.2,0],ArrowRight:[.2,0],d:[.2,0],ArrowUp:[0,.12],w:[0,.12],ArrowDown:[0,-.12],s:[0,-.12]}[key];

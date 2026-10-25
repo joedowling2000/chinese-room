@@ -8,3 +8,5 @@ cp index.html app.js lab.js field.js maths.js styles.css field.css favicon.svg r
 cp articles/* dist/articles/
 cp assets/* dist/assets/
 cp maths/*.js dist/maths/
+
+cp -R maths-games dist/maths-games

@@ -97,6 +97,7 @@ Maths.scene({
       const a=A(),h=V.dot(me,d);
       $('abl-alpha-out').value=a.toFixed(2);
       k.setText($('abl-run'),a>=.999?'Restore':'Ablate',a>=.999?'Remember height':'Forget height');
+      k.challenge({alpha:a,gap:(1-a)*gap0,blocked:!!note&&a>=.999});
       k.readout(s.abstract
         ?`α = ${a.toFixed(2)} · your height above the plane: ${((1-a)*h).toFixed(2)} (it was ${h.toFixed(2)}) · the clouds are ${((1-a)*gap0).toFixed(2)} apart along r̂${note?' · '+note:''}`
         :`α = ${a.toFixed(2)} · gap between the clusters along r̂: ${((1-a)*gap0).toFixed(2)} (was ${gap0.toFixed(2)})`);
@@ -116,7 +117,7 @@ Maths.scene({
     const turnBy=a=>{look.yaw+=a;s.draw();};
 
     k.on($('abl-run'),'click',toggle);
-    k.on($('abl-alpha'),'input',()=>{run.stop();update();});
+    k.on($('abl-alpha'),'input',()=>{run.stop();note='';update();});
     k.on($('abl-plane'),'change',()=>s.draw());
     [['abl-fwd',()=>drift(.25)],['abl-back',()=>drift(-.25)],['abl-left',()=>turnBy(-.25)],['abl-right',()=>turnBy(.25)],['abl-rise',()=>rise(.2)],['abl-fall',()=>rise(-.2)]]
       .forEach(([id,fn])=>k.on($(id),'click',fn));

@@ -29,10 +29,18 @@ The site includes browser-only interactive experiments and decorative mathematic
 
 ## The maths of AI
 
-- `http://localhost:8000/#maths` — seven interactive illustrations.
-- Each topic has a flat diagram and an **Abstract** first-person mode. Choose **Step inside →** on a topic or **Enter the experience** in the hero to go straight into the world.
-- Inside a world: drag to look around, use the on-screen pad or arrow keys / W A S D to move, follow the guide card (three short lessons per world), and jump between worlds with the numbered strip along the bottom. **Controls** opens the original sliders; **Pause motion** freezes all animation; **Exit** or `Esc` returns to the page.
-- Motion is never required: with `prefers-reduced-motion` the worlds start paused and every action snaps instead of animating.
+- `http://localhost:8000/#maths` — the seven concepts and their flat diagrams.
+- `http://localhost:8000/#maths/play` — **The Field Instruments**, seven mathematical games with three authored chambers each.
+- Direct game route: `#maths/play/linear-maps` (also `folding`, `gradient-descent`, `attention`, `rotary`, `dimensions`, `ablation`).
+- Change the instrument using its handles or native controls — every range has labelled −/+ step buttons and visible bounds — inspect the live preview, then **Run trial**. **Step trial** inspects individual probes. Contour Pilot advances one or four real optimiser updates and offers per-update **Rewind here** from its update history.
+- After a trial, **Replay trial** plays the captured result back with **Pause/Resume**, and the **Measurements** panel lists probes or update frames with their real inputs, outputs and errors, plus the full configuration. **The maths** shows your actual state and links the primary reference.
+- **Undo** restores a previous configuration (first clearing an inspected trial or uncommitted preview); **Reset** restores the chamber. Hints are progressive; using a chamber's final hint marks that completion **assisted**, labelled in the chamber navigation and the catalogue. Completed chambers offer **Restore solution**, which is itself undoable.
+- Keyboard: native controls support arrows; Enter from the stage runs a trial, Z undoes, Space pauses or resumes replay, and Esc returns to the collection. Touch-only play is supported through the controls.
+- Progress and preferences are saved on this device under a versioned store when local storage is available. The collection has a progress reset with an undo option. No account or model API is used. Note: Contour Pilot now records a per-update snapshot history; saves written before that schema existed are retained verbatim in a separate local backup entry (no data loss), while the new session starts fresh. Other instruments keep compatible saved completions.
+- Motion and sound are optional. Reduced-motion preferences disable decorative animation; all calculations and completion rules remain available.
+- On another device on the same network, use this machine's current LAN IP instead of `localhost` (for example `http://192.168.1.144:8000/#maths/play`). The server must listen on the LAN interface.
+
+Implementation progress and remaining review work are recorded in [the live plan](docs/maths-games/PLAN.md). [Design](docs/maths-games/DESIGN.md), [research](docs/maths-games/RESEARCH.md), and [numerical witness fixtures](docs/maths-games/FIXTURES.md) are kept alongside it. The current build is a local review candidate; physical iPad and unaided user testing remain outstanding.
 
 ## Interactive lab
 
@@ -50,8 +58,9 @@ See [PLAN.md](PLAN.md) for the implementation status, source requirements and fo
 
 - `index.html`, `styles.css`, `field.css`, `app.js`, `field.js`: site shell, layout base, Field theme, and client-side navigation/content
 - `lab.js`: cube geometry, experiment pages and quantization calculations
-- `maths.js`: The Maths of AI page — page shell, shared canvas plumbing, first-person camera, full-screen and Abstract modes
-- `maths/*.js`: one file per Maths illustration (copy, flat view, Abstract scene and controls), registered with `Maths.scene`
+- `maths.js`: The Maths of AI page, flat diagram plumbing and full-screen diagrams; game launch links
+- `maths/*.js`: explanatory copy and flat illustrations; legacy Abstract renderers retained during migration
+- `maths-games/`: the new model-driven game host, seven instruments, authored chamber data and scoped stylesheet
 - `scripts/generate-field-art.mjs`: regenerates the procedural SVG artwork in `assets/`
 - `PLAN.md`: interactive-site plan and progress
 - `assets/`: visual assets

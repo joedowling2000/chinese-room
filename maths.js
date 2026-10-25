@@ -59,6 +59,7 @@ const Maths = (() => {
     </div>
   </header>
   <button type="button" class="maths-reveal" hidden>Show panels</button>
+  <aside class="maths-challenge" aria-label="Play challenge"><p class="maths-kicker mc-count"></p><h4 class="mc-title"></h4><p class="mc-hint"></p><progress class="mc-progress" max="1" value="0" aria-label="Challenge progress"></progress><p class="mc-metric"></p><p class="mc-result" role="status"></p><button type="button" class="maths-btn mc-next">Start challenge</button></aside>
   <aside class="maths-guide" aria-label="Guide">
     <p class="maths-kicker g-eyebrow"></p>
     <h4 class="g-title"></h4>
@@ -100,8 +101,8 @@ const Maths = (() => {
   function topic(t){
     return `<section class="maths-topic" id="maths-${t.id}" aria-labelledby="maths-${t.id}-title">
   <div class="maths-copy"><p class="eyebrow">${t.no} / ${t.tag}</p><h2 id="maths-${t.id}-title">${t.title}</h2>${t.body.map(p=>`<p>${p}</p>`).join('')}<div class="maths-why"><p class="maths-why-label">Why it matters</p><p>${t.why}</p></div><div class="maths-llm"><p class="maths-why-label">Inside an LLM</p><p><b>Where it lives</b>${t.llm.where}</p><p><b>What the model uses it for</b>${t.llm.role}</p></div><p class="maths-formula">${t.formula}</p></div>
-  <figure class="maths-figure"><div class="maths-stagewrap"><canvas id="mx-${t.id}" class="${t.mode==='2d'?'is-2d':''}" tabindex="0" role="img" aria-label="${t.label}"></canvas><div class="maths-stagebtns"><button type="button" class="maths-full-open" aria-label="Open ${t.short} full screen"><span aria-hidden="true">⤢</span> Full screen</button><button type="button" class="maths-enter" aria-label="Step inside ${t.short}">Step inside →</button></div></div><figcaption>${swap(t.caption,t.abstractCaption)}</figcaption></figure>
-  <div class="maths-fullbar"><div class="maths-fulltitle"><p class="eyebrow">${t.no} / ${t.tag}</p><p>${t.short}</p></div><div class="maths-buttons"><button type="button" class="maths-btn maths-abstract-toggle" aria-pressed="false">Abstract</button><button type="button" class="maths-btn maths-hide-ui" aria-pressed="false">Hide panels</button><button type="button" class="maths-btn maths-full-close">Exit full screen <span aria-hidden="true">✕</span></button></div></div>
+  <figure class="maths-figure"><div class="maths-stagewrap"><canvas id="mx-${t.id}" class="${t.mode==='2d'?'is-2d':''}" tabindex="0" role="img" aria-label="${t.label}"></canvas><div class="maths-stagebtns"><button type="button" class="maths-full-open" aria-label="Open ${t.short} full screen"><span aria-hidden="true">⤢</span> Full screen</button><button type="button" class="maths-enter" aria-label="Play ${t.short}">Play instrument →</button></div></div><figcaption>${swap(t.caption,t.abstractCaption)}</figcaption></figure>
+  <div class="maths-fullbar"><div class="maths-fulltitle"><p class="eyebrow">${t.no} / ${t.tag}</p><p>${t.short}</p></div><div class="maths-buttons"><button type="button" class="maths-btn maths-abstract-toggle" aria-pressed="false">Play</button><button type="button" class="maths-btn maths-hide-ui" aria-pressed="false">Hide panels</button><button type="button" class="maths-btn maths-full-close">Exit full screen <span aria-hidden="true">✕</span></button></div></div>
   <div class="maths-dream"><p class="eyebrow">Abstract / ${t.no}</p><h3>${t.dream.title}</h3>${t.dream.text.map(p=>`<p>${p}</p>`).join('')}</div>
   <div class="maths-panel" id="mp-${t.id}" role="group" aria-label="Controls">${t.controls(ui)}<p class="maths-readout" id="mx-${t.id}-readout"></p></div>
   ${overlay(t)}
@@ -141,9 +142,9 @@ const Maths = (() => {
   <div class="maths-hero-copy">
     <p class="eyebrow">The maths of AI</p>
     <h1>Step inside the maths.</h1>
-    <p>Seven ideas. Seven worlds to step inside. Together they are the anatomy of a large language model: the matrices that carry every token, the folds that give the network its shape, the descent that trains it, the attention that lets words listen to each other, and the directions a model can be made to forget.</p>
-    <p class="maths-hero-actions"><button type="button" class="pill light maths-hero-enter" data-journey-enter="linear-maps">Enter the experience ↗</button> <a class="text-link" href="#maths" data-scroll-target="maths-index">or browse the seven ideas ↓</a></p>
-    <p class="maths-hero-note">Interactive worlds · no installation · keyboard &amp; touch</p>
+    <p>Seven ideas. Seven instruments to bring to life. Transform a constellation, fold a signal, tune an optimiser, weave an answer. Learn the mathematics of AI by making its rules work.</p>
+    <p class="maths-hero-actions"><button type="button" class="pill light maths-hero-enter" data-journey-enter="collection">Play the instruments ↗</button> <a class="text-link" href="#maths" data-scroll-target="maths-index">or browse the seven ideas ↓</a></p>
+    <p class="maths-hero-note">Seven mathematical games · no installation · keyboard &amp; touch</p>
   </div>
 </section>
 <nav class="maths-index" id="maths-index" aria-label="Topics">${scenes.map(t=>`<a href="#maths/${t.id}" data-scroll-target="maths-${t.id}"><span>${t.no}</span>${t.short}</a>`).join('')}</nav>
@@ -414,6 +415,44 @@ ${pipeline()}
     if(L.click)$(L.click)?.click();
   }
 
+  function renderChallenge(def){
+    const card=section(def).querySelector('.maths-challenge'),g=def.game;
+    const missions=MathsJourney.challenges[def.id],m=missions[g.index];
+    card.querySelector('.mc-count').textContent=`PLAY · ${g.index+1} / ${missions.length}`;
+    card.querySelector('.mc-title').textContent=m.title;
+    card.querySelector('.mc-hint').textContent=m.hint;
+    card.querySelector('.mc-progress').value=g.done?1:g.started?clamp(m.score(def.measure||{} )||0,0,1):0;
+    card.querySelector('.mc-metric').textContent=g.started&&def.measure?m.metric(def.measure):'Start to set up the experiment. Explore freely at any time.';
+    const result=g.done?`✓ ${m.win}`:'',status=card.querySelector('.mc-result');
+    if(status.textContent!==result)status.textContent=result;
+    card.classList.toggle('complete',g.done);
+    const b=card.querySelector('.mc-next');
+    b.textContent=!g.started?'Start challenge':!g.done?'Restart challenge':g.index<missions.length-1?'Next challenge →':'Play again';
+  }
+  function challengeState(def,value){
+    def.measure=value;
+    const g=def.game;
+    if(!def.s?.abstract||!g)return;
+    const m=MathsJourney.challenges[def.id][g.index];
+    if(g.started&&!g.done&&(m.done?m.done(value):m.score(value)>=1-1e-6))g.done=true;
+    renderChallenge(def);
+  }
+  function startChallenge(def){
+    const g=def.game,missions=MathsJourney.challenges[def.id];
+    if(g.done)g.index=(g.index+1)%missions.length;
+    g.started=false;g.done=false;
+    clearHeld();def.s.players.forEach(p=>p.stop());
+    const m=missions[g.index];
+    if(g.index===0)def.hooks.resetView?.();
+    def.hooks.prepareChallenge?.(g.index);
+    for(const [id,v] of Object.entries(m.values)){
+      const el=$(id);el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));
+    }
+    if(m.click)$(m.click).click();
+    g.started=true;
+    renderChallenge(def);
+  }
+
   function openFull(def,{opener,scroll,abstract=false}={}){
     if(active)closeFull(active);
     const sec=section(def);
@@ -430,9 +469,10 @@ ${pipeline()}
     sec.setAttribute('aria-label',worldOf(def).name);
     document.documentElement.classList.add('maths-locked');
     def.lesson=0;renderGuide(def);
+    def.game={index:0,started:false,done:false};renderChallenge(def);
     // Abstract: canvas first, prose hidden; diagram: controls drawer open.
     sec.classList.toggle('drawer-open',!abstract);
-    sec.classList.toggle('guide-off',matchMedia('(max-width:760px)').matches);
+    sec.classList.add('guide-off');
     sec.classList.remove('hide-ui');
     setAbstract(def,abstract);
     syncTop(def);
@@ -486,6 +526,7 @@ ${pipeline()}
     s.canvas.setAttribute('aria-label',on?def.abstractLabel:def.label);
     if(on)s.visible=true;
     def.hooks.onMode?.(on);
+    if(on&&def.game&&!def.game.started)startChallenge(def);
     s.draw();
     ambientSync();
   }
@@ -557,6 +598,7 @@ ${pipeline()}
       stage:(paint,paintAbstract)=>stage(def,paint,paintAbstract),
       orbit:(s,view,onPick)=>orbit(s,view,signal,onPick),
       look:(s,look,opts)=>lookDrag(s,look,signal,opts),
+      challenge:value=>challengeState(def,value),
       readout:text=>{
         $('mx-'+def.id+'-readout').textContent=text;
         const r=$('mr-'+def.id);if(r)r.textContent=text;
@@ -579,11 +621,11 @@ ${pipeline()}
       if(dream&&slot)slot.appendChild(dream);
       const W=worldOf(def);
       sec.querySelector('.maths-full-open').addEventListener('click',()=>openFull(def),{signal});
-      sec.querySelector('.maths-enter').addEventListener('click',()=>openFull(def,{abstract:true}),{signal});
+      sec.querySelector('.maths-enter').addEventListener('click',()=>{location.hash='maths/play/'+def.id;},{signal});
       sec.querySelector('.maths-full-close').addEventListener('click',()=>closeFull(def),{signal});
       sec.querySelector('.maths-exit').addEventListener('click',()=>closeFull(def),{signal});
-      sec.querySelector('.maths-abstract-toggle').addEventListener('click',()=>{setAbstract(def,!def.s.abstract);syncTop(def);},{signal});
-      sec.querySelector('.maths-mode-ab').addEventListener('click',()=>{if(!def.s.abstract){setAbstract(def,true);sec.classList.remove('drawer-open');syncTop(def);def.s.canvas.focus({preventScroll:true});}},{signal});
+      sec.querySelector('.maths-abstract-toggle').addEventListener('click',()=>{location.hash='maths/play/'+def.id;},{signal});
+      sec.querySelector('.maths-mode-ab').addEventListener('click',()=>{location.hash='maths/play/'+def.id;},{signal});
       sec.querySelector('.maths-mode-flat').addEventListener('click',()=>{if(def.s.abstract){setAbstract(def,false);sec.classList.add('drawer-open');syncTop(def);}},{signal});
       sec.querySelector('.maths-hide-ui').addEventListener('click',e=>{sec.classList.toggle('hide-ui');e.currentTarget.setAttribute('aria-pressed',String(sec.classList.contains('hide-ui')));},{signal});
       sec.querySelector('.maths-clear').addEventListener('click',e=>{sec.classList.toggle('hide-ui');e.currentTarget.setAttribute('aria-pressed',String(sec.classList.contains('hide-ui')));syncTop(def);},{signal});
@@ -595,6 +637,7 @@ ${pipeline()}
       },{signal});
       sec.querySelector('.maths-drawer-toggle').addEventListener('click',()=>{sec.classList.toggle('drawer-open');syncTop(def);},{signal});
       sec.querySelector('.maths-guide-toggle').addEventListener('click',()=>{sec.classList.toggle('guide-off');syncTop(def);},{signal});
+      sec.querySelector('.mc-next').addEventListener('click',()=>startChallenge(def),{signal});
       sec.querySelector('.g-try').addEventListener('click',()=>applyLesson(def),{signal});
       sec.querySelector('.g-prev').addEventListener('click',()=>{def.lesson=Math.max(0,(def.lesson||0)-1);renderGuide(def);},{signal});
       sec.querySelector('.g-next').addEventListener('click',()=>{
@@ -632,7 +675,7 @@ ${pipeline()}
     document.querySelectorAll('[data-journey-enter]').forEach(b=>{
       b.addEventListener('click',()=>{
         const def=scenes.find(d=>d.id===b.dataset.journeyEnter);
-        if(def)openFull(def,{abstract:true});
+        location.hash=def?'maths/play/'+def.id:'maths/play';
       },{signal});
     });
     document.addEventListener('keydown',onKey,{signal});

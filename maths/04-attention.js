@@ -112,6 +112,7 @@ Maths.scene({
       $('att-temp-out').value=Number($('att-temp').value).toFixed(2);
       $('att-bars').innerHTML=keys.map((kk,i)=>`<div class="maths-bar"><span>${kk.t}</span><i style="--w:${(weights[i]*100).toFixed(1)}%"></i><b>${Math.round(weights[i]*100)}%</b></div>`).join('');
       const top=weights.indexOf(Math.max(...weights)),H=-weights.reduce((a,p)=>a+(p>0?p*Math.log2(p):0),0);
+      k.challenge({cat:weights[1],effective:2**H});
       k.readout(s.abstract
         ?`you are listening most to “${keys[top].t}” (${Math.round(weights[top]*100)}%) · it is as if you were listening to ${(2**H).toFixed(1)} of the 8 words · leaning in ${lean().toFixed(2)}`
         :`strongest match: “${keys[top].t}” (${Math.round(weights[top]*100)}%) · entropy ${H.toFixed(2)} of 3 bits`);
@@ -140,6 +141,7 @@ Maths.scene({
     update();
 
     return {
+      prepareChallenge(index){if(index===0)aim(0,.6);},
       onMode(on){if(on)look.yaw=Math.atan2(q[0],q[1]);update();},
       resetView(){look.yaw=Math.atan2(q[0],q[1]);look.pitch=-.12;s.camera=null;s.draw();},
       onKey(key){

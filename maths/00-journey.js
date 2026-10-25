@@ -70,8 +70,8 @@ const MathsJourney = (() => {
       legend:['Stars · sampled directions','Horizon · 90° from you'],
       note:'A sky projection of sampled angles, not a literal view of high-dimensional space. Large dimensions use an approximation.',
       noDust:true,
-      dpad:{up:['ArrowUp','Tilt up'],down:['ArrowDown','Tilt down'],left:['ArrowLeft','Turn left'],right:['ArrowRight','Turn right']},
-      hint:'Drag to look · arrows to turn · + − for dimensions',
+      dpad:{up:['ArrowUp','More dimensions'],down:['ArrowDown','Fewer dimensions'],left:['ArrowLeft','Turn left'],right:['ArrowRight','Turn right']},
+      hint:'↑ ↓ add or remove dimensions · drag to look · + − also work',
       lessons:[
         {title:'A crowded small sky.',text:'In two dimensions, random directions often point towards or away from you. Their cosine similarities spread widely.',tryLabel:'Start with two',values:{'dim-k':0},llm:'You are riding the residual stream — the wide vector each token carries, which every layer reads from and writes back to.'},
         {title:'Almost perpendicular.',text:'Add dimensions. Cosine similarities concentrate near zero; the stars collect near the 90° horizon. Their azimuth is decorative.',tryLabel:'Open 1,000 dimensions',values:{'dim-k':7},llm:'Near-orthogonality enables superposition: the model packs far more features than it has dimensions into one stream.'},
@@ -88,6 +88,31 @@ const MathsJourney = (() => {
         {title:'One direction separates two clouds.',text:'Rise or fall through the activations. The direction r̂ is up in this world; it is the axis along which the two synthetic groups differ.',tryLabel:'Restore the direction',values:{'abl-alpha':0},llm:'Interpretability research finds real directions like this in the residual stream — for refusal, sentiment, even specific concepts.'},
         {title:'Subtract the projection.',text:'Ablation subtracts α(x·r̂)r̂. Nothing moves sideways: only the component parallel to the chosen direction shrinks.',tryLabel:'Remove halfway',values:{'abl-alpha':0.5},llm:'This subtraction, applied at every layer, is how abliteration removes a refusal behaviour without any retraining.'},
         {title:'There is no up left.',text:'At α = 1 every point lies on the perpendicular plane. Try rising now: motion along the removed direction has no visible effect.',tryLabel:'Forget height',values:{'abl-alpha':1},llm:'Steering vectors run the same move backwards — add a direction to push the model towards a behaviour instead of deleting it.'}]}
+  };
+
+  // Challenges score simulation outcomes, never camera motion or button counts.
+  const challenges = {
+    'linear-maps': [
+      {title:'Deliver yourself to (2, 2)',hint:'Use ↑ and → to reach input address (2, 2). Shear the world and watch the destination change.',values:{},click:'lm-shear',score:v=>1-Math.min(1,Math.hypot(v.x-2,v.y-2)/Math.sqrt(8)),metric:v=>`Address (${v.x}, ${v.y}) · target (2, 2)`,win:'Delivered! Each step adds a matrix column. With the starting shear, (2, 2) lands at (4, 2).'},
+      {title:'Make an entire direction disappear',hint:'Open Controls and choose Collapse. Move to see different addresses share a destination.',values:{},score:v=>1-Math.min(1,Math.abs(v.det)),metric:v=>`Area scale: ${Math.abs(v.det).toFixed(2)}× · target 0`,win:'Collapsed! A zero determinant means the map loses information.'}],
+    folding:[
+      {title:'Find a wall hidden in the floor',hint:'Fold the world, then walk with ↑ ↓ and turn with ← → until your height reaches 0.5.',values:{'fold-t':0,'fold-act':'relu','fold-theta':35,'fold-bias':.3},score:v=>Math.min(v.t/2,v.height/.5),metric:v=>`Your height: ${v.height.toFixed(2)} · target 0.50`,win:'Found it! The wall shows the magnitude ReLU removed from your negative coordinates.'},
+      {title:'Bring the wall back to the floor',hint:'Unfold the world. Watch your lost coordinates return as the layer rewinds.',values:{},score:v=>1-v.t/2,metric:v=>`Layer applied: ${Math.round(v.t/2*100)}% · target 0%`,win:'Restored! Rewinding this demonstration restores the saved input; a real ReLU output alone cannot recover it.'}],
+    'gradient-descent':[
+      {title:'Find low ground',hint:'Take learning steps until loss is below 0.10. Watch the loss, not just the scenery.',values:{'gd-lr':.15,'gd-mu':0},click:'gd-new',score:v=>1-Math.max(0,v.loss-.1)/2,done:v=>v.loss<.1,metric:v=>`Loss ${v.loss.toFixed(3)} · target < 0.100 · ${v.steps} steps`,win:'Low ground reached! Small updates followed the local slope to reduce error.'},
+      {title:'Settle the slope',hint:'Keep stepping until the gradient magnitude falls below 0.02. Try momentum in Controls.',values:{},score:v=>1-Math.max(0,v.slope-.02),done:v=>v.slope<.02,metric:v=>`Slope ${v.slope.toFixed(3)} · target < 0.020`,win:'Settled! A small gradient means a locally flat region, not proof of the best possible solution.'}],
+    attention:[
+      {title:'Tune in to “cat”',hint:'Turn with ← → toward cat, then lean in with ↑. Give cat at least 65% of the attention.',values:{'att-temp':.4},score:v=>v.cat/.65,metric:v=>`cat receives ${Math.round(v.cat*100)}% · target 65%`,win:'Tuned in! Aligning the query with a key and increasing its strength concentrates attention.'},
+      {title:'Hear at least six words at once',hint:'Lean back with ↓ and raise temperature in Controls. Spread the attention across the room.',values:{},score:v=>v.effective/6,metric:v=>`Effective words: ${v.effective.toFixed(1)} / 8 · target 6`,win:'A mixture! The output combines values from many words, rather than choosing a single winner.'}],
+    rotary:[
+      {title:'Land on word 8',hint:'Use ↑ ↓ to travel one word at a time. Stop at position 8 and compare the two clocks.',values:{'rope-pos':0,'rope-ratio':.08},score:v=>1-Math.min(1,Math.abs(v.pos-8)/8),done:v=>Math.abs(v.pos-8)<.02,metric:v=>`Position ${v.pos.toFixed(1)} · target 8`,win:'Arrived! Both coordinate pairs encode the same position at different rotation speeds.'},
+      {title:'Inspect the trail you encoded',hint:'Advance to word 16, then press B or use Look back in Controls to inspect earlier positions.',values:{},score:v=>Math.min(v.pos/16,v.back?1:.5),metric:v=>`Position ${v.pos.toFixed(1)} / 16 · ${v.back?'looking back':'look forward'}`,win:'Trail revealed! Relative phase records separation between positions.'}],
+    dimensions:[
+      {title:'Gather 90% near the horizon',hint:'Use ↑ to add dimensions. Find enough room for 90% of sampled directions to have |cos θ| < 0.1.',values:{'dim-k':0},score:v=>v.near/.9,metric:v=>`${v.d.toLocaleString()} dimensions · ${(v.near*100).toFixed(1)}% near horizon · target 90%`,win:'Room found! Random directions concentrate near perpendicular as dimension grows.'},
+      {title:'Scatter the sky again',hint:'Use ↓ to remove dimensions until fewer than 10% of directions are near the horizon.',values:{},score:v=>1-Math.max(0,v.near-.1),done:v=>v.near<.1,metric:v=>`${(v.near*100).toFixed(1)}% near horizon · target < 10%`,win:'Scattered! Low-dimensional random directions have a much wider spread of similarities.'}],
+    ablation:[
+      {title:'Erase the gap between the clouds',hint:'Forget height to bring the cluster separation along r̂ below 0.01. Watch the gap shrink.',values:{'abl-alpha':0},score:v=>v.alpha,done:v=>v.gap<.01,metric:v=>`Cluster gap ${v.gap.toFixed(2)} · target < 0.01`,win:'Gap erased! Subtracting the projection removes the component parallel to r̂.'},
+      {title:'Test the missing direction',hint:'Press Rise or Fall while height is removed. A blocked move is the experiment: sideways motion still works.',values:{'abl-alpha':1},score:v=>v.blocked?1:0,metric:v=>v.blocked?'Height input received · output movement 0':'Try Rise or Fall',win:'Confirmed! Your input height changed, but its projected output stayed zero. Restore height to see it again.'}]
   };
 
   const rgb = hex => [parseInt(hex.slice(1,3),16),parseInt(hex.slice(3,5),16),parseInt(hex.slice(5,7),16)];
@@ -154,5 +179,5 @@ const MathsJourney = (() => {
     ctx.fillStyle=v;ctx.fillRect(0,0,w,h);
   }
 
-  return {worlds,atmosphere,finish,tint,surface,beacon,rgba};
+  return {worlds,challenges,atmosphere,finish,tint,surface,beacon,rgba};
 })();

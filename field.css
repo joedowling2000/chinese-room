@@ -512,3 +512,23 @@ button.maths-hero-enter{border:0;cursor:pointer}
   .ch-num span{display:none}
   .maths-hero-actions{flex-wrap:wrap;row-gap:14px}
 }
+
+/* Play goals stay visible independently of the optional lesson guide. */
+.maths-challenge{position:absolute;z-index:4;top:100px;left:22px;width:min(340px,42%);padding:16px 18px;border:1px solid var(--line2);border-radius:16px;background:#090d12ed;color:var(--text)}
+.mc-title{margin:4px 0 8px;font:500 21px/1.15 var(--sans)}
+.mc-hint,.mc-result{margin:8px 0;font:400 13px/1.45 var(--sans)}
+.mc-metric{margin:8px 0;font:400 11px/1.5 var(--mono);color:var(--muted)}
+.mc-progress{display:block;width:100%;height:8px;accent-color:#8de8df}
+.mc-result:empty{display:none}
+.maths-challenge.complete{border-color:#8de8df}
+.mc-result{color:#8de8df}
+.mc-next{margin-top:5px;min-height:36px}
+.is-full:not(.is-abstract) .maths-challenge,.is-full.hide-ui .maths-challenge,.is-full:not(.guide-off) .maths-challenge,.is-full.drawer-open .maths-challenge{display:none}
+@media(max-width:760px){
+  .maths-challenge{top:154px;left:10px;right:10px;width:auto;max-height:calc(100dvh - 370px);overflow:auto;padding:10px 12px}
+  .mc-title{font-size:18px}.mc-hint,.mc-result{font-size:12px}
+  .is-full.is-abstract .maths-ribbon{display:none}
+}
+@media(max-height:550px) and (min-width:761px){
+  .maths-challenge{top:90px;max-height:calc(100dvh - 260px);overflow:auto}
+}

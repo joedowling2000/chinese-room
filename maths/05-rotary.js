@@ -127,6 +127,7 @@ Maths.scene({
       $('rope-pos-out').value=p.toFixed(1);
       $('rope-ratio-out').value=g.toFixed(2);
       k.setText($('rope-play'),play.playing?'Pause':'Play',play.playing?'Stop':'Ride on');
+      k.challenge({pos:p,back});
       k.readout(s.abstract
         ?`${onWord?`you are word ${n}`:`you are between words ${n} and ${n+1}`} · the fast wheel has turned you ${turns(p*w1)} times, the slow wheel ${turns(p*w1*g)} · ${onWord?n:n+1} lamps lie behind you${back?' · you are looking back':''}`
         :`position ${p.toFixed(1)} · pair 1 has turned ${turns(p*w1)} times · pair 2 has turned ${turns(p*w1*g)} times`);

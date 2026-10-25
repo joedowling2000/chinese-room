@@ -12,7 +12,7 @@ Maths.scene({
   caption:'Step through one layer',
   abstractCaption:'↑ ↓ or W S: walk · ← → or A D: turn · F: fold or unfold · drag to look around',
   label:'A square grid passed through a rotation, a shift and an activation function.',
-  abstractLabel:'A first-person view of a sheet of graph paper folding up into walls as the activation is applied.',
+  abstractLabel:'A follow-camera view of your marker on a sheet folding into walls, with an overhead output map.',
   dream:{title:'You are a point inside the disc.',text:[
     'You are one point of the inner disc, standing on a sheet of graph paper that is about to pass through one layer of a network.',
     'Around you the grid runs to the horizon, and the points of the outer ring stand in a wide circle like a crowd. First the sheet turns and slides beneath your feet. Then the activation arrives: everything with a coordinate below zero lifts off the floor and folds up into walls, pressed flat against the axes.',
@@ -22,7 +22,7 @@ Maths.scene({
     ${buttons(button('fold-play','Play the layer','Let the layer happen'))}
     <div class="ab-only"><p class="maths-subhead">Walk</p>${buttons(button('fold-left','↺ Turn left'),button('fold-fwd','↑ Step forward'),button('fold-back','↓ Step back'),button('fold-right','Turn right ↻'))}</div>`,
   init(k){
-    const {$,clamp,lerp,stroke,dot,persp,pline,pdot,heading}=k;
+    const {$,clamp,lerp,stroke,dot,label,persp,pline,pdot,heading}=k;
     const r=k.rng(5),pts=[];
     for(let i=0;i<70;i++){const a=r()*Math.PI*2,rad=Math.sqrt(r())*.8;pts.push([rad*Math.cos(a),rad*Math.sin(a),0]);}
     for(let i=0;i<70;i++){const a=r()*Math.PI*2,rad=1.25+r()*.5;pts.push([rad*Math.cos(a),rad*Math.sin(a),1]);}
@@ -60,7 +60,11 @@ Maths.scene({
     const big=(x,y,p)=>lift(x,y,p).map(c=>c*2.2);
     function paintAbstract(s){
       const {ctx}=s,p=params(),you=big(me[0],me[1],p),fold=clamp(p.t-1,0,1),ac=k.world.accent,se=k.world.secondary;
-      const P=persp(s,[you[0],you[1]+.45,you[2]],heading(look.yaw,look.pitch),[0,1,0],1.25);
+      // Follow just behind the player so a collapsed patch cannot swallow the camera.
+      const forward=heading(look.yaw),eye=[you[0]-forward[0]*3,you[1]+1.6,you[2]-forward[2]*3];
+      const P=persp(s,eye,heading(look.yaw,look.pitch-.25),[0,1,0],1.25);
+      const player=k.beacon(ctx,P,[you[0],you[1]+.15,you[2]],se,.3,1);
+      if(player)label(ctx,'YOU',player[0],player[1]-18,1,'center');
       // The membrane itself: low-alpha tiles laid over the same mapped sheet.
       for(let ix=0;ix<12;ix++)for(let iy=0;iy<12;iy++){
         const x=-3+ix*.5,y=-3+iy*.5,inner=Math.hypot(x+.25,y+.25)<1.1;
@@ -102,6 +106,16 @@ Maths.scene({
         if(ring)k.tint(ctx,se,()=>pdot(ctx,P,[q[0],q[1]+.08,q[2]],.07,.95,true,10));
         else k.beacon(ctx,P,[q[0],q[1]+.08,q[2]],ac,.045,.9);
       }
+      // A fixed overhead instrument keeps the fold legible even when looking
+      // away from the finite sheet. Positions are the actual mapped outputs.
+      const size=Math.min(170,s.w*.3),left=s.w-size-18,top=s.h-size-180;
+      ctx.fillStyle='#080d16e8';ctx.fillRect(left,top,size,size);
+      label(ctx,size<140?'OUTPUT':'OUTPUT · overhead',left+10,top+16,.85);
+      const mini=(x,y)=>[left+size/2+x*size/9,top+size/2-y*size/9];
+      for(const [x,y,ring] of pts){const q=mini(...map(x,y,p));dot(ctx,...q,2,.55,!!ring);}
+      const q=mini(...map(me[0],me[1],p));
+      k.tint(ctx,se,()=>{dot(ctx,...q,6,1,true);label(ctx,'you',q[0]+9,q[1],1);});
+      label(ctx,`height ${lift(me[0],me[1],p)[1].toFixed(2)}`,left+10,top+size-10,.9);
     }
 
     function update(){
@@ -112,6 +126,7 @@ Maths.scene({
       if(!play.playing)k.setText($('fold-play'),folded?'Rewind':'Play the layer',folded?'Unfold the world':'Let the layer happen');
       if(s.abstract){
         const you=lift(me[0],me[1],p),lifted=pts.filter(([x,y])=>lift(x,y,p)[1]>.02).length;
+        k.challenge({t:p.t,height:you[1]});
         k.readout(`${p.t<.005?'the layer has not started':p.t<=1?'the sheet is turning and sliding':`${names[key]} is folding the world`} · ${you[1]>.02?`you have been carried ${you[1].toFixed(2)} up a wall`:'you are still on the floor'} · ${lifted} of the ${pts.length} points have left the floor`);
       }else{
         const below=pts.filter(([x,y])=>{const [X,Y]=linear(x,y,p);return X<0||Y<0;}).length;

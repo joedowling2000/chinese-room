@@ -121,6 +121,7 @@ Maths.scene({
       k.setText($('gd-run'),run.playing?'Pause':'Run',run.playing?'Stop':'Walk downhill');
       const loss=Math.max(0,f(...ball)-lo),global=loss<.02,[gx,gz]=grad(...ball);
       if(s.abstract){
+        k.challenge({loss,slope:Math.hypot(gx,gz),steps});
         const text={ready:'you are standing still; take a step',running:'walking downhill',
           settled:global?'the ground is flat in every direction. This is the deepest hollow on the map, though you cannot know that':'the ground is flat in every direction, but this is not the lowest point. Try more momentum, or wake somewhere else',
           diverged:'your stride was too long: you leapt clean off the edge of the map',stopped:'still walking after 500 steps; lengthen your stride'}[status];
