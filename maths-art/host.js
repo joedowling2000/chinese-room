@@ -279,6 +279,7 @@ const Interiors = (() => {
     };
     let inst;
     try { inst = p.create(k); } catch (e) { console.error(e); inst = { frame() {} }; }
+    root._piece = inst; // handy for inspection in devtools
 
     function resize() {
       const r = root.getBoundingClientRect();
