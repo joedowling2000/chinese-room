@@ -42,13 +42,14 @@ const Maths = (() => {
   const scenes = [];
   const scene = def => { scenes.push(def); };
   const worldOf = def => MathsJourney.worlds[def.id];
+  const enhanced = def => !!def.learn;
 
   function overlay(t){
     const w=worldOf(t),i=scenes.indexOf(t),n=scenes.length,no=String(i+1).padStart(2,'0'),tot=String(n).padStart(2,'0');
     const d=w.dpad,db=(dir)=>{const e=d[dir];return e?`<button type="button" class="mt-dir mt-${dir}" data-key="${e[0]}" aria-label="${e[1]}"><span aria-hidden="true">${{up:'↑',down:'↓',left:'←',right:'→'}[dir]}</span><small>${e[1]}</small></button>`:'<span class="mt-gap"></span>';};
     return `<div class="maths-ovl">
   <header class="maths-topline">
-    <div class="maths-ident"><p class="maths-kicker">The maths · ${no} — ${tot}</p><h3 class="maths-worldname">${t.short}</h3><p class="maths-sub">${w.name}</p></div>
+    <div class="maths-ident"><p class="maths-kicker">The maths · ${no} — ${tot}</p><h3 class="maths-worldname">${t.short}</h3><p class="maths-sub">${w.name}${Experiences.badges(t.id)}</p></div>
     <div class="maths-topbtns">
       <span class="maths-modegrp" role="group" aria-label="View mode"><button type="button" class="maths-topbtn maths-mode-ab" aria-pressed="true">First-person</button><button type="button" class="maths-topbtn maths-mode-flat" aria-pressed="false">Diagram</button></span>
       <button type="button" class="maths-topbtn maths-pause" aria-pressed="false">Pause motion</button>
@@ -63,6 +64,7 @@ const Maths = (() => {
     <p class="maths-kicker g-eyebrow"></p>
     <h4 class="g-title"></h4>
     <p class="g-text"></p>
+    <p class="g-prompt" hidden></p>
     <h5 class="g-context-heading">In a language model</h5>
     <p class="g-llm"></p>
     <details class="g-details"><summary>Legend &amp; notes</summary>
@@ -102,8 +104,10 @@ const Maths = (() => {
   }
 
   function topic(t){
-    return `<section class="maths-topic" id="maths-${t.id}" aria-labelledby="maths-${t.id}-title">
-  <div class="maths-copy"><p class="eyebrow">${t.no} / ${t.tag}</p><h2 id="maths-${t.id}-title">${t.title}</h2>${t.body.map(p=>`<p>${p}</p>`).join('')}<div class="maths-llm"><p class="maths-why-label">In a language model</p><p>${t.llm.where}</p><p>${t.llm.role}</p></div><p class="maths-formula">${t.formula}</p>${t.sources&&t.sources.length?`<p class="maths-sources">${t.sources.map(l=>`<a class="text-link" href="${l.href}" target="_blank" rel="noopener">${l.label} ↗</a>`).join(' · ')}</p>`:''}</div>
+    const learn=enhanced(t);
+    return `<section class="maths-topic${learn?' has-learning':''}" id="maths-${t.id}" aria-labelledby="maths-${t.id}-title">
+  <div class="maths-copy"><p class="eyebrow">${t.no} / ${t.tag}</p>${Experiences.badges(t.id)}<h2 id="maths-${t.id}-title">${t.title}</h2><p class="exp-card-outcome">Goal: ${Experiences.outcome(t.id)}</p>${t.body.map(p=>`<p>${p}</p>`).join('')}<div class="maths-llm"><p class="maths-why-label">In a language model</p><p>${t.llm.where}</p><p>${t.llm.role}</p></div><p class="maths-formula">${t.formula}</p>${t.sources&&t.sources.length?`<p class="maths-sources">${t.sources.map(l=>`<a class="text-link" href="${l.href}" target="_blank" rel="noopener">${l.label} ↗</a>`).join(' · ')}</p>`:''}</div>
+  ${learn?`<div class="maths-learning" id="learn-${t.id}">${Experiences.teachingMarkup(t.id)}</div>`:''}
   <figure class="maths-figure"><div class="maths-stagewrap"><canvas id="mx-${t.id}" class="${t.mode==='2d'?'is-2d':''}" tabindex="0" role="img" aria-label="${t.label}"></canvas><div class="maths-stagebtns"><button type="button" class="maths-full-open" aria-label="Open ${t.short} full screen"><span aria-hidden="true">⤢</span> Full screen</button><button type="button" class="maths-enter" aria-label="Step inside ${t.short}">Step inside →</button></div></div><figcaption>${swap(t.caption,t.abstractCaption)}</figcaption></figure>
   <div class="maths-fullbar"><div class="maths-fulltitle"><p class="eyebrow">${t.no} / ${t.tag}</p><p>${t.short}</p></div><div class="maths-buttons"><button type="button" class="maths-btn maths-abstract-toggle" aria-pressed="false">First-person</button><button type="button" class="maths-btn maths-hide-ui" aria-pressed="false">Hide panels</button><button type="button" class="maths-btn maths-full-close">Exit full screen <span aria-hidden="true">✕</span></button></div></div>
   <div class="maths-dream"><p class="eyebrow">First-person / ${t.no}</p><h3>${t.dream.title}</h3>${t.dream.text.map(p=>`<p>${p}</p>`).join('')}</div>
@@ -153,7 +157,7 @@ const Maths = (() => {
     <p class="maths-hero-note">Interactive worlds · no installation · keyboard &amp; touch</p>
   </div>
 </section>
-<nav class="maths-index" id="maths-index" aria-label="Topics">${scenes.map(t=>`<a href="#maths/${t.id}" data-scroll-target="maths-${t.id}"><span>${t.no}</span>${t.short}</a>`).join('')}</nav>
+${Experiences.directory()}
 ${pipeline()}
 <div class="maths-topics">${scenes.map(topic).join('')}</div>
 <section class="section-dark maths-outro">
@@ -374,7 +378,7 @@ ${pipeline()}
   const inertOff = saved => saved&&saved.forEach(([el,v])=>{el.inert=v;});
 
   function focusables(sec){
-    return [...sec.querySelectorAll('canvas,button,input,select,a[href],[tabindex]')]
+    return [...sec.querySelectorAll('canvas,button,input,select,a[href],summary,[tabindex]')]
       .filter(el=>!el.disabled&&!el.hidden&&el.offsetParent!==null&&el.tabIndex>=0);
   }
 
@@ -386,7 +390,7 @@ ${pipeline()}
     pb.textContent=paused?'Resume motion':'Pause motion';
     pb.setAttribute('aria-pressed',String(paused));
     const dt=sec.querySelector('.maths-drawer-toggle');
-    dt.setAttribute('aria-expanded',String(sec.classList.contains('drawer-open')));
+    dt.setAttribute('aria-expanded',String(enhanced(def)?!sec.querySelector('.maths-learning')?.classList.contains('controls-collapsed'):sec.classList.contains('drawer-open')));
     const gt=sec.querySelector('.maths-guide-toggle');
     gt.setAttribute('aria-expanded',String(!sec.classList.contains('guide-off')));
     const rv=sec.querySelector('.maths-reveal');
@@ -402,16 +406,28 @@ ${pipeline()}
     const gl=sec.querySelector('.g-llm');
     gl.textContent=L.llm||def.llm.where;
     gl.style.borderColor=worldOf(def).accent;
+    const gp=sec.querySelector('.g-prompt');
+    if(gp){gp.textContent=L.prompt||'';gp.hidden=!L.prompt;}
     const tryB=sec.querySelector('.g-try');
     tryB.textContent=(L.tryLabel?L.tryLabel+' →':'Try it →');
-    tryB.hidden=!(L.tryLabel&&(L.click||Object.keys(L.values).length));
+    tryB.hidden=!(L.tryLabel&&(L.click||Object.keys(L.values).length||def.hooks?.applyLesson));
     sec.querySelector('.g-prev').disabled=i===0;
     const isLast=i===w.lessons.length-1,hasNext=scenes.indexOf(def)<scenes.length-1;
     sec.querySelector('.g-next').textContent=isLast?(hasNext?'Next world →':'Finish journey'):'Next →';
     sec.querySelectorAll('.g-steps i').forEach((el,j)=>el.classList.toggle('on',j<=i));
+    def.hooks.onLesson?.(i);
+  }
+
+  function setGuided(sec,on){
+    sec.classList.toggle('guide-off',!on);
+    sec.querySelectorAll('.learn-guided,.learn-explore').forEach(b=>b.setAttribute('aria-pressed',String(b.classList.contains('learn-guided')===on)));
+    const gt=sec.querySelector('.maths-guide-toggle');
+    if(gt)gt.setAttribute('aria-expanded',String(on));
   }
   function applyLesson(def){
-    const L=worldOf(def).lessons[def.lesson||0];
+    const i=def.lesson||0;
+    if(def.hooks.applyLesson){def.hooks.applyLesson(i);return;}
+    const L=worldOf(def).lessons[i];
     for(const [id,v] of Object.entries(L.values||{})){
       const el=$(id);if(!el)continue;
       el.value=v;
@@ -436,10 +452,12 @@ ${pipeline()}
     sec.setAttribute('aria-modal','true');
     sec.setAttribute('aria-label',worldOf(def).name);
     document.documentElement.classList.add('maths-locked');
-    def.lesson=0;renderGuide(def);
+    if(!enhanced(def))def.lesson=0;
+    renderGuide(def);
     // Abstract: canvas first, prose hidden; diagram: controls drawer open.
-    sec.classList.toggle('drawer-open',!abstract);
-    sec.classList.toggle('guide-off',matchMedia('(max-width:760px)').matches);
+    // Enhanced scenes keep their controls in the teaching dock instead.
+    if(!enhanced(def))sec.classList.toggle('drawer-open',!abstract);
+    sec.classList.toggle('guide-off',!enhanced(def)&&matchMedia('(max-width:760px)').matches);
     sec.classList.remove('hide-ui');
     setAbstract(def,abstract);
     syncTop(def);
@@ -450,6 +468,7 @@ ${pipeline()}
     const sec=section(def);
     if(active===def){active=null;ambientStop();}
     clearHeld();
+    def.hooks?.onDeactivate?.();
     if(def.s?.abstract)setAbstract(def,false);
     def.s&&(def.s.paused=false);
     // Nothing may keep animating off screen.
@@ -486,6 +505,7 @@ ${pipeline()}
   function setAbstract(def,on){
     const sec=section(def),s=def.s;
     clearHeld();
+    def.hooks?.onPause?.();
     if(!on)s.players.forEach(p=>p.stop());
     sec.classList.toggle('is-abstract',on);
     sec.querySelector('.maths-abstract-toggle').setAttribute('aria-pressed',String(on));
@@ -524,7 +544,7 @@ ${pipeline()}
     if(e.repeat){if(HELD.has(key))e.preventDefault();return;}
     if(HELD.has(key)&&dispatchKey(active,key)){
       e.preventDefault();
-      if(!held.has(key))held.set(key,setInterval(()=>dispatchKey(active,key),110));
+      if(!held.has(key)&&active.hooks.repeatKeys!==false)held.set(key,setInterval(()=>dispatchKey(active,key),110));
       return;
     }
     if(dispatchKey(active,key))e.preventDefault();
@@ -577,10 +597,26 @@ ${pipeline()}
     if(!on)return;
     const controller=new AbortController(),{signal}=controller;
     disposers.push(()=>{if(active)closeFull(active);},()=>{ambientStop();clearHeld();},()=>controller.abort());
+    Experiences.wireDirectory($('maths-index'),signal);
     scenes.forEach(def=>{
       const sec=section(def);
+      if(enhanced(def)){
+        // The existing guide and controls move into the teaching dock's slots.
+        const learn=sec.querySelector('.maths-learning');
+        const guide=sec.querySelector('.maths-guide'),panel=sec.querySelector('.maths-panel');
+        if(guide)learn.querySelector('.learn-guide-slot').appendChild(guide);
+        if(panel)learn.querySelector('.learn-controls-slot').appendChild(panel);
+        sec.querySelector('.maths-guide-toggle').textContent='Lessons';
+        const ret=sec.querySelector('.maths-reticle');
+        if(ret)sec.querySelector('.maths-stagewrap').appendChild(ret);
+        const topline=sec.querySelector('.maths-topline');
+        const ro=new ResizeObserver(()=>sec.style.setProperty('--learn-header',`${topline.offsetHeight+8}px`));
+        ro.observe(topline);
+        signal.addEventListener('abort',()=>ro.disconnect(),{once:true});
+      }
       def.hooks=def.init(kit(def,signal))||{};
       def.lesson=0;
+      if(enhanced(def))renderGuide(def);
       // The long-form story lives inside the guide's "About this world".
       const dream=sec.querySelector('.maths-dream'),slot=sec.querySelector('.g-dream');
       if(dream&&slot)slot.appendChild(dream);
@@ -591,17 +627,22 @@ ${pipeline()}
       sec.querySelector('.maths-exit').addEventListener('click',()=>closeFull(def),{signal});
       sec.querySelector('.maths-abstract-toggle').addEventListener('click',()=>{setAbstract(def,!def.s.abstract);syncTop(def);},{signal});
       sec.querySelector('.maths-mode-ab').addEventListener('click',()=>{if(!def.s.abstract){setAbstract(def,true);sec.classList.remove('drawer-open');syncTop(def);def.s.canvas.focus({preventScroll:true});}},{signal});
-      sec.querySelector('.maths-mode-flat').addEventListener('click',()=>{if(def.s.abstract){setAbstract(def,false);sec.classList.add('drawer-open');syncTop(def);}},{signal});
+      sec.querySelector('.maths-mode-flat').addEventListener('click',()=>{if(def.s.abstract){setAbstract(def,false);if(!enhanced(def))sec.classList.add('drawer-open');syncTop(def);}},{signal});
       sec.querySelector('.maths-hide-ui').addEventListener('click',e=>{sec.classList.toggle('hide-ui');e.currentTarget.setAttribute('aria-pressed',String(sec.classList.contains('hide-ui')));},{signal});
       sec.querySelector('.maths-clear').addEventListener('click',e=>{sec.classList.toggle('hide-ui');e.currentTarget.setAttribute('aria-pressed',String(sec.classList.contains('hide-ui')));syncTop(def);},{signal});
       sec.querySelector('.maths-reveal').addEventListener('click',()=>{sec.classList.remove('hide-ui');sec.querySelector('.maths-clear').setAttribute('aria-pressed','false');sec.querySelector('.maths-hide-ui').setAttribute('aria-pressed','false');syncTop(def);},{signal});
       sec.querySelector('.maths-pause').addEventListener('click',()=>{
         paused=!paused;
+        if(paused)def.hooks?.onPause?.();
         if(!paused)kickAll();
         syncTop(def);def.s.draw();ambientSync();
       },{signal});
-      sec.querySelector('.maths-drawer-toggle').addEventListener('click',()=>{sec.classList.toggle('drawer-open');syncTop(def);},{signal});
-      sec.querySelector('.maths-guide-toggle').addEventListener('click',()=>{sec.classList.toggle('guide-off');syncTop(def);},{signal});
+      sec.querySelector('.maths-drawer-toggle').addEventListener('click',()=>{
+        if(enhanced(def))sec.querySelector('.maths-learning')?.classList.toggle('controls-collapsed');
+        else sec.classList.toggle('drawer-open');
+        syncTop(def);
+      },{signal});
+      sec.querySelector('.maths-guide-toggle').addEventListener('click',()=>{setGuided(sec,sec.classList.contains('guide-off'));syncTop(def);},{signal});
       sec.querySelector('.g-try').addEventListener('click',()=>applyLesson(def),{signal});
       sec.querySelector('.g-prev').addEventListener('click',()=>{def.lesson=Math.max(0,(def.lesson||0)-1);renderGuide(def);},{signal});
       sec.querySelector('.g-next').addEventListener('click',()=>{
@@ -631,7 +672,7 @@ ${pipeline()}
     window.addEventListener('blur',clearHeld,{signal});
     document.addEventListener('visibilitychange',()=>{
       clearHeld();
-      if(document.hidden){ambientStop();}
+      if(document.hidden){active?.hooks?.onPause?.();ambientStop();}
       else{ambientLast=0;ambientSync();kickAll();}
     },{signal});
   }

@@ -1,0 +1,111 @@
+/* ---------- Experience directory ---------- */
+.maths-index{display:block;padding:56px 7vw 8px;max-width:1440px;margin:0 auto}
+.maths-index-head{max-width:720px}
+.maths-index-head h2{margin:0 0 12px;font:500 clamp(28px,3.4vw,40px)/1.1 var(--sans);letter-spacing:-.03em}
+.maths-index-head p{color:var(--muted);font:400 15px/1.65 var(--sans)}
+.exp-filters{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 8px}
+.exp-filter[aria-pressed="true"]{background:#fff;border-color:#fff;color:#111}
+.exp-filter-note{margin:0;color:var(--dim);font:400 12px var(--sans)}
+.exp-dir{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;margin-top:24px}
+.exp-card{display:flex;flex-direction:column;gap:10px;padding:18px;border:1px solid var(--line);border-radius:16px;background:#0b0c0d;text-decoration:none;color:var(--text)}
+.exp-card:hover{border-color:var(--muted)}
+.exp-card.is-hidden{display:none}
+.exp-card-top b{font:500 15px var(--sans)}
+.exp-card-outcome{color:var(--muted);font:400 12.5px/1.5 var(--sans)}
+.exp-card-go{margin-top:auto;color:var(--quiet);font:500 11px var(--sans);letter-spacing:.06em;text-transform:uppercase}
+.exp-badges{display:flex;flex-wrap:wrap;gap:6px}
+.exp-badge{padding:3px 8px;border:1px solid var(--line2);border-radius:999px;color:var(--muted);font:500 10px var(--sans);letter-spacing:.06em;text-transform:uppercase}
+.exp-badge-kind{border-style:dashed;color:var(--dim)}
+.maths-copy .exp-badges{margin:0 0 16px}
+.maths-sub .exp-badges{margin-top:6px}
+.lab-purpose{display:flex;flex-direction:column;gap:8px;margin:14px 0}
+.lab-purpose p{margin:0;color:var(--muted);font:400 13px/1.55 var(--sans)}
+
+/* ---------- Teaching panel (enhanced scenes) ---------- */
+.maths-learning{display:flex;flex-direction:column;gap:14px;grid-column:1/-1;margin-top:28px;padding:18px 20px;border:1px solid var(--line);border-radius:18px;background:#0b0c0d}
+.learn-head{display:flex;flex-direction:column;gap:8px}
+.learn-strip{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none;counter-reset:stage}
+.learn-strip li{display:flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--line2);border-radius:999px;color:var(--dim);font:500 10.5px var(--sans);letter-spacing:.08em;text-transform:uppercase}
+.learn-strip li::before{counter-increment:stage;content:counter(stage);color:var(--quiet);font:400 10px var(--mono)}
+.learn-strip li.on{border-color:#f5f5f5;color:var(--text)}
+.learn-note{margin:0;color:var(--dim);font:400 11.5px var(--sans)}
+.learn-outcome{margin:0;color:var(--body);font:400 13.5px/1.55 var(--sans)}
+.learn-outcome b{color:var(--text)}
+.learn-orient details,.learn-orient{border:1px solid var(--line);border-radius:12px}
+.learn-orient>summary{padding:10px 14px;color:var(--quiet);font:500 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+.learn-dl{margin:0;padding:0 14px 12px;display:grid;gap:8px}
+.learn-dl dt{color:var(--quiet);font:500 10px var(--sans);letter-spacing:.1em;text-transform:uppercase}
+.learn-dl dd{margin:2px 0 0;color:var(--muted);font:400 12.5px/1.5 var(--sans)}
+.learn-mode{display:flex;gap:8px}
+.learn-mode .maths-btn[aria-pressed="true"]{background:#f5f5f5;color:#111}
+.learn-feedback-bar{position:sticky;top:-1px;z-index:7;margin:-6px -4px;padding:8px 4px 10px;background:#0b0c0d;border-bottom:1px solid var(--line)}
+.learn-actions{display:flex;flex-wrap:wrap;gap:8px}
+.learn-actions .maths-btn{min-height:40px}
+.learn-preview{margin:0;padding:8px 12px;border:1px dashed var(--line2);border-radius:10px;color:var(--muted);font:400 11.5px var(--sans)}
+.learn-notice{margin:0;min-height:1em;color:var(--dim);font:400 11.5px var(--sans)}
+.learn-compare-details{border-top:1px solid var(--line);padding:8px 0 2px}
+.learn-compare-details>summary{color:var(--quiet);font:500 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+.maths-learning .article-table-wrap{margin:0}
+.maths-learning>*{flex-shrink:0}
+.learn-why{margin-top:10px}
+.learn-last-h{margin:0;color:var(--quiet);font:500 11px var(--sans);letter-spacing:.12em;text-transform:uppercase}
+.learn-summary{margin:0;color:var(--body);font:400 13.5px/1.55 var(--sans)}
+.learn-table{width:100%;border-collapse:collapse;font:400 12px/1.5 var(--mono)}
+.learn-table th,.learn-table td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.learn-table thead th{color:var(--quiet);font:500 10px var(--sans);letter-spacing:.1em;text-transform:uppercase}
+.learn-table tbody th{color:var(--muted);font:500 11px var(--sans)}
+.learn-table td{color:var(--body)}
+.learn-table tr.is-selected th,.learn-table tr.is-selected td{background:#f5f5f510}
+.learn-why>summary,.learn-history>summary,.learn-check>summary{color:var(--quiet);font:500 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+.learn-why,.learn-history,.learn-check{border-top:1px solid var(--line);padding:8px 0 2px}
+.learn-explain{margin:10px 0;color:var(--muted);font:400 12.5px/1.6 var(--sans)}
+.learn-calc .learn-table{margin-top:6px}
+.learn-histlist{margin:10px 0 4px;padding-left:18px;display:grid;gap:6px}
+.learn-histlist li{color:var(--muted);font:400 12px/1.5 var(--sans)}
+.learn-histlist b{display:block;color:var(--body);font:500 12px var(--sans)}
+.learn-check-q{margin:10px 0;color:var(--body);font:400 13px/1.55 var(--sans)}
+.learn-check-opts{display:flex;flex-wrap:wrap;gap:8px}
+.learn-check-opts .maths-btn{min-height:40px;white-space:normal;text-align:left}
+.learn-check-r{margin:8px 0 4px;color:var(--muted);font:400 12.5px/1.55 var(--sans)}
+.learn-live{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.learn-slot-heading{margin:0 0 8px;color:var(--quiet);font:500 10px var(--sans);letter-spacing:.12em;text-transform:uppercase}
+
+/* Enhanced scenes: moved panels take normal flow inside the dock. */
+.has-learning .maths-guide{position:static;z-index:auto;left:auto;right:auto;bottom:auto;top:auto;width:auto;max-height:none;overflow:visible;padding:0;border:0;background:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.has-learning .maths-guide .g-footer{position:static;margin:12px 0 0;padding:10px 0 0;border-radius:0}
+.has-learning .learn-controls-slot .maths-panel{display:grid;position:static;inset:auto;width:auto;max-height:none;margin:0;padding:0;border:0;background:none;overflow:visible;backdrop-filter:none;-webkit-backdrop-filter:none}
+.is-full.has-learning .learn-controls-slot .maths-panel{display:grid;position:static;inset:auto;width:auto;max-height:none;margin:0;padding:0;border:0;background:none;overflow:visible;backdrop-filter:none;-webkit-backdrop-filter:none}
+.is-full.has-learning .learn-guide-slot .maths-guide{display:block}
+.is-full.has-learning:not(.is-abstract) .learn-guide-slot .maths-guide{display:block}
+.is-full.has-learning:not(.is-abstract) .maths-reticle{display:none}
+.maths-learning.controls-collapsed .learn-controls-slot{display:none}
+.has-learning.guide-off .learn-guide-slot .maths-guide{display:none}
+.is-full.has-learning.guide-off:not(.is-abstract) .learn-guide-slot .maths-guide{display:none}
+.g-prompt{margin:0 0 10px;padding:8px 10px;border-left:2px solid var(--line2);color:var(--body);font:400 12px/1.5 var(--sans);font-style:italic}
+
+/* Fullscreen dock for enhanced scenes. */
+.is-full.has-learning .maths-learning{display:flex}
+.is-full.has-learning .maths-ribbon,.is-full.has-learning .maths-transport{display:none}
+.is-full.hide-ui .maths-learning{display:none}
+
+/* The figure carries inherited width/height:100%; override with explicit
+   insets so the dock is real screen space, not an overlay on the canvas. */
+.is-full.has-learning .maths-topline{padding:12px 14px;background:#08090a;z-index:7}
+.is-full.has-learning .maths-figure{width:auto;height:auto}
+.has-learning .maths-stagewrap{position:relative}
+.is-full.has-learning:not(.hide-ui) .maths-figure{inset:var(--learn-header,86px) min(420px,42vw) 56px 0}
+.is-full.has-learning.hide-ui .maths-figure{inset:var(--learn-header,86px) 0 56px 0}
+.has-learning .maths-reticle{position:absolute;left:50%;top:50%}
+@media(min-width:1000px){
+  .is-full.has-learning .maths-learning{position:absolute;top:calc(var(--learn-header,86px) + 4px);right:14px;bottom:64px;width:calc(min(420px,42vw) - 28px);margin:0;overflow-y:auto;z-index:6}
+}
+@media(max-width:999px){
+  .is-full.has-learning:not(.hide-ui) .maths-figure{inset:var(--learn-header,86px) 0 calc(48dvh + 56px) 0}
+  .is-full.has-learning .maths-learning{position:absolute;left:10px;right:10px;bottom:56px;height:48dvh;margin:0;overflow-y:auto;z-index:6;padding:12px 14px}
+}
+@media(max-width:760px){
+  .maths-index{padding:40px 20px 8px}
+  .exp-dir{grid-template-columns:1fr}
+  .learn-actions .maths-btn{flex:1 1 44%}
+}

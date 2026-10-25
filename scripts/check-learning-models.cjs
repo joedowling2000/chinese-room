@@ -1,0 +1,15 @@
+const assert=require('node:assert/strict');
+const M=require('../maths/learning-models.js');
+const near=(a,b,e=1e-10)=>assert.ok(Math.abs(a-b)<e,`${a} != ${b}`);
+const keys=[[1,0],[0,1],[-1,0],[0,-1]];
+let a=M.attention([0,0],1,keys);a.weights.forEach(w=>near(w,.25));near(a.output[0],0);near(a.entropy,2);
+a=M.attention([1,0],1,keys);near(a.weights.reduce((x,y)=>x+y,0),1);near(a.output[0],(Math.exp(1)-Math.exp(-1))/(Math.exp(1)+Math.exp(-1)+2));
+const b=M.attention([1,0],.2,keys);assert.ok(b.entropy<a.entropy);assert.deepEqual(b.scores,a.scores);
+const p=[1.2,-.8],eps=1e-6,g=M.gradient(...p);
+near(g[0],(M.loss(p[0]+eps,p[1])-M.loss(p[0]-eps,p[1]))/(2*eps),1e-8);
+near(g[1],(M.loss(p[0],p[1]+eps)-M.loss(p[0],p[1]-eps))/(2*eps),1e-8);
+const base={point:[2.1,-1.9],velocity:[0,0],lr:.15,mu:0,steps:0};const frozen=JSON.stringify(base),r=M.descentStep(base);assert.equal(JSON.stringify(base),frozen);r.next.point.forEach((v,i)=>near(v,base.point[i]-.15*M.gradient(...base.point)[i]));assert.ok(r.deltaLoss<0);
+const second=M.descentStep({...r.next,mu:.7});second.momentum.forEach((v,i)=>near(v,.7*r.next.velocity[i]));
+const over=M.descentStep({point:[2.5,2.5],velocity:[2,2],lr:.02,mu:.95,steps:2});assert.equal(over.outside,true);assert.equal(over.next.status,'diverged');assert.deepEqual(over.next.point,[2.6,2.6]);
+const overshoot=M.descentStep({point:[-0.9332152662979467,-0.4992343106497743],velocity:[-1.4481552637927455,0.47141191031765994],lr:1.5,mu:.7,steps:2});near(overshoot.deltaLoss,.308514660305492);assert.equal(overshoot.outside,false);
+console.log('Learning model checks passed.');
