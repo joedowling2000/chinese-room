@@ -218,7 +218,8 @@ const Interiors = (() => {
     let w = 0, h = 0, dpr = 1, raf = 0, alive = true, idleTimer = 0, last = performance.now(), t = 0;
     let gl = null, ctx = null;
     if (p.webgl) {
-      gl = base.getContext('webgl', { antialias: true, premultipliedAlpha: false, preserveDrawingBuffer: false });
+      const opts = { antialias: true, premultipliedAlpha: false, preserveDrawingBuffer: false };
+      gl = base.getContext('webgl2', opts) || (p.webgl === 'any' ? base.getContext('webgl', opts) : null);
       if (!gl) ctx = base.getContext('2d');
     } else ctx = base.getContext('2d');
     const octx = over.getContext('2d');
