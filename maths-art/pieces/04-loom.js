@@ -296,7 +296,7 @@
 
     poster(ctx, w, h, t) {
       const toks = SENTENCES.tired.toks, L = layout(toks.length, w, h);
-      L.R = Math.min(w, h) * 0.4; L.cy = h * 0.46;
+      L.R = Math.min(w * 0.34, h * 0.44); L.cy = h * 0.56;
       L.pins.forEach(p => { p.x = L.cx + L.R * Math.cos(p.a); p.y = L.cy + L.R * Math.sin(p.a); });
       background(ctx, w, h, L);
       weave(ctx, toks, L, HEADS, 0.8 + 0.4 * Math.sin(t * 0.5), t, 1.3);

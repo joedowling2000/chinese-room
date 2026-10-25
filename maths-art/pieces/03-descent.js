@@ -270,7 +270,7 @@
       const st = this._poster ||= { surf: makeSurface(3), seeds: [], key: '', img: null };
       const key = `${w}x${h}`;
       if (st.key !== key) {
-        st.key = key; st.cam = camera(w, h, st.surf);
+        st.key = key; st.cam = camera(w, h * 0.78, st.surf);
         st.img = document.createElement('canvas'); st.img.width = w * 2; st.img.height = h * 2;
         const c = st.img.getContext('2d'); c.scale(2, 2); paintTerrain(c, w, h, st.surf, st.cam, 40, 110);
       }

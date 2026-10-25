@@ -386,16 +386,22 @@ void main(){
     },
 
     poster(ctx, w, h, t) {
-      const st = this._poster ||= { net: makeNet(2, 12, 4), data: spirals(5), steps: 0, img: null, key: '' };
-      if (st.steps < 900) { for (let i = 0; i < 6; i++) trainStep(st.net, st.data, 0.015); st.steps += 6; st.img = null; }
-      const key = `${w}x${h}`;
-      if (!st.img || st.key !== key || st.steps % 60 === 0) {
-        st.key = key; st.img = document.createElement('canvas'); st.img.width = w; st.img.height = h;
-        const vs = Math.min(w / 3, h / 2.75), c = st.img.getContext('2d'), view = { cx: w / 2, cy: h * 0.5 + 0.2 * vs, s: vs };
-        c.fillStyle = '#060608'; c.fillRect(0, 0, w, h);
-        paintCPU(c, w, h, st.net, view, 3);
+      const st = this._poster ||= { net: makeNet(2, 12, 4), data: spirals(5), steps: 0 };
+      if (st.steps < 900) { for (let i = 0; i < 6; i++) trainStep(st.net, st.data, 0.015); st.steps += 6; }
+      const vs = Math.min(w / 3, h / 3.4), view = { cx: w / 2, cy: h * 0.46 + 0.2 * vs, s: vs, w, h, dpr: 2 };
+      if (st.gl === undefined) {
+        st.canvas = document.createElement('canvas');
+        const gl = st.canvas.getContext('webgl2', { premultipliedAlpha: false, preserveDrawingBuffer: true });
+        try { st.gl = gl; st.render = gl ? makeGL(gl) : null; } catch { st.render = null; }
       }
-      ctx.drawImage(st.img, 0, 0, w, h);
+      if (st.render) {
+        if (st.canvas.width !== w * 2 || st.canvas.height !== h * 2) { st.canvas.width = w * 2; st.canvas.height = h * 2; st.gl.viewport(0, 0, w * 2, h * 2); }
+        st.render(st.net, view, t);
+        ctx.drawImage(st.canvas, 0, 0, w, h);
+      } else {
+        ctx.fillStyle = '#060608'; ctx.fillRect(0, 0, w, h);
+        paintCPU(ctx, w, h, st.net, view, 3);
+      }
     }
   });
 })();
