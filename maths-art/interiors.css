@@ -57,7 +57,10 @@ body.ir-playing main{min-height:100dvh}
 .ir-guide{border-left:1px solid var(--ir-accent);padding:2px 0 2px 14px}
 .ir-prompt{font:13px/1.55 var(--mono);color:#f2f4f6;margin:0;text-shadow:0 1px 10px #000}
 .ir-prompt span{color:var(--ir-accent);margin-right:4px}
-.ir-insight{font:15px/1.55 var(--sans);color:var(--ir-accent);margin:0 0 10px;text-shadow:0 1px 12px #000;max-width:52ch}
+.ir-insight{font:15px/1.55 var(--sans);color:#f3efe6;margin:0 0 10px;text-shadow:0 1px 12px #000,0 0 2px #000;max-width:52ch}
+.ir-insight::before{content:'✦ ';color:var(--ir-accent)}
+.ir-insight b{color:var(--ir-accent);font-weight:600}
+.ir-piece.ir-idle .ir-caption{opacity:.5}
 .ir-insight.ir-flash{animation:ir-flash 1.2s ease}
 @keyframes ir-flash{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .ir-dots{display:flex;gap:6px;margin-top:10px}
