@@ -300,7 +300,7 @@ void main(){
       const layout = () => {
         view.w = k.w; view.h = k.h; view.dpr = k.dpr;
         view.s = Math.min(k.w / 3.0, k.h / 3.1);
-        view.cx = k.w > 900 ? k.w * 0.58 : k.w * 0.5; view.cy = k.h * 0.5 + 0.2 * view.s;
+        view.cx = k.w > 900 ? k.w * 0.58 : k.w * 0.5; view.cy = k.h * (k.w < 760 ? 0.4 : 0.5) + 0.2 * view.s;
       };
       const toWorld = p => [(p.x - view.cx) / view.s, (view.cy - p.y) / view.s];
       const drone = k.sound.drone(146, 'triangle');

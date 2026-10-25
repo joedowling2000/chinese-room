@@ -30,19 +30,23 @@ The site includes browser-only interactive experiments and decorative mathematic
 ## The maths of AI
 
 - `http://localhost:8000/#maths` — the seven concepts and their flat diagrams.
-- `http://localhost:8000/#maths/play` — **The Field Instruments**, seven mathematical games with three authored chambers each.
-- Direct game route: `#maths/play/linear-maps` (also `folding`, `gradient-descent`, `attention`, `rotary`, `dimensions`, `ablation`).
-- Change the instrument using its handles or native controls — every range has labelled −/+ step buttons and visible bounds — inspect the live preview, then **Run trial**. **Step trial** inspects individual probes. Contour Pilot advances one or four real optimiser updates and offers per-update **Rewind here** from its update history.
-- After a trial, **Replay trial** plays the captured result back with **Pause/Resume**, and the **Measurements** panel lists probes or update frames with their real inputs, outputs and errors, plus the full configuration. **The maths** shows your actual state and links the primary reference.
-- **Undo** restores a previous configuration (first clearing an inspected trial or uncommitted preview); **Reset** restores the chamber. Hints are progressive; using a chamber's final hint marks that completion **assisted**, labelled in the chamber navigation and the catalogue. Completed chambers offer **Restore solution**, which is itself undoable.
-- Keyboard: native controls support arrows; Enter from the stage runs a trial, Z undoes, Space pauses or resumes replay, and Esc returns to the collection. Touch-only play is supported through the controls.
-- Progress and preferences are saved on this device under a versioned store when local storage is available. The collection has a progress reset with an undo option. No account or model API is used. Note: Contour Pilot now records a per-update snapshot history; saves written before that schema existed are retained verbatim in a separate local backup entry (no data loss), while the new session starts fresh. Other instruments keep compatible saved completions.
-- Motion and sound are optional. Reduced-motion preferences disable decorative animation; all calculations and completion rules remain available.
-- On another device on the same network, use this machine's current LAN IP instead of `localhost` (for example `http://192.168.1.144:8000/#maths/play`). The server must listen on the LAN interface.
+- `http://localhost:8000/#maths/play` — **Interiors**, seven interactive artworks from inside a language model. Each is a full-screen piece drawn by the mathematics it depicts:
 
-Safe local packaging without touching `dist/`: `build_root=$(mktemp -d /tmp/field-instruments-build.XXXXXX) && ./scripts/prepare-hosting.sh "$build_root/site"` — the optional output argument must be a brand-new path and is never deleted. Running the script with no argument rebuilds `dist/` destructively (unchanged default); deployment remains a separate step.
+| Route | Artwork | Concept | Interaction |
+| --- | --- | --- | --- |
+| `#maths/play/linear-maps` | Lattice | Linear maps | Drag the basis arrows î, ĵ; the whole embedding space bends |
+| `#maths/play/folding` | Stained Glass | Non-linearity (ReLU) | Draw creases; panes are linear regions; train on two spirals (WebGL2) |
+| `#maths/play/gradient-descent` | Descent | Gradient descent | Drop seeds on a ridgeline loss landscape; tune η and momentum |
+| `#maths/play/attention` | Loom | Attention | Tap a word; threads are softmax weights from four toy heads |
+| `#maths/play/rotary` | Orrery | Rotary position | Drag the sentence; position is rotation, score depends only on distance |
+| `#maths/play/dimensions` | Crowded Sky | Superposition / high dimensions | Add concepts, light stars, watch interference; random angles in 1,000-D |
+| `#maths/play/ablation` | Nullspace | Projection / ablation | Turn a blade through a cloud of activations and delete a direction |
 
-Implementation progress and remaining review work are recorded in [the live plan](docs/maths-games/PLAN.md). [Design](docs/maths-games/DESIGN.md), [research](docs/maths-games/RESEARCH.md), and [numerical witness fixtures](docs/maths-games/FIXTURES.md) are kept alongside it. The current build is a local review candidate; physical iPad and unaided user testing remain outstanding.
+- Each piece walks the viewer through 4–5 discoveries with a guiding prompt line; **The maths** (`M`) opens a live drawer with the equation, the viewer's current numbers, a plain-English walkthrough, an "inside the model" note, an honesty note about what is synthetic, and primary references. `S` toggles optional generative sound, `Space` pauses ambient motion, `Esc` exits.
+- Everything runs locally in the browser; no model or API is called. Data are small and synthetic, and each piece says so.
+- Static servers like `python3 -m http.server` let Chrome cache scripts heuristically; hard-reload after editing.
+
+Design, review and progress log: [docs/maths-games/DESIGN.md](docs/maths-games/DESIGN.md), [docs/maths-games/PLAN.md](docs/maths-games/PLAN.md), [docs/maths-games/RESEARCH.md](docs/maths-games/RESEARCH.md).
 
 ## Interactive lab
 
@@ -62,7 +66,7 @@ See [PLAN.md](PLAN.md) for the implementation status, source requirements and fo
 - `lab.js`: cube geometry, experiment pages and quantization calculations
 - `maths.js`: The Maths of AI page, flat diagram plumbing and full-screen diagrams; game launch links
 - `maths/*.js`: explanatory copy and flat illustrations; legacy Abstract renderers retained during migration
-- `maths-games/`: the new model-driven game host, seven instruments, authored chamber data and scoped stylesheet
+- `maths-art/`: Interiors — `host.js` (gallery, full-bleed frame, prompts, maths drawer, sound), `interiors.css`, and one file per artwork in `pieces/`
 - `scripts/generate-field-art.mjs`: regenerates the procedural SVG artwork in `assets/`
 - `PLAN.md`: interactive-site plan and progress
 - `assets/`: visual assets
