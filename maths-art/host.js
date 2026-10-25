@@ -163,7 +163,7 @@ const Interiors = (() => {
         <h3>Inside the model</h3>
         <div class="ir-inside">${(p.inside || []).map(t => `<p>${t}</p>`).join('')}</div>
         ${p.honest ? `<p class="ir-honest">${p.honest}</p>` : ''}
-        <p class="ir-refs">${(p.refs || []).map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener">${esc(t)} ↗</a>`).join('')}</p>
+        <p class="ir-refs">${(p.refs || []).map(([t, u]) => u.startsWith('#') ? `<a href="${u}">${esc(t)} →</a>` : `<a href="${u}" target="_blank" rel="noopener">${esc(t)} ↗</a>`).join('')}</p>
       </aside>
     </section>`;
   }
