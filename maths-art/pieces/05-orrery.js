@@ -150,8 +150,8 @@
           draw.label(octx, fmt(s), cx, cy - 4, '#fff', '500 20px "IBM Plex Mono", monospace', 'center');
           draw.label(octx, 'score', cx, cy + 16, `rgba(${BRASS},.8)`, '10px "IBM Plex Mono", monospace', 'center');
           const dist = B - A;
-          draw.label(octx, `“${WORDS[A]}” at ${Math.round(pos(A))}   ·   “${WORDS[B]}” at ${Math.round(pos(B))}   ·   distance n − m = ${dist}`, cx, rail.y + 70, 'rgba(236,230,215,.85)', '12px "IBM Plex Mono", monospace', 'center');
-          if (Math.abs(offset) > 0.5) draw.label(octx, `whole sentence shifted by ${offset > 0 ? '+' : ''}${Math.round(offset)} · score unchanged`, cx, rail.y + 90, `rgba(${EMBER},.9)`, '11px "IBM Plex Mono", monospace', 'center');
+          draw.label(octx, k.w < 600 ? `“${WORDS[B]}”→“${WORDS[A]}”  n − m = ${dist}` : `“${WORDS[A]}” at ${Math.round(pos(A))}   ·   “${WORDS[B]}” at ${Math.round(pos(B))}   ·   distance n − m = ${dist}`, cx, rail.y + 74, 'rgba(236,230,215,.85)', '12px "IBM Plex Mono", monospace', 'center');
+          if (Math.abs(offset) > 0.5) draw.label(octx, `whole sentence shifted by ${offset > 0 ? '+' : ''}${Math.round(offset)} · score unchanged`, cx, rail.y + 94, `rgba(${EMBER},.9)`, '11px "IBM Plex Mono", monospace', 'center');
 
           // the sentence rail with a tiny clock per word
           const th = thetas(K, base);
@@ -165,10 +165,11 @@
               octx.strokeStyle = sel ? `rgba(${sel},${0.9 - j * 0.08})` : `rgba(220,210,190,${0.55 - j * 0.05})`;
               octx.beginPath(); octx.moveTo(x, y); octx.lineTo(x + l * Math.cos(a), y + l * Math.sin(a)); octx.stroke();
             }
-            draw.label(octx, w, x, y + cr + 14, sel ? `rgb(${sel})` : 'rgba(236,236,236,.75)', `${sel ? 600 : 400} 13px "DM Sans", sans-serif`, 'center');
+            const tight = rail.sp < 50;
+            draw.label(octx, w, x, y + cr + 14 + (tight && i % 2 ? 14 : 0), sel ? `rgb(${sel})` : 'rgba(236,236,236,.75)', `${sel ? 600 : 400} ${tight ? 11 : 13}px "DM Sans", sans-serif`, 'center');
             draw.label(octx, String(Math.round(pos(i))), x, y - cr - 10, 'rgba(200,200,200,.45)', '10px "IBM Plex Mono", monospace', 'center');
           });
-          draw.label(octx, '← drag the sentence →', k.w / 2, rail.y + 50, 'rgba(220,210,190,.4)', '10px "IBM Plex Mono", monospace', 'center');
+          draw.label(octx, '← drag the sentence →', k.w / 2, rail.y + 54, 'rgba(220,210,190,.4)', '10px "IBM Plex Mono", monospace', 'center');
 
           // score against distance, with the current distance marked
           const pw = Math.min(240, k.w * 0.22), ph = 70, px = k.w - pw - 34, py = k.h * 0.3;

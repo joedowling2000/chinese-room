@@ -137,7 +137,7 @@ const Interiors = (() => {
         <a href="#maths/play" class="ir-back">← Interiors</a>
         <span class="ir-where">${p.no} / ${esc(p.concept)}</span>
         <span class="ir-top-actions">
-          <button type="button" data-host="maths" aria-pressed="false">The maths <kbd>M</kbd></button>
+          <button type="button" data-host="maths" aria-pressed="false"><span class="ir-wide">The </span>maths <kbd>M</kbd></button>
           <button type="button" data-host="sound" aria-pressed="false">Sound <kbd>S</kbd></button>
           <a href="#maths/play/${prev.id}" class="ir-step" aria-label="Previous room: ${esc(prev.title)}">‹</a>
           <a href="#maths/play/${next.id}" class="ir-step" aria-label="Next room: ${esc(next.title)}">›</a>

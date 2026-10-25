@@ -121,11 +121,13 @@ body.ir-playing main{min-height:100dvh}
   .ir-top{padding:10px 12px;gap:10px}
   .ir-where,.ir-top-actions kbd{display:none}
   .ir-top-actions button{padding:8px 11px}
-  .ir-caption{left:16px;right:16px;top:64px;bottom:auto}
-  .ir-caption h1{font-size:42px}
-  .ir-caption:has(.ir-insight:not([hidden])) h1{font-size:clamp(32px,3.6vw,48px)}
-.ir-caption h1{transition:font-size .6s ease}
-.ir-sub{font-size:14px;margin-bottom:10px}
+  .ir-caption{left:16px;right:16px;bottom:64px}
+  .ir-caption h1,.ir-caption:has(.ir-insight:not([hidden])) h1{font-size:34px;margin-bottom:6px}
+  .ir-sub{font-size:13px;margin-bottom:8px}
+  .ir-insight{font-size:13px;margin-bottom:6px}
+  .ir-prompt{font-size:12px}
+  .ir-top-actions .ir-step,.ir-wide{display:none}
+  .ir-top-actions{gap:4px}
   .ir-dock{left:12px;right:12px;bottom:12px;width:auto;padding:10px;gap:8px}
   .ir-dock.ir-dock-closed{left:auto}
   .ir-dock-body{flex-direction:row;flex-wrap:wrap}.ir-dock-body>*{flex:1 1 140px}

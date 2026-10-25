@@ -60,8 +60,8 @@
 
   // an arch: the sentence reads left to right over the top, leaving the floor clear
   function layout(n, w, h) {
-    const narrow = w < 760, cx = w * 0.5, cy = narrow ? h * 0.56 : h * 0.58;
-    const R = narrow ? Math.min(w * 0.36, h * 0.3) : Math.min(w * 0.27, h * 0.44);
+    const narrow = w < 760, cx = w * 0.5, cy = narrow ? h * 0.46 : h * 0.58;
+    const R = narrow ? Math.min(w * 0.27, h * 0.26) : Math.min(w * 0.27, h * 0.44);
     const a0 = Math.PI - 0.12, span = Math.PI + 0.24, pins = [];
     for (let i = 0; i < n; i++) {
       const a = a0 + span * i / (n - 1);
@@ -245,13 +245,13 @@
             let wsum = 0, wcol = c;
             if (!sel) (shown || []).forEach((w, hi) => { if ((w[i] || 0) > wsum) { wsum = w[i]; wcol = hs[hi].color; } });
             const col = future ? 'rgba(200,205,215,.28)' : sel ? '#fff' : i === hover ? '#fff' : `rgba(236,240,244,${0.55 + 0.45 * Math.min(1, (wsum || 0) * 3)})`;
-            draw.label(octx, word, lx, ly, col, `${sel ? 600 : 400} ${sel ? 19 : 15}px "DM Sans", sans-serif`, right ? 'left' : 'right');
+            draw.label(octx, word, lx, ly, col, `${sel ? 600 : 400} ${(sel ? 19 : 15) - (k.w < 760 ? 3 : 0)}px "DM Sans", sans-serif`, right ? 'left' : 'right');
             if (!sel && !future && wsum > 0.06) draw.label(octx, `${Math.round(wsum * 100)}%`, lx + (right ? 1 : -1) * (octx.measureText(word).width + 8), ly, rgba(wcol, 1), '11px "IBM Plex Mono", monospace', right ? 'left' : 'right');
             if (future && i === query + 1) draw.label(octx, 'masked: not yet read →', lx, ly + 18, 'rgba(200,205,215,.35)', '10px "IBM Plex Mono", monospace', right ? 'left' : 'right');
           });
           draw.label(octx, `“${toks[query][0]}” becomes`, L.cx, L.cy + L.R * 0.2 + 22, 'rgba(236,240,244,.7)', '11px "IBM Plex Mono", monospace', 'center');
           // legend of heads
-          hs.forEach((H, i) => draw.label(octx, `— ${H.name}`, 28, 100 + i * 20, rgba(H.color, 0.95), '12px "IBM Plex Mono", monospace'));
+          if (k.w > 760) hs.forEach((H, i) => draw.label(octx, `— ${H.name}`, 28, 100 + i * 20, rgba(H.color, 0.95), '12px "IBM Plex Mono", monospace'));
 
           // entropy of attention drives a soft drone
           const ent = -w0.reduce((s, v) => s + (v > 0 ? v * Math.log(v) : 0), 0);
