@@ -12,4 +12,15 @@ const base={point:[2.1,-1.9],velocity:[0,0],lr:.15,mu:0,steps:0};const frozen=JS
 const second=M.descentStep({...r.next,mu:.7});second.momentum.forEach((v,i)=>near(v,.7*r.next.velocity[i]));
 const over=M.descentStep({point:[2.5,2.5],velocity:[2,2],lr:.02,mu:.95,steps:2});assert.equal(over.outside,true);assert.equal(over.next.status,'diverged');assert.deepEqual(over.next.point,[2.6,2.6]);
 const overshoot=M.descentStep({point:[-0.9332152662979467,-0.4992343106497743],velocity:[-1.4481552637927455,0.47141191031765994],lr:1.5,mu:.7,steps:2});near(overshoot.deltaLoss,.308514660305492);assert.equal(overshoot.outside,false);
+// Matrix columns, rank loss and fixed-rule input changes.
+assert.deepEqual(M.linearMap([1,2,3,4],[5,6]).columns,[[5,15],[12,24]]);
+assert.deepEqual(M.linearMap([1,2,3,4],[5,6]).output,[17,39]);
+near(M.linearMap([1,2,3,4],[5,6]).determinant,-2);
+for (const input of [[0,0],[-2,1],[2,-1]]) assert.deepEqual(M.linearMap([1,2,.5,1],input).output,[0,0]);
+for (const input of [[2,1],[-2,1],[0,0]]) assert.deepEqual(M.linearMap([0,0,0,0],input).output,[0,0]);
+const lm={matrix:[1,0,0,1],input:[1,1]};
+assert.match(M.linearFeedback(lm,{...lm,input:[2,1]}).summary,/matrix stayed fixed/);
+assert.match(M.linearFeedback(lm,{...lm,matrix:[1,1,0,1]}).summary,/rule now acts on every input/);
+assert.match(M.linearFeedback(lm,lm).summary,/No mathematical/);
+assert.throws(()=>M.linearMap([1,2,3],[1,2]),TypeError);
 console.log('Learning model checks passed.');

@@ -1,7 +1,7 @@
 /* 01 · Linear maps. Flat: a grid under a 2×2 matrix. Abstract: walk the
    transformed plane in the first person, among posts at whole-number addresses. */
 Maths.scene({
-  id:'linear-maps',no:'01',tag:'Vectors & matrices',short:'Linear maps',mode:'2d',
+  id:'linear-maps',no:'01',tag:'Vectors & matrices',short:'Linear maps',mode:'2d',learn:true,
   title:'A matrix moves all of space at once.',
   body:['Almost everything inside a transformer is a matrix multiplication. A 2×2 matrix is simply a rule for where the two basis arrows, î and ĵ, land. Every other point follows along, so grid lines stay straight, parallel and evenly spaced.',
         'The absolute value of the determinant gives the area scale. At zero, the plane collapses onto a line or a point and information is lost.'],
@@ -9,26 +9,34 @@ Maths.scene({
        role:'A projection can discard information. The determinant illustrates that for this square matrix; rank is the more general concept used for rectangular matrices.'},
   sources:[{label:'Hu et al., LoRA: Low-Rank Adaptation of Large Language Models (2021)',href:'https://arxiv.org/abs/2106.09685'}],
   formula:'[x′ y′] = [[a b] [c d]] · [x y]  ·  det = ad − bc',
-  caption:'Drag the tips of î and ĵ',
+  caption:'Edit the pinned input or matrix; inspect the column contributions',
   abstractCaption:'Arrow keys or W A S D: step along î and ĵ · Q E or drag: look around',
   label:'A grid transformed by a 2 by 2 matrix, with the unit circle mapped to an ellipse.',
   abstractLabel:'A first-person view across the transformed plane, with posts standing at whole-number addresses.',
   dream:{title:'What the scene represents',text:[
     'The posts mark input coordinates. The matrix transforms their positions and yours by the same rule. Compare a shear with a collapse: one changes the angles; the other makes distinct addresses share a destination.']},
   controls:({slider,button,buttons,swap})=>`<p class="maths-subhead">${swap('Presets','Matrix presets')}</p>
-    ${buttons(...[['identity','Identity'],['rotate','Rotate'],['shear','Shear'],['stretch','Stretch'],['flip','Reflect'],['collapse','Collapse']].map(([k,l])=>button('lm-'+k,l,undefined,`data-lm-preset="${k}"`)))}
-    <div class="maths-grid2 flat-only">${slider('lm-a','a',-2,2,.05,1)}${slider('lm-b','b',-2,2,.05,.5)}${slider('lm-c','c',-2,2,.05,-.3)}${slider('lm-d','d',-2,2,.05,1.1)}</div>
+    ${buttons(...[['identity','Identity'],['rotate','Rotate'],['shear','Shear'],['stretch','Stretch'],['flip','Reflect'],['collapse','Collapse'],['zero','Zero matrix']].map(([k,l])=>button('lm-'+k,l,undefined,`data-lm-preset="${k}"`)))}
+    <p class="maths-subhead">Edit one object at a time</p>
+    ${buttons(button('lm-input-mode','Edit input',undefined,'aria-pressed="true"'),button('lm-matrix-mode','Edit matrix',undefined,'aria-pressed="false"'))}
+    <div class="maths-grid2">${slider('lm-x','Input x',-2,2,.05,1)}${slider('lm-y','Input y',-2,2,.05,1)}</div>
+    <div class="maths-grid2">${slider('lm-a','a',-2,2,.05,1)}${slider('lm-b','b',-2,2,.05,.5)}${slider('lm-c','c',-2,2,.05,-.3)}${slider('lm-d','d',-2,2,.05,1.1)}</div>
+    ${buttons(button('lm-collision','Load two colliding inputs'))}
+    <p id="lm-trace"></p>
+    <div class="article-table-wrap"><table class="learn-table"><caption>One matrix, several inputs</caption><thead><tr><th scope="col">Input</th><th scope="col">Output</th></tr></thead><tbody id="lm-vectors"></tbody></table></div>
     <div class="ab-only"><p class="maths-subhead">Walk</p>${buttons(button('lm-west','← Back along î'),button('lm-east','Along î →'),button('lm-south','↓ Back along ĵ'),button('lm-north','Along ĵ ↑'))}</div>`,
   init(k){
-    const {$,clamp,lerp,ease,stroke,dot,arrow,label,persp,pline,pdot,heading}=k;
+    const {$,clamp,lerp,stroke,dot,arrow,label,persp,pline,pdot,heading}=k;
     const ids=['lm-a','lm-b','lm-c','lm-d'];
-    const presets={identity:[1,0,0,1],rotate:[.87,-.5,.5,.87],shear:[1,1,0,1],stretch:[1.8,0,0,.6],flip:[-1,0,0,1],collapse:[1,2,.5,1]};
-    let M=ids.map(id=>Number($(id).value)),shown=[...M],from=null,t0=0,grab=null;
+    const presets={identity:[1,0,0,1],rotate:[.87,-.5,.5,.87],shear:[1,1,0,1],stretch:[1.8,0,0,.6],flip:[-1,0,0,1],collapse:[1,2,.5,1],zero:[0,0,0,0]};
+    let M=ids.map(id=>Number($(id).value)),shown=[...M],grab=null;
+    let input=[1,1],editMode='input',ghost=null,pending=null;
+    const snapshot=()=>({matrix:[...M],input:[...input]});
+    const sec=document.getElementById('maths-linear-maps');
     let me=[0,0],goal=[0,0];
     const look={yaw:.6,pitch:-.32};
     const s=k.stage(paint,paintAbstract);
     const unit=()=>Math.min(s.w,s.h)/7.5;
-    const tween=k.player(s,now=>{const t=Math.min(1,(now-t0)/450);shown=from.map((v,i)=>lerp(v,M[i],ease(t)));return t<1;});
     const walk=k.player(s,()=>{
       me=me.map((v,i)=>lerp(v,goal[i],.2));
       if(Math.hypot(me[0]-goal[0],me[1]-goal[1])>.003)return true;
@@ -48,6 +56,14 @@ Maths.scene({
       const o=T(0,0),I=T(1,0),J=T(0,1),w0=k.world;
       k.tint(ctx,w0.accent,()=>{arrow(ctx,o[0],o[1],I[0],I[1],1,1.8);dot(ctx,I[0],I[1],4,1);label(ctx,'î',I[0]+10,I[1]-12,.95);});
       k.tint(ctx,w0.secondary,()=>{arrow(ctx,o[0],o[1],J[0],J[1],1,1.8);dot(ctx,J[0],J[1],4,1);label(ctx,'ĵ',J[0]+10,J[1]-12,.95);});
+      const C=T(input[0],0), O=T(...input);
+      ctx.setLineDash([4,3]);stroke(ctx,[o,C,O],.9,2);ctx.setLineDash([]);
+      dot(ctx,O[0],O[1],6,1,true);label(ctx,'pinned output',O[0]+10,O[1]+18,.95);
+      const X=[cx+input[0]*u,cy-input[1]*u];
+      dot(ctx,X[0],X[1],4,.7);label(ctx,'input',X[0]+9,X[1]-15,.7);
+      [[-2,1],[0,0],[1,0]].forEach(v=>{const p=T(...v);dot(ctx,p[0],p[1],3,.6);});
+      if(ghost){const v=LearningModels.linearMap(ghost.matrix,ghost.input).output,p=[cx+v[0]*u,cy-v[1]*u];dot(ctx,p[0],p[1],8,.5,true);label(ctx,'before',p[0]+10,p[1]-14,.7);}
+
     }
 
     // Input (x, y) lands at world (ax + by, cx + dy) on the ground; h lifts it.
@@ -56,6 +72,11 @@ Maths.scene({
       const W=(x,y,h=0)=>[a*x+b*y,h,c*x+d*y];
       const feet=W(...me),eye=[feet[0],.55,feet[2]];
       const P=persp(s,eye,heading(look.yaw,look.pitch),[0,1,0],1.2);
+      const pinned=W(...input,.04);
+      k.beacon(ctx,P,pinned,se,.1,1);
+      const pin=P(...pinned);if(pin)label(ctx,'pinned output',pin[0]+10,pin[1]-15,1);
+      k.tint(ctx,se,()=>pline(ctx,P,[W(0,0,.02),W(input[0],0,.02),W(...input,.02)],.95,2,1e9));
+      if(ghost){const v=LearningModels.linearMap(ghost.matrix,ghost.input).output;const p=pdot(ctx,P,[v[0],.05,v[1]],.1,.6,true,1e9);if(p)label(ctx,'before',p[0]+10,p[1]-12,.7);}
       const horizon=[];
       for(let n=0;n<=160;n++){const t=n/160*Math.PI*2;horizon.push([eye[0]+80*Math.sin(t),0,eye[2]+80*Math.cos(t)]);}
       k.tint(ctx,se,()=>pline(ctx,P,horizon,.3,.8,1e9));
@@ -115,7 +136,13 @@ Maths.scene({
 
     function sync(){
       ids.forEach((id,i)=>{$(id).value=M[i];$(id+'-out').value=M[i].toFixed(2);});
-      const det=M[0]*M[3]-M[1]*M[2];
+      const result=LearningModels.linearMap(M,input),det=result.determinant,pair=LearningModels.pair;
+      ['lm-x','lm-y'].forEach((id,i)=>{$(id).value=input[i];$(id+'-out').value=input[i].toFixed(2);$(id).disabled=editMode!=='input';});
+      ids.forEach(id=>{$(id).disabled=editMode!=='matrix';});
+      $('lm-input-mode').setAttribute('aria-pressed',String(editMode==='input'));
+      $('lm-matrix-mode').setAttribute('aria-pressed',String(editMode==='matrix'));
+      $('lm-trace').textContent=`x × column 1 = ${pair(result.columns[0])}; y × column 2 = ${pair(result.columns[1])}; sum = ${pair(result.output)}.`;
+      $('lm-vectors').innerHTML=[input,[-2,1],[0,0],[1,0]].map((v,i)=>`<tr><th scope="row">${i===0?'Pinned ':''}${pair(v)}</th><td>${pair(LearningModels.linearMap(M,v).output)}</td></tr>`).join('');
       if(!s.abstract){
         k.readout(`det = ${det.toFixed(2)} · areas scale by ${Math.abs(det).toFixed(2)}×${Math.abs(det)<.03?' · determinant near zero; area is strongly compressed':det<0?' · orientation is flipped':''}`);
         return;
@@ -123,43 +150,66 @@ Maths.scene({
       const at=[M[0]*goal[0]+M[1]*goal[1],M[2]*goal[0]+M[3]*goal[1]];
       k.readout(`your own address: (${goal[0]}, ${goal[1]}) · the world puts you at (${at[0].toFixed(2)}, ${at[1].toFixed(2)}) · ${Math.abs(det)<.03?'determinant near zero; distinct inputs may map very close together':`your unit square covers ${Math.abs(det).toFixed(2)} square units${det<0?', mirrored':''}`}`);
     }
-    function set(next,animate){
-      M=next;sync();
-      if(animate&&!k.reduced()){from=[...shown];t0=performance.now();tween.start();}
-      else{tween.stop();shown=[...M];s.draw();}
+    function set(next){
+      M=next;shown=[...M];sync();s.draw();
     }
     // Each step is a column of the matrix: one unit along î or ĵ in your own coordinates.
     function step(dx,dy){
-      goal=[clamp(goal[0]+dx,-12,12),clamp(goal[1]+dy,-12,12)];sync();
+      goal=[clamp(goal[0]+dx,-12,12),clamp(goal[1]+dy,-12,12)];sync();teach.notice('Camera position changed; the pinned experiment is unchanged.');
       if(k.reduced()){me=[...goal];s.draw();}else walk.start();
     }
 
+    const begin=action=>{if(!pending){pending=snapshot();teach.begin(action,'input');}};
+    const finish=()=>{if(!pending)return;const before=pending;pending=null;teach.commit(LearningModels.linearFeedback(before,snapshot()));};
+    const cancel=()=>{pending=null;grab=null;walk.stop();teach.cancelPending();};
+    const restore=st=>{cancel();M=[...st.matrix];shown=[...M];input=[...st.input];sync();s.draw();};
+    const teach=Experiences.createTeaching(sec.querySelector('.maths-learning'),{
+      id:'linear-maps',signal:k.signal,snapshot,
+      describe:(a,b)=>LearningModels.linearFeedback(a,b).rows,
+      restore,settle:finish,cancel,
+      reset(){restore({matrix:[1,.5,-.3,1.1],input:[1,1]});editMode='input';sync();},
+      resetCamera(){walk.stop();me=[0,0];goal=[0,0];look.yaw=.6;look.pitch=-.32;s.camera=null;sync();s.draw();},
+      onCompare(g){ghost=g;s.draw();teach.notice(g?'Hollow before marker in the diagram; exact values in the comparison table.':'');},
+      onGuided(on){Maths.setGuided(sec,on);}
+    });
     const c=s.canvas;
     const local=e=>{const r=c.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top];};
     k.on(c,'pointerdown',e=>{
-      if(s.abstract)return;
+      if(s.abstract||editMode!=='matrix')return;
       const [px,py]=local(e),u=unit();
       const dist=[[M[0],M[2]],[M[1],M[3]]].map(([x,y])=>Math.hypot(s.w/2+x*u-px,s.h/2-y*u-py));
-      const n=dist[0]<=dist[1]?0:1;
-      if(dist[n]>30)return;
-      grab=n;c.setPointerCapture(e.pointerId);
+      const n=dist[0]<=dist[1]?0:1;if(dist[n]>30)return;
+      finish();begin('Drag a matrix column');grab=n;c.setPointerCapture(e.pointerId);
     });
     k.on(c,'pointermove',e=>{
       if(grab===null)return;
       const [px,py]=local(e),u=unit();
       const x=clamp(Math.round((px-s.w/2)/u*20)/20,-2,2),y=clamp(Math.round(-(py-s.h/2)/u*20)/20,-2,2);
-      const next=[...M];if(grab===0){next[0]=x;next[2]=y;}else{next[1]=x;next[3]=y;}
-      set(next,false);
+      const next=[...M];if(grab===0){next[0]=x;next[2]=y;}else{next[1]=x;next[3]=y;}set(next);
     });
-    ['pointerup','pointercancel'].forEach(t=>k.on(c,t,()=>{grab=null;}));
-    ids.forEach((id,i)=>k.on($(id),'input',()=>{const next=[...M];next[i]=Number($(id).value);set(next,false);}));
-    document.querySelectorAll('[data-lm-preset]').forEach(b=>k.on(b,'click',()=>set([...presets[b.dataset.lmPreset]],true)));
+    ['pointerup','pointercancel','lostpointercapture'].forEach(t=>k.on(c,t,()=>{grab=null;finish();}));
+    [...ids,'lm-x','lm-y'].forEach((id,i)=>{
+      k.on($(id),'input',()=>{
+        if($(id).disabled)return;
+        begin(i<4?'Edit matrix':'Move pinned input');
+        if(i<4){const next=[...M];next[i]=Number($(id).value);set(next);}
+        else{input[i-4]=Number($(id).value);sync();s.draw();}
+      });
+      ['change','blur','pointerup','pointercancel','lostpointercapture','keyup'].forEach(t=>k.on($(id),t,finish));
+    });
+    ['input','matrix'].forEach(mode=>k.on($('lm-'+mode+'-mode'),'click',()=>{finish();editMode=mode;sync();teach.notice(mode==='input'?'Input edits keep the matrix fixed.':'Matrix edits keep the pinned input fixed.');}));
+    sec.querySelectorAll('[data-lm-preset]').forEach(b=>k.on(b,'click',()=>{finish();begin('Load '+b.textContent+' matrix');set([...presets[b.dataset.lmPreset]]);finish();}));
+    k.on($('lm-collision'),'click',()=>{finish();begin('Load colliding inputs');input=[0,0];set([...presets.collapse]);finish();teach.notice('Compare pinned (0, 0) with (−2, 1): both map to (0, 0). The zero matrix collapses every input to that point.');});
     [['lm-east',1,0],['lm-west',-1,0],['lm-north',0,1],['lm-south',0,-1]].forEach(([id,dx,dy])=>k.on($(id),'click',()=>step(dx,dy)));
+    look.onchange=()=>teach.notice('Camera moved; the pinned input and matrix are unchanged.');
     k.look(s,look);
     sync();
 
     return {
-      onMode:sync,
+      teaching:teach,
+      onMode(){finish();sync();},
+      onDeactivate:finish,
+      onPause:finish,
       resetView(){walk.stop();me=[0,0];goal=[0,0];look.yaw=.6;look.pitch=-.32;s.camera=null;sync();},
       onKey(key){
         const m={ArrowRight:[1,0],d:[1,0],ArrowLeft:[-1,0],a:[-1,0],ArrowUp:[0,1],w:[0,1],ArrowDown:[0,-1],s:[0,-1]}[key];

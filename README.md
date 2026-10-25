@@ -50,7 +50,7 @@ See [PLAN.md](PLAN.md) for the implementation status, source requirements and fo
 
 - `index.html`, `styles.css`, `field.css`, `app.js`, `field.js`: site shell, layout base, Field theme, and client-side navigation/content
 - `lab.js`: cube geometry, experiment pages and quantisation calculations
-- `experiences.js`, `experiences.css`: shared experience layer — purpose labels, the nine-experience directory, and the teaching panel used by the attention and gradient-descent prototypes (phase 1 of `experience-learning-plan.md`)
+- `experiences.js`, `experiences.css`: shared experience layer — purpose labels, the nine-experience directory, and the teaching panel used by linear maps, attention and gradient descent (see `enhancement_plan.md` for progress)
 - `scripts/check-learning-models.cjs`: numerical regression checks for the teaching calculations — run with `node scripts/check-learning-models.cjs`
 - `maths.js`: The Maths of AI page — page shell, shared canvas plumbing, first-person camera, full-screen journey and diagram modes
 - `maths/*.js`: one file per Maths illustration (copy, flat view, first-person scene and controls), registered with `Maths.scene`

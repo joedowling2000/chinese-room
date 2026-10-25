@@ -1,6 +1,5 @@
 /* Shared experience layer: purpose labels, the discovery directory and the
-   teaching panel used by the first two prototype scenes (attention and
-   gradient descent). All explanations use values computed by the scenes and
+   teaching panel used by linear maps, attention and gradient descent. All explanations use values computed by the scenes and
    maths/learning-models.js — the panel only records, compares and renders. */
 const Experiences = (() => {
   const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -60,10 +59,26 @@ const Experiences = (() => {
     }, {signal}));
   }
 
-  /* ---------- Teaching panel (attention + gradient descent) ---------- */
+  /* ---------- Teaching panel ---------- */
 
   const STAGES = ['Forward pass','Loss','Parameter update'];
   const PANELS = {
+    'linear-maps': {
+      stage: 0,
+      note: 'Manual input and weight edits in a synthetic forward pass',
+      orient: {
+        control: 'Choose Edit input or Edit matrix; the other object is locked. Presets load named experiments.',
+        fixed: 'In input mode, the matrix. In matrix mode, the pinned input. Camera movement changes neither.',
+        watch: 'The two scaled columns add to the pinned output. Reference inputs use the same matrix.'
+      },
+      check: {
+        question: 'Which change alters the transformation rule for every input?',
+        choices: [
+          ['Move the pinned input.', 'That changes one example. The same matrix still acts on all inputs.'],
+          ['Edit the matrix.', 'Exactly. Both matrix columns define the rule. Try the collision preset: two different inputs have the same output.']
+        ]
+      }
+    },
     'attention': {
       stage: 0,
       note: 'The forward pass also runs during training',

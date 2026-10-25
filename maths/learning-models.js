@@ -6,6 +6,33 @@ const LearningModels = (() => {
   const vector = v => Array.isArray(v) && v.length === 2 && v.every(Number.isFinite);
   const pair = v => `(${v[0].toFixed(3)}, ${v[1].toFixed(3)})`;
 
+  function linearMap(matrix, input) {
+    if (!Array.isArray(matrix) || matrix.length !== 4 || !matrix.every(Number.isFinite) || !vector(input)) {
+      throw new TypeError('Linear maps need four finite matrix entries and a two-coordinate input.');
+    }
+    const [a,b,c,d] = matrix, [x,y] = input;
+    const columns = [[a*x,c*x],[b*y,d*y]];
+    return {columns, output: columns[0].map((v,i) => v + columns[1][i]), determinant: a*d-b*c};
+  }
+
+  function linearFeedback(before, after) {
+    const a = linearMap(before.matrix,before.input), b = linearMap(after.matrix,after.input);
+    const matrixChanged = before.matrix.some((v,i) => v !== after.matrix[i]);
+    const inputChanged = before.input.some((v,i) => v !== after.input[i]);
+    return {
+      summary: matrixChanged ? 'The matrix changed: the same new rule now acts on every input.' :
+        inputChanged ? 'The input changed; the matrix stayed fixed.' : 'No mathematical values changed.',
+      explanation: 'Multiply each matrix column by its input coordinate, then add the two contributions. ' +
+        (b.determinant === 0 ? 'This matrix loses information: distinct inputs can share an output.' :
+        'This matrix has nonzero determinant, so distinct inputs have distinct outputs.') +
+        ' These are manual edits to a synthetic example, not optimiser updates.',
+      rows: [['Input',pair(before.input),pair(after.input)],
+        ['Matrix rows',pair(before.matrix.slice(0,2))+'; '+pair(before.matrix.slice(2)),pair(after.matrix.slice(0,2))+'; '+pair(after.matrix.slice(2))],
+        ['Output',pair(a.output),pair(b.output)],['Determinant',a.determinant.toFixed(3),b.determinant.toFixed(3)]],
+      calculation: [['x × first column',pair(b.columns[0])],['y × second column',pair(b.columns[1])],['Sum / output',pair(b.output)]]
+    };
+  }
+
   function attention(query, temperature, keys) {
     if (!vector(query) || !Number.isFinite(temperature) || temperature <= 0 ||
         !Array.isArray(keys) || !keys.length || !keys.every(vector)) {
@@ -113,7 +140,7 @@ const LearningModels = (() => {
     };
   }
 
-  return {attention, attentionFeedback, loss, gradient, domain, descentStep, descentFeedback, pair};
+  return {linearMap, linearFeedback, attention, attentionFeedback, loss, gradient, domain, descentStep, descentFeedback, pair};
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = LearningModels;

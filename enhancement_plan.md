@@ -20,17 +20,18 @@ calculations that drive the animation.
 
 ## Current stage and release boundary
 
-**Stage: first teaching prototype release complete and reviewed; later enhancements pending.**
+**Stage: first teaching prototype release complete; linear-maps teaching upgrade implemented locally.**
 
-The user requested a stopping point to conserve credits. This release preserves
-the current prototype; the next phase has not started.
+The first release was paused to conserve credits. Work resumed on 25 October 2026
+from `73d7d20`, shared by `origin/main` and `origin/worktree/idiom`. The next
+increment extends the teaching panel to linear maps.
 
 The current build includes:
 
 - A nine-experience directory with purpose filters, labels, example types and
   educational outcomes.
 - Purpose labels on all seven maths topics and both lab examples.
-- A shared teaching panel for **attention** and **gradient descent**.
+- A shared teaching panel for **linear maps**, **attention** and **gradient descent**.
 - Guided lesson prompts and an Explore mode.
 - Before/after values, explanations, action history, comparison markers and undo.
 - Separate experiment and camera resets.
@@ -46,7 +47,7 @@ explicit single steps; continuous playback needs a separate pass on pause,
 interruption, undo and announcement behaviour. The prototype is not the complete
 educational upgrade described in the original plan.
 
-The other seven experiences retain their existing interactions and have received
+The other six experiences retain their existing interactions and have received
 labels/outcomes only. Their deeper teaching upgrades, the connected trained model,
 and validation with first-time learners remain outstanding.
 
@@ -110,18 +111,22 @@ order rather than imply the route is a literal transformer pipeline.
 
 ### Linear maps
 
-Current: purpose labels and outcome; existing grid and first-person scene.
+Implemented in the continuation build:
 
-Planned:
+- Pinned input with x/y controls; scaled matrix-column contributions and their sum.
+- Separate input-edit and matrix-edit modes, locking the other object's controls.
+- One matrix applied to the pinned input and three reference inputs in a text table.
+- Line-collapse and zero-matrix presets, plus a reproducible pair of colliding inputs.
+- Guided prediction prompts, a retryable rule-change check, action history,
+  before/after values, undo, experiment reset and separate camera reset.
+- Diagram contribution path, pinned-output markers and before-state markers.
+- Presets apply atomically so the numerical result and scene agree immediately.
 
-- Pin an input and expose the two scaled matrix-column contributions and their sum.
-- Separate input-edit mode from weight-edit mode, locking the other object.
-- Show the same matrix acting on several vectors; changing the matrix updates all.
-- Compare a line collapse and a zero matrix; find different inputs with one output.
+Remaining:
+
 - Add a frozen base plus low-rank update panel. Explain that adding an adapter does
   not delete the base model's other directions.
-- Transfer check: construct a collision and identify which change alters the rule
-  for every input.
+- Extend the prepared collision and rule-change check into an unaided collision-construction exercise.
 
 ### Activations
 
@@ -296,7 +301,7 @@ from the simpler mathematical demonstrations.
 | `experiences.css` | Directory and responsive teaching layouts |
 | `maths.js` | Scene lifecycle, fullscreen shell, guide hooks and input handling |
 | `maths/00-journey.js` | Lessons, prompts and model-context explanations |
-| `maths/learning-models.js` | Shared attention and gradient-descent calculations and numerical feedback |
+| `maths/learning-models.js` | Shared linear-map, attention and gradient-descent calculations and numerical feedback |
 | `maths/01–07-*.js` | Scene state, controls, painting and teaching integration |
 | `lab.js` | Cube and quantisation examples |
 | `scripts/check-learning-models.cjs` | Focused numerical regression checks |
@@ -355,3 +360,20 @@ measured educational improvement until such an evaluation has been designed and 
 Temporary browser scripts and screenshots under `/tmp/pw-test` are local review
 artifacts, not durable project dependencies. Recreate browser verification if that
 directory no longer exists.
+
+## Continuation verification — 25 October 2026
+
+The linear-map increment passed column-sum and determinant checks, collision and
+zero-map invariants, input-versus-matrix feedback checks, and invalid-input checks.
+Browser checks covered mode locking, action grouping, undo, comparison markers,
+collision/zero examples, pending-action reset, camera-only reset, and separate
+canvas/panel layouts at 390 × 844 and 1024 × 768 with reduced motion enabled.
+The existing attention/gradient browser suite also passed, with zero JavaScript
+errors. Screenshots of both new layouts were visually reviewed. JavaScript syntax,
+production asset preparation and whitespace checks passed.
+
+Browser checks were run using local Playwright scripts under `/tmp/pw-test`;
+the mathematical regressions are retained in `scripts/check-learning-models.cjs`.
+Real-device touch and first-time-learner studies remain outstanding. The low-rank
+adapter panel and the six remaining experience upgrades are not implemented by
+this increment. No public deployment was performed.
