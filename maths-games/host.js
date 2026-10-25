@@ -5,6 +5,12 @@ const FieldGames = (() => {
   const copy = v => JSON.parse(JSON.stringify(v));
   const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fmt = (v,n=2) => Number(v.toFixed(n)).toString();
+  function describeValue(v){
+    if(typeof v==='number')return fmt(v,5);
+    if(Array.isArray(v))return '('+v.map(describeValue).join(', ')+')';
+    if(record(v))return Object.entries(v).map(([k,x])=>`${k} = ${describeValue(x)}`).join('; ');
+    return String(v);
+  }
   const dot = (a,b) => a.reduce((sum,v,i)=>sum+v*b[i],0);
   const norm = a => Math.hypot(...a);
   const distance = (a,b) => norm(a.map((v,i)=>v-b[i]));
@@ -21,7 +27,7 @@ const FieldGames = (() => {
   const action = (id,label,on=false) => `<button type="button" data-action="${id}" ${on?'aria-pressed="true"':''}>${label}</button>`;
   const select = (id,label,options,value) => `<label class="fi-select"><span>${esc(label)}</span><select data-param="${id}" aria-label="${esc(label)}">${options.map(([v,t])=>`<option value="${v}" ${String(value)===String(v)?'selected':''}>${esc(t)}</option>`).join('')}</select></label>`;
   const point = (p,cx,cy,u) => [cx+p[0]*u,cy-p[1]*u];
-  const courier = (pts,i=0) => `<circle r="6" class="fi-courier" opacity="0"><animateMotion path="${pts.map((p,j)=>(j?'L':'M')+p.join(',')).join(' ')}" dur=".9s" begin="${i*.1}s" fill="freeze"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.1;.9;1" dur=".9s" begin="${i*.1}s" fill="freeze"/></circle>`;
+  const courier = (pts,i=0) => `<circle r="6" class="fi-courier" opacity="0"><animateMotion path="${pts.map((p,j)=>(j?'L':'M')+p.join(',')).join(' ')}" dur=".55s" begin="0s" fill="freeze"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.1;.9;1" dur=".55s" begin="0s" fill="freeze"/></circle>`;
   const helpers={courier,clamp,copy,esc,fmt,dot,norm,distance,mat,softmax,txt,line,circle,path,arrow,grid,handle,range,action,select,point};
   const refs={'linear-maps':'https://arxiv.org/html/1706.03762v7','folding':'https://arxiv.org/html/1706.03762v7','attention':'https://arxiv.org/html/1706.03762v7','gradient-descent':'https://distill.pub/2017/momentum/','rotary':'https://arxiv.org/html/2104.09864v5','dimensions':'https://arxiv.org/abs/2209.10652','ablation':'https://arxiv.org/abs/2406.11717'};
   const record=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
@@ -57,7 +63,7 @@ const FieldGames = (() => {
     if(!keys.length)return '';
     const i=Math.max(...keys),c=comp[i];
     try{
-      const markup=String(g.draw(c.state,i,{trial:false,step:-1,motion:false})).replace(/\s(tabindex|role|data-action|data-handle)="[^"]*"/g,'').replace(/<\/?button\b[^>]*>/g,'');
+      const markup=String(g.draw(c.state,i,{trial:false,step:-1,motion:false,editable:false})).replace(/\s(tabindex|role|data-action|data-handle)="[^"]*"/g,'').replace(/<\/?button\b[^>]*>/g,'');
       return `<svg class="fi-mini" viewBox="0 0 1000 560" aria-hidden="true" focusable="false">${markup}</svg>`;
     }catch{return '';}
   }
@@ -73,8 +79,8 @@ const FieldGames = (() => {
     if(!g||!root){
       const catalogue=document.querySelector('.fi-index');
       if(catalogue){const controller=new AbortController();catalogue.addEventListener('click',e=>{
-        if(e.target.closest('[data-clear-progress]')){resetBackup=copy(saved.games);saved.games={};persist();catalogue.outerHTML=page();wire();}
-        else if(e.target.closest('[data-restore-progress]')&&resetBackup){saved.games=resetBackup;resetBackup=null;games.forEach(g=>{contourLegacyCheck(g,saved.games[g.id]);saved.games[g.id]=cleanGame(g,saved.games[g.id]);});persist();catalogue.outerHTML=page();wire();}
+        if(e.target.closest('[data-clear-progress]')){resetBackup=copy(saved.games);saved.games={};persist();catalogue.outerHTML=page();wire();document.querySelector('[data-restore-progress]')?.focus({preventScroll:true});}
+        else if(e.target.closest('[data-restore-progress]')&&resetBackup){saved.games=resetBackup;resetBackup=null;games.forEach(g=>{contourLegacyCheck(g,saved.games[g.id]);saved.games[g.id]=cleanGame(g,saved.games[g.id]);});persist();catalogue.outerHTML=page();wire();document.querySelector('[data-clear-progress]')?.focus({preventScroll:true});}
       },{signal:controller.signal});session={dispose:()=>controller.abort()};
         if(exitedGame){const back=exitedGame;exitedGame=null;catalogue.querySelector(`a[href="#maths/play/${back}"]`)?.focus({preventScroll:true});}
       }
@@ -123,31 +129,43 @@ const FieldGames = (() => {
       let r=22;try{const m=stage.getScreenCTM(),sc=m?Math.hypot(m.a,m.b):0;if(sc>0)r=22/sc;}catch{}
       stage.querySelectorAll('.fi-hit').forEach(h=>h.setAttribute('r',r.toFixed(1)));
     }
-    function renderMeasurements(openInspect,openConfig){
+    function renderMeasurements(){
       const body=$('#fi-measurements-body');if(!body)return;
+      const openInspect=body.querySelector('.fi-inspect')?.open,openConfig=body.querySelector('.fi-config')?.open,openEx=body.querySelector('.fi-exact')?.open,openWl=body.querySelector('.fi-workload')?.open;
       const e=trial||g.evaluate(state,levelIndex),items=e.items||[{detail:e.detail,good:e.pass}],shown=trial?frameState(Math.max(probe,0)):state;
       const updates=Array.isArray(trial?.state?.updates)&&trial.state.updates.length?trial.state.updates:(Array.isArray(state.updates)?state.updates:null);
       const replay=!!(trial&&Array.isArray(trial.state?.updates)&&trial.state.updates.length);
       let h='';
+      const ph=probe<0?`<option value="" disabled selected>Choose ${updates?'an update':'a probe'}</option>`:'';
       const opts=updates?updates.map((u,i)=>`<option value="${i}" ${i===probe?'selected':''}>Update ${i} · speed ${fmt(Math.hypot(u.vx,u.vy),3)}</option>`).join(''):items.map((it,i)=>`<option value="${i}" ${i===probe?'selected':''}>${i+1} · ${esc(String(it.detail||'item').slice(0,60))}</option>`).join('');
-      h+=`<div class="fi-probe-row"><label class="fi-select"><span>${replay||updates?'Update / frame':'Probe'}</span><select data-probe aria-label="Select ${updates?'update':'probe'}" ${trial||updates?'':'disabled'}>${opts}</select></label><div class="fi-tool-buttons"><button type="button" data-host="prev" ${trial?'':'disabled'}>← Previous</button><button type="button" data-host="fwd" ${trial?'':'disabled'}>Next →</button></div></div>`;
-      if(updates&&probe>=0){const u=updates[clamp(probe,0,updates.length-1)];h+=`<pre class="fi-probe-json">${esc(JSON.stringify(u,null,1))}</pre>`;}
-      else if(trial&&probe>=0&&items[probe]){const it=items[probe];h+=`<p class="fi-probe-detail">${esc(it.detail||'')}</p>`;if(it.good!==undefined)h+=`<p class="fi-probe-good">${it.good?'Constraint met':'Not yet met'}</p>`;const rest={};['input','output','expected','value','weight','scores','prediction','error','target','z','p','out'].forEach(k=>{if(it[k]!==undefined)rest[k]=it[k];});if(Object.keys(rest).length)h+=`<pre class="fi-probe-json">${esc(JSON.stringify(rest,null,1))}</pre>`;}
-      else if(!trial)h+='<p class="fi-fine">Run or step a trial to inspect probes and frames.</p>';
+      h+=`<div class="fi-probe-row"><label class="fi-select"><span>${replay||updates?'Update / frame':'Probe'}</span><select data-probe aria-label="Select ${updates?'update':'probe'}">${ph}${opts}</select></label><div class="fi-tool-buttons"><button type="button" data-host="prev" ${trial?'':'disabled'}>← Previous</button><button type="button" data-host="fwd" ${trial?'':'disabled'}>Next →</button></div></div>`;
+      const canon={p:'input',out:'output',target:'expected'};
+      const labels={input:'Input',p:'Input',output:'Output',out:'Output',expected:'Target',target:'Target',value:'Value carrier',weight:'Attention weight',scores:'Decoder scores',prediction:'Recovered activity',error:'Error',z:'Pre-activation',intermediate:'Intermediate output',representation:'Shared representation',removed:'Removed component'};
+      const keys=['input','p','output','out','expected','target','value','weight','scores','prediction','error','z','intermediate','representation','removed'];
+      if(updates&&probe>=0){const u=updates[clamp(probe,0,updates.length-1)];
+        h+=`<dl class="fi-probe-values"><dt>Update</dt><dd>${clamp(probe,0,updates.length-1)}</dd><dt>Position</dt><dd>${esc(describeValue([u.x,u.y]))}</dd><dt>Velocity</dt><dd>${esc(describeValue([u.vx,u.vy]))}</dd><dt>Learning rate η</dt><dd>${fmt(u.eta)}</dd><dt>Momentum μ</dt><dd>${fmt(u.mu)}</dd><dt>Status</dt><dd>${esc(u.status)}</dd></dl><details class="fi-exact"><summary>Exact frame values</summary><pre class="fi-probe-json">${esc(JSON.stringify(u,null,1))}</pre></details>`;}
+      else if(trial&&probe>=0&&items[probe]){const it=items[probe];h+=`<p class="fi-probe-detail">${esc(it.detail||'')}</p>`;if(it.good!==undefined)h+=`<p class="fi-probe-good">${it.good?'Constraint met':'Not yet met'}</p>`;
+        const seen=new Set(),rows=[],rest={};keys.forEach(k=>{if(it[k]!==undefined){const c=canon[k]||k;if(!seen.has(c)){seen.add(c);rows.push([labels[k],it[k]]);}rest[k]=it[k];}});
+        if(rows.length)h+=`<dl class="fi-probe-values">${rows.map(([lab,v])=>`<dt>${esc(lab)}</dt><dd>${esc(describeValue(v))}</dd>`).join('')}</dl>`;
+        if(Object.keys(rest).length)h+=`<details class="fi-exact"><summary>Exact probe values</summary><pre class="fi-probe-json">${esc(JSON.stringify(rest,null,1))}</pre></details>`;}
+      else if(!trial)h+='<p class="fi-fine">Select a probe to inspect the current configuration, or run a trial.</p>';
       const extra=g.inspect?.(shown,levelIndex);
+      if(updates&&extra?.updates)h+=`<details class="fi-workload"><summary>Update history</summary><ol>${extra.updates.map(u=>`<li>Update ${u.index} · loss ${esc(fmt(u.loss,4))} · speed ${esc(fmt(u.speed,3))}${u.status==='diverged'?' · diverged':''}</li>`).join('')}</ol></details>`;
+      else if(items.length&&items[0].detail)h+=`<details class="fi-workload"><summary>Required probes</summary><ol>${items.map((it,i)=>`<li>${i+1} · ${esc(it.detail||'')}${it.good===false?' · not met':it.good===true?' · met':''}</li>`).join('')}</ol></details>`;
       if(extra)h+=`<details class="fi-inspect"><summary>Instrument data</summary><pre class="fi-probe-json">${esc(JSON.stringify(extra,null,1))}</pre></details>`;
-      h+=`<details class="fi-config"><summary>${trial?'Trial result · captured configuration':'Current configuration'}</summary><pre class="fi-probe-json">${esc(JSON.stringify(trial?trial.state:state,null,1))}</pre><p class="fi-fine">${esc(e.metric)} · ${esc(e.detail)}</p></details>`;
+      h+=`<details class="fi-config"><summary>${trial?'Trial result · captured configuration':'Current configuration'}</summary><pre class="fi-probe-json">${esc(JSON.stringify(trial?trial.state:state,null,1))}</pre><p class="fi-fine">${esc(trial?'Trial result':'Live preview')} · ${esc(e.metric)} · ${esc(e.detail)}</p></details>`;
       body.innerHTML=h;
-      if(openInspect)body.querySelector('.fi-inspect').open=true;
-      if(openConfig)body.querySelector('.fi-config').open=true;
+      for(const [selector,open] of [['.fi-inspect',openInspect],['.fi-config',openConfig],['.fi-exact',openEx],['.fi-workload',openWl]]){
+        const panel=body.querySelector(selector);if(panel&&open)panel.open=true;
+      }
     }
     function render(controls=true){
-      const e=trial||g.evaluate(state,levelIndex),focus=document.activeElement,fc=focus?{param:focus.dataset?.param,action:focus.dataset?.action,nudge:focus.dataset?.nudge,dir:focus.dataset?.direction,rewind:focus.dataset?.rewind!==undefined,probe:focus.dataset?.probe!==undefined,host:focus.dataset?.host,level:focus.dataset?.level}:null;
-      const mbody=$('#fi-measurements-body'),openInspect=mbody?.querySelector('.fi-inspect')?.open,openConfig=mbody?.querySelector('.fi-config')?.open;
+      const e=trial||g.evaluate(state,levelIndex),focus=document.activeElement,fc=focus?{param:focus.dataset?.param,action:focus.dataset?.action,nudge:focus.dataset?.nudge,dir:focus.dataset?.direction,rewind:focus.dataset?.rewind!==undefined,probe:focus.dataset?.probe!==undefined,host:focus.dataset?.host,level:focus.dataset?.level,summary:focus.matches?.('summary')?focus.parentElement?.classList?.[0]:null}:null;
       const rewindVal=root.querySelector('[data-rewind]')?.value;
       const displayState=trial?frameState(Math.max(probe,0)):state;
-      stage.innerHTML=`<defs><radialGradient id="fi-aura"><stop stop-color="${g.accent}" stop-opacity=".12"/><stop offset="1" stop-color="${g.accent}" stop-opacity="0"/></radialGradient><filter id="fi-glow"><feGaussianBlur stdDeviation="4"/></filter></defs><ellipse cx="500" cy="290" rx="490" ry="280" fill="url(#fi-aura)"/>${g.draw(displayState,levelIndex,{trial:!!trial,step:trial?Math.max(probe,0):-1,motion:motion&&playing})}`;
+      stage.innerHTML=`<defs><radialGradient id="fi-aura"><stop stop-color="${g.accent}" stop-opacity=".12"/><stop offset="1" stop-color="${g.accent}" stop-opacity="0"/></radialGradient><filter id="fi-glow"><feGaussianBlur stdDeviation="4"/></filter></defs><ellipse cx="500" cy="290" rx="490" ry="280" fill="url(#fi-aura)"/>${g.draw(displayState,levelIndex,{trial:!!trial,step:trial?Math.max(probe,0):-1,motion:motion&&playing,editable:!trial||(!playing&&probe===frameCount()-1)})}`;
       if(!drag)fitBoard();sizeHits();
+      if(motion&&playing)try{stage.setCurrentTime(0);}catch{}
       if(drag)stage.querySelector(`[data-handle="${drag.id}"]`)?.classList.add('fi-selected');
       stage.setAttribute('aria-label',`${g.title}. ${e.metric}. ${e.detail}`);
       if(controls){$('#fi-controls').innerHTML=g.controls(state,levelIndex);const nr=root.querySelector('[data-rewind]');if(nr&&rewindVal&&nr.querySelector(`option[value="${rewindVal}"]`))nr.value=rewindVal;}
@@ -172,15 +190,17 @@ const FieldGames = (() => {
       $('[data-host="sound"]').textContent=sound?'Sound on':'Sound off';
       $('[data-host="sound"]').setAttribute('aria-pressed',String(sound));
       $('#fi-levels').innerHTML=g.levels.map((l,i)=>`<button type="button" data-level="${i}" aria-label="Chamber ${i+1}: ${esc(l.name)}${completed[i]?`, completed${completed[i].assisted?' with hints':''}`:''}" ${i===levelIndex?'aria-current="step"':''}><span>${completed[i]?'✓':String(i+1).padStart(2,'0')}</span><small>${esc(l.name)}${completed[i]?.assisted?' · assisted':''}</small></button>`).join('');
-      renderMeasurements(openInspect,openConfig);
+      renderMeasurements();
       if(focus&&!focus.isConnected){const q=s=>root.querySelector(s);
         if(fc.param)q(`[data-param="${fc.param}"]`)?.focus({preventScroll:true});
         else if(fc.action)q(`[data-action="${fc.action}"]`)?.focus({preventScroll:true});
         else if(fc.nudge)q(`[data-nudge="${fc.nudge}"][data-direction="${fc.dir}"]`)?.focus({preventScroll:true});
         else if(fc.probe)q('[data-probe]')?.focus({preventScroll:true});
         else if(fc.rewind)q('[data-rewind]')?.focus({preventScroll:true});
+        else if(fc.summary&&['fi-inspect','fi-config','fi-workload','fi-exact','fi-measurements'].includes(fc.summary))q('.'+fc.summary+' > summary')?.focus({preventScroll:true});
         else if(fc.host)q(`[data-host="${fc.host}"]`)?.focus({preventScroll:true});
         else if(fc.level!==undefined&&fc.level!==null)q(`[data-level="${fc.level}"]`)?.focus({preventScroll:true});}
+      else if(focus&&focus.isConnected&&root.contains(focus)&&(focus.hidden||focus.closest('[hidden]'))){(completed[levelIndex]?$('[data-host="next"]'):stage)?.focus({preventScroll:true});}
       smil(!playing||!motion);
     }
     function mountLevel(i){preview=null;stopPlayback();levelIndex=i;level=g.levels[i];state=copy(level.initial);history=[];trial=null;probe=-1;hints=0;assisted=false;$('#fi-level-count').textContent=`CHAMBER 0${i+1} / 03`;$('#fi-level-title').textContent=level.name;$('#fi-objective').textContent=level.brief;message(g.invitation,'Awaiting trial');save();render();}
@@ -247,7 +267,7 @@ const FieldGames = (() => {
     },{signal});
     root.addEventListener('input',e=>{const key=e.target.dataset.param;if(!key)return;preview ||= copy(state);g.set(state,key,Number(e.target.value),levelIndex);clearTrial();render(false);},{signal});
     root.addEventListener('change',e=>{const key=e.target.dataset.param;if(key){if(!preview){preview=copy(state);g.set(state,key,Number(e.target.value),levelIndex);}remember(preview);preview=null;message(g.evaluate(state,levelIndex).detail,'Preview updated');render(e.target.tagName==='SELECT');return;}
-      if(e.target.dataset.probe!==undefined&&trial){pausePlayback();probe=Number(e.target.value);render(false);return;}
+      if(e.target.dataset.probe!==undefined){pausePlayback();if(!trial){trial=captureTrial();trial.verified=false;}probe=Number(e.target.value);render(false);return;}
       if(e.target.dataset.rewind!==undefined)return;
     },{signal});
     stage.addEventListener('keydown',e=>{const target=e.target.closest('[data-action]');if(target&&(e.key==='Enter'||e.key===' ')){e.preventDefault();e.stopPropagation();edit(()=>g.act(state,target.dataset.action,levelIndex));}},{signal});

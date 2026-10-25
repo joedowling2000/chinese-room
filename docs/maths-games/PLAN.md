@@ -8,10 +8,10 @@ Read with [DESIGN.md](DESIGN.md) and [RESEARCH.md](RESEARCH.md). This plan conce
 
 Updated: 25 October 2026. This section is the resume point if the session ends.
 
-- **Current task:** local user review of the complete seven-instrument, 21-chamber collection.
+- **Current task:** checkpoint 8 implementation and targeted local verification complete; proceed to device/player acceptance.
 - **Completed:** the preceding agent's seven game modules and fixtures were audited against `RESEARCH.md`, `DESIGN.md`, and this plan. Core runtime gaps have been filled: bounded replay/pause, inspectable trial records, per-update optimiser rewind, explicit non-drag controls, assisted-completion provenance, saved-solution restoration, save validation, reference links, and responsive/focus fixes.
-- **Next exact action:** open `#maths/play` on the Mac and physical iPad; review Basis Foundry first, then the Phase and Superposition transfer tasks. Record observations before deciding whether mechanics or presentation need revision.
-- **Verification still pending:** actual iPad/Safari, screen-reader review, measured device performance, and unaided-player learning/enjoyment gates. Desktop emulation and successful witness entry do not establish these.
+- **Next exact action:** user review at `#maths/play` on the physical iPad, starting with Basis Foundry, Phase Observatory, and Superposition Array. Desktop Safari automation can resume after the user enables “Allow remote automation” in Safari's Developer settings.
+- **Verification still pending:** actual iPad/Safari, screen-reader review, measured device performance, and unaided-player learning/enjoyment gates. Safari session creation was attempted and blocked by its existing automation setting; no system setting was changed. Desktop emulation and successful witness entry do not establish these acceptance results.
 - **Checkpoint policy:** the user has authorised local commits. Preserve the earlier agent's work in the checkpoint alongside the audited implementation. Commit each substantive completed milestone with this plan updated in the same commit; record verification, blockers, and the next exact action before ending a session. Do not push or deploy without separate authorisation.
 - **Verification policy:** no permanent automated test suite or dependency was added; checks used direct numerical calculations, syntax checks, and temporary browser-review scripts.
 
@@ -22,10 +22,24 @@ Updated: 25 October 2026. This section is the resume point if the session ends.
 | M2 Phase / Superposition | Both three-chamber sequences implemented and numerically/browser checked; player understanding gates pending |
 | M3 other four games | All implemented; actual optimiser history/rewind and inspectable probe data now included |
 | M4 presentation / 21 core chambers | SVG/DOM presentation, hints, explanations, saved miniatures, and trial replay implemented; visual/educational acceptance remains a user-review gate |
-| M5 verification | Chromium, responsive layouts, input/state/lifecycle checks, numerical checks, and temporary staging review completed as detailed below; physical-device/accessibility/playtest matrix remains open |
+| M5 verification | Chromium, responsive layouts, input/state/lifecycle checks, numerical checks, and actual fresh-output packaging review completed as detailed below; Safari automation blocked by permission setting; physical-device/accessibility/playtest matrix remains open |
 | M6 local review | Source served on port 8000 bound to all interfaces; local review candidate, not an accepted release |
 
 ### Incremental build log
+
+- **Checkpoint 8 — local build completion:** continued from checkpoint commit `2da9be0`. Restored Contour's draggable next-update handle after stepping while keeping old replay frames read-only. Trial pulses now follow the selected probe, with explicit timeline resets; phase inspection has a static selected-clock marker. Added native labelled numerical readouts, complete workload lists, optional exact values, inspection before Run without awarding completion, and focus handling for hidden/rebuilt controls. Fixed an inspection-panel crash when an open Exact panel disappeared after editing/reset, and preserved Previous/Next and summary focus. Nullspace's final replay now depicts the independent nuisance/useful probes used by its completion contract, not unrelated mixed samples. Added and tested a non-destructive fresh-output mode to the actual packaging script. Mathematical scoring rules and the 21 witness configurations are unchanged.
+
+### Checkpoint 8 evidence and blockers
+
+- **Interaction:** reproduced the missing Contour handle after one update; the fix permits rate dragging without changing position or update count. Older replay frames have no mutable handle. Verified replay/restart after an aged page, one pulse per selected probe, and static pause. The proposed stale-SVG-clock failure was not reproduced in Chromium; explicit resets make the intended timing deterministic rather than constitute evidence of that hypothesised bug.
+- **Inspection/accessibility:** native Input/Output/Target and update/velocity readouts use the captured state, with exact data available separately. Pre-Run probe selection does not record completion. Exact/workload panels preserve their open state when applicable and tolerate disappearing after edits. Previous/Next retain button focus; summary focus survives redraws. A real Tab/Enter path completed Basis Foundry's order chamber, with focus moving to Next after Run became hidden. Phone/tablet expanded-panel checks recorded no horizontal overflow. This does not certify all-game Tab order or screen-reader usability.
+- **Mathematical presentation:** directly checked the new intermediate matrix outputs for both operation orders, shared representation sums and decoder dot products for the dense workload, removed projection components, and the independent N/S projection outputs. These checks cover added presentation fields, not new scoring rules.
+- **Packaging:** `scripts/prepare-hosting.sh [NEW_OUTPUT_DIRECTORY]` was executed into a fresh directory and the resulting site smoke-tested. Existing destinations, symlinks, empty arguments, and excess arguments were rejected; an existing sentinel was preserved. Latest review artifact: `/tmp/field-instruments-build.0MsPwG/site`. Changed packaged files matched source; the staged Phase chamber completed successfully. Temporary staging servers were stopped. The original no-argument `dist/` rebuild remains unchanged and was not executed.
+- **Checks:** changed JavaScript syntax, shell syntax, and whitespace checks passed; the final targeted browser regression checks recorded no page errors. Previous 21-chamber results remain the baseline; no new permanent suite or dependency was added.
+- **Safari blocker:** installed `safaridriver` reports Safari 27.0.1, but session creation requires “Allow remote automation” in Safari's Developer settings. The user was informed; no permission/configuration change was made. Safari, physical iPad, screen-reader, device-performance, and unaided-player tasks remain open.
+- **Runtime:** source remains served on port 8000, bound to all interfaces. Use the links below; re-check the server and LAN address after a new session. Temporary artifacts and servers are not durable checkpoint storage.
+
+### Earlier checkpoints
 
 - **Checkpoint 7 — durable session handoff:** checkpoint the preceding agent's research/design/implementation and this session's audited runtime improvements together, so the working collection and its acceptance status can be recovered from Git. The latest syntax/whitespace checks passed and both `/` and `/maths-games/host.js` returned HTTP 200 on the local server. Resume from the current task and next action above; local server processes and temporary staging/screenshots may not survive session termination. If needed, restart from the repository root with `python3 -m http.server 8000 --bind 0.0.0.0`, checking that the port is free first. No push or public deployment is authorised.
 
@@ -58,7 +72,7 @@ The implementation uses the plan's permitted SVG/DOM overview approach rather th
 **Open acceptance tasks — do not mark complete without evidence:**
 
 1. Physical iPad on the LAN: record model, iPadOS/Safari version, orientation and display size; complete the core games using actual touch, review audio and lifecycle, and measure the busiest scene's input/frame behaviour.
-2. Actual desktop Safari and screen-reader review, including focus order and non-visual use of measurements.
+2. Actual desktop Safari and screen-reader review, including focus order and non-visual use of measurements. Safari automation is currently blocked until the user enables “Allow remote automation”; do not change that setting without authorisation.
 3. Unaided player observations for the M1/M2 gates and all seven transfer tasks: first useful action, first success, misunderstanding/failure recovery, prediction, and willingness to retry. Timing and enjoyment targets remain unmeasured.
 4. Review the seven visual treatments and educational explanations with the user; revise any mechanic that only rewards following hints or copying settings.
 5. After acceptance, decide whether to retire the retained legacy Abstract rendering/control code. Flat diagrams must remain; do not remove unrelated prior work before that decision.

@@ -40,6 +40,8 @@ The site includes browser-only interactive experiments and decorative mathematic
 - Motion and sound are optional. Reduced-motion preferences disable decorative animation; all calculations and completion rules remain available.
 - On another device on the same network, use this machine's current LAN IP instead of `localhost` (for example `http://192.168.1.144:8000/#maths/play`). The server must listen on the LAN interface.
 
+Safe local packaging without touching `dist/`: `build_root=$(mktemp -d /tmp/field-instruments-build.XXXXXX) && ./scripts/prepare-hosting.sh "$build_root/site"` — the optional output argument must be a brand-new path and is never deleted. Running the script with no argument rebuilds `dist/` destructively (unchanged default); deployment remains a separate step.
+
 Implementation progress and remaining review work are recorded in [the live plan](docs/maths-games/PLAN.md). [Design](docs/maths-games/DESIGN.md), [research](docs/maths-games/RESEARCH.md), and [numerical witness fixtures](docs/maths-games/FIXTURES.md) are kept alongside it. The current build is a local review candidate; physical iPad and unaided user testing remain outstanding.
 
 ## Interactive lab

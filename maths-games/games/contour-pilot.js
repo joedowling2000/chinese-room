@@ -45,7 +45,11 @@
  const frame=view.trial&&view.step>=0&&s.updates?.length?s.updates[clamp(view.step,0,s.updates.length-1)]:null,cur=frame||s,p=P([cur.x,cur.y]),g=grad(cur.x,cur.y,l);
  a+=circle(p,10,'fi-dot')+txt(p[0]+15,p[1]-15,'θ','fi-label');
  if(frame){const vel=P([cur.x+cur.vx,cur.y+cur.vy]),step=P([cur.x-cur.eta*g[0],cur.y-cur.eta*g[1]]);a+=arrow(p,vel,'fi-vector')+txt(vel[0]+12,vel[1]-8,'v · update velocity','fi-label')+arrow(p,step,'fi-warm')+txt(step[0]+12,step[1]+16,'−η∇L · chosen step','fi-label')+txt(p[0]+15,p[1]+32,`update ${cur.steps} · η ${fmt(cur.eta)} · μ ${fmt(cur.mu)}`,'fi-tiny');}
- else{const n=Math.hypot(...g)||1,head=P([cur.x-g[0]/n*.45,cur.y-g[1]/n*.45]);a+=arrow(p,head,'fi-warm');const next=[s.x+s.mu*s.vx-s.eta*g[0],s.y+s.mu*s.vy-s.eta*g[1]];if(!settled(s,l)&&s.steps<budget(l)&&s.status!=='diverged')a+=line(p,P(next),'fi-trace')+handle(P(next),'rate','next');}
+ else{const n=Math.hypot(...g)||1,head=P([cur.x-g[0]/n*.45,cur.y-g[1]/n*.45]);a+=arrow(p,head,'fi-warm');}
+ if(view.editable!==false&&!settled(s,l)&&s.steps<budget(l)&&s.status!=='diverged'){
+ const next=[s.x+s.mu*s.vx-s.eta*g[0],s.y+s.mu*s.vy-s.eta*g[1]];
+ a+=line(p,P(next),'fi-trace')+handle(P(next),'rate','next');
+}
  a+=txt(50,515,`η ${fmt(s.eta)}   μ ${fmt(s.mu)}   update ${s.steps}`,'fi-label')+txt(950,515,l===1?'L = ½(x² + 16y²)':l===0?'L = ½(x² + y²)':'L = (x² − 1)² + ½y² + 0.2x + 0.25','','end');return a;},
  inspect(s,l){return {updates:(s.updates||[]).map((u,i)=>({index:i,position:[u.x,u.y],velocity:[u.vx,u.vy],loss:loss(u.x,u.y,l),speed:Math.hypot(u.vx,u.vy),eta:u.eta,mu:u.mu,status:u.status}))};},
  explain(s,l){const g=grad(s.x,s.y,l);return `At (${fmt(s.x)}, ${fmt(s.y)}), the gradient is (${g.map(v=>fmt(v,3)).join(', ')}). The next update combines −η times this gradient with μ times your current velocity. The target requires both low loss and a small update velocity, so passing through a minimum at speed does not count.`;}
