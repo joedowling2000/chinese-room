@@ -367,6 +367,7 @@ function articlePage(a){
 }
 function modelsPage(){return `<section class="page model-page"><div class="page-index">[02] Models · research registry</div><h1 class="page-title">Models & experiments.</h1><p class="page-intro">Models used or produced in these projects. The entries describe their status and link to the relevant write-up. You can’t run these models on this website.</p><div class="model-registry">${models.map(m=>`<article class="model-item"><div class="model-state"><span class="${m.cls}"><i></i>${m.status}</span><span>${m.version}</span></div><h3>${m.name}</h3><p>${esc(m.desc)}</p><div class="model-specs">${m.specs.map(s=>`<span><small>${s[0]}</small>${s[1]}</span>`).join('')}</div>${m.note?`<p class="model-note">${esc(m.note)}</p>`:''}<div class="model-links">${m.article?`<a class="text-link" href="${href('article/'+m.article)}">Read the article →</a>`:''}${m.url?`<a class="text-link" href="${esc(m.url)}" target="_blank" rel="noopener">${esc(m.urlLabel||'Model repository ↗')}</a>`:''}</div></article>`).join('')}</div><div class="lab-next"><div><h2>Explore Mindcuber</h2><p>Turn the cube, step through a scramble reversal and inspect the reported training results.</p></div><a class="button primary" href="#lab/mindcuber">Open the experiment →</a></div></section>`}
 function aboutPage(){return `<section class="page"><div class="page-index">[03] About</div><h1 class="page-title">Inside the room.</h1><div class="about-grid"><div class="about-visual">${Field.art('surface','dark',{alt:'A mathematical surface, drawn as a wire mesh'})}</div><div class="about-copy"><h2>About Joe</h2><p>My longer-term aim is to build and train a language model from scratch. The projects here cover things I’m learning along the way: training a cube-solving network, reducing model memory use, and inspecting internal representations.</p><p>I run these experiments on a DGX Spark and write up what happened, including the attempts that didn’t work.</p><div class="setup-grid">${[['Hardware','NVIDIA DGX Spark · GB10 · 128 GB'],['Long project','An LLM built and trained from scratch'],['Interests','Interpretability, quantisation, RL, agents'],['Contact','hello@chineseroom.io']].map(x=>`<div class="setup"><small>${x[0]}</small><b>${x[1]==='hello@chineseroom.io'?`<a href="mailto:${x[1]}">${x[1]}</a>`:x[1]}</b></div>`).join('')}</div></div></div></section>`}
+let lastRoute = null;
 function render(initial=false){
   const r = route();
   let page = r.page;
@@ -380,6 +381,7 @@ function render(initial=false){
   });
   Lab.wire(null);
   Maths.wire(false);
+  Interiors.wire(null);
   if(page==='article'){
     const a = articles.find(x=>x.id===r.id)||articles[0];
     app.innerHTML = articlePage(a);
@@ -388,8 +390,8 @@ function render(initial=false){
     app.innerHTML = Lab.page(r.id);
     document.title = (r.id==='mindcuber'?'Mindcuber lab':r.id==='quantization'?'Quantisation lab':'The lab')+' — Chinese Room';
   }else if(page==='maths'){
-    app.innerHTML = Maths.page();
-    document.title = 'The Maths of AI — Chinese Room';
+    app.innerHTML = r.id==='play' ? Interiors.page(location.hash.split('/')[2]) : Maths.page();
+    document.title = (r.id==='play'?(Interiors.games.find(g=>g.id===location.hash.split('/')[2])?.title||'Interiors'):'The Maths of AI')+' — Chinese Room';
   }else if(page==='research'){
     app.innerHTML = research();
     document.title = 'Research — Chinese Room';
@@ -406,12 +408,23 @@ function render(initial=false){
   Field.wire();
   wirePage();
   Lab.wire(page==='lab'?r.id:null);
-  Maths.wire(page==='maths');
+  Maths.wire(page==='maths'&&r.id!=='play');
+  if(page==='maths'&&r.id==='play')Interiors.wire(location.hash.split('/')[2]);
   document.querySelector('#nav-sweep').style.width = '0%';
   closeMenu();
+  const wasPlay = lastRoute === 'play';
+  lastRoute = r.id === 'play' ? 'play' : page;
   window.scrollTo({top:0,behavior:'instant'});
-  if(!initial) document.querySelector('#main').focus({preventScroll:true});
-  if(page==='maths'&&r.id) document.getElementById(`maths-${r.id}`)?.scrollIntoView({behavior:'instant'});
+  if(!initial){
+    if(page==='maths'&&r.id==='play'&&location.hash.split('/')[2]) document.querySelector('.ir-over')?.focus({preventScroll:true});
+    else if(!(page==='maths'&&r.id==='play')) document.querySelector('#main').focus({preventScroll:true});
+  }
+  if(page==='maths'&&r.id&&r.id!=='play') document.getElementById(`maths-${r.id}`)?.scrollIntoView({behavior:'instant'});
+  else if(page==='maths'&&!r.id&&wasPlay&&Interiors.lastGame){
+    const topic = document.getElementById(`maths-${Interiors.lastGame}`);
+    topic?.scrollIntoView({behavior:'instant'});
+    topic?.querySelector('.maths-enter')?.focus({preventScroll:true});
+  }
 }
 
 function wirePage(){
@@ -491,6 +504,7 @@ function search(){
     ...articles.map(a=>({kind:'RESEARCH',label:a.title,href:`#article/${a.id}`,text:a.title+' '+a.tag+' '+a.dek})),
     {kind:'PAGE',label:'The Maths of AI',href:'#maths',text:'maths mathematics linear algebra matrix gradient descent attention softmax rope rotary torus dimensions superposition ablation'},
     ...Maths.topics.map(t=>({kind:'MATHS',label:t.short,href:`#maths/${t.id}`,text:t.short+' '+t.tag+' '+t.title})),
+    ...Interiors.games.map(g=>({kind:'ART',label:g.title,href:'#maths/play/'+g.id,text:g.title+' '+g.caption+' '+g.concept})),
     {kind:'PAGE',label:'Research index',href:'#research',text:'research index articles'},
     {kind:'PAGE',label:'Models and experiments',href:'#models',text:'models console registry experiments'},
     {kind:'PAGE',label:'About',href:'#about',text:'about joe'}

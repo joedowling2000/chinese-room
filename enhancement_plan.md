@@ -4,6 +4,18 @@ This is the continuation plan for the experience-learning work on `worktree/idio
 The detailed educational design is in [experience-learning-plan.md](experience-learning-plan.md).
 The editorial accuracy rules remain in [human-idiom.md](human-idiom.md).
 
+
+> **Update, 26 October 2026 — merged with Interiors.** The old maths instruments
+> (flat diagrams, first-person worlds, `maths/*.js`) were replaced on `#maths` by the
+> seven Interiors artworks (`maths-art/`, see `docs/maths-games/`). Kept from this
+> work: the editorial text of all seven topics, the purpose badges, goals, sources and
+> the nine-experience directory (`experiences.js`), and the lab labels. Removed: the
+> teaching panels for linear maps, attention and gradient descent,
+> `maths/learning-models.js` and `scripts/check-learning-models.cjs`, which only worked
+> inside the old canvases. They remain in git history at `bdcba60` if the teaching
+> layer is rebuilt on top of the artworks. The file tables below describe the
+> pre-merge build.
+
 ## Objective
 
 Turn the seven maths scenes and two lab examples into a connected learning environment.

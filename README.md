@@ -29,10 +29,24 @@ The site includes browser-only interactive experiments and decorative mathematic
 
 ## The maths of AI
 
-- `http://localhost:8000/#maths` — seven interactive illustrations.
-- Each topic has a flat diagram and a **First-person** mode. Choose **Step inside →** on a topic or **Start with linear maps** in the hero to go straight into the world.
-- Inside a world: drag to look around, use the on-screen pad or arrow keys / W A S D to move, follow the guide card (three short lessons per world), and jump between worlds with the numbered strip along the bottom. **Controls** opens the original sliders; **Pause motion** freezes all animation; **Exit** or `Esc` returns to the page.
-- Motion is never required: with `prefers-reduced-motion` the worlds start paused and every action snaps instead of animating.
+- `http://localhost:8000/#maths` — the seven concepts in prose, each beside a live preview of its Interiors artwork.
+- `http://localhost:8000/#maths/play` — **Interiors**, seven interactive artworks from inside a language model. Each is a full-screen piece drawn by the mathematics it depicts:
+
+| Route | Artwork | Concept | Interaction |
+| --- | --- | --- | --- |
+| `#maths/play/linear-maps` | Lattice | Linear maps | Drag the basis arrows î, ĵ; the whole embedding space bends |
+| `#maths/play/folding` | Stained Glass | Non-linearity (ReLU) | Draw creases; panes are linear regions; train on two spirals (WebGL2) |
+| `#maths/play/gradient-descent` | Descent | Gradient descent | Drop seeds on a ridgeline loss landscape; tune η and momentum |
+| `#maths/play/attention` | Loom | Attention | Tap a word; threads are softmax weights from four toy heads |
+| `#maths/play/rotary` | Orrery | Rotary position | Drag the sentence; position is rotation, score depends only on distance |
+| `#maths/play/dimensions` | Crowded Sky | Superposition / high dimensions | Add concepts, light stars, watch interference; random angles in 1,000-D |
+| `#maths/play/ablation` | Nullspace | Projection / ablation | Turn a blade through a cloud of activations and delete a direction |
+
+- Each piece walks the viewer through 4–5 discoveries with a guiding prompt line; **The maths** (`M`) opens a live drawer with the equation, the viewer's current numbers, a plain-English walkthrough, an "inside the model" note, an honesty note about what is synthetic, and primary references. `S` toggles optional generative sound, `Space` pauses ambient motion, `Esc` exits.
+- Everything runs locally in the browser; no model or API is called. Data are small and synthetic, and each piece says so.
+- Static servers like `python3 -m http.server` let Chrome cache scripts heuristically; hard-reload after editing.
+
+Design, review and progress log: [docs/maths-games/DESIGN.md](docs/maths-games/DESIGN.md), [docs/maths-games/PLAN.md](docs/maths-games/PLAN.md), [docs/maths-games/RESEARCH.md](docs/maths-games/RESEARCH.md).
 
 ## Interactive lab
 
@@ -50,11 +64,9 @@ See [PLAN.md](PLAN.md) for the implementation status, source requirements and fo
 
 - `index.html`, `styles.css`, `field.css`, `app.js`, `field.js`: site shell, layout base, Field theme, and client-side navigation/content
 - `lab.js`: cube geometry, experiment pages and quantisation calculations
-- `experiences.js`, `experiences.css`: shared experience layer — purpose labels, the nine-experience directory, and the teaching panel used by linear maps, attention and gradient descent (see `enhancement_plan.md` for progress)
-- `scripts/check-learning-models.cjs`: numerical regression checks for the teaching calculations — run with `node scripts/check-learning-models.cjs`
-- `maths.js`: The Maths of AI page — page shell, shared canvas plumbing, first-person camera, full-screen journey and diagram modes
-- `maths/*.js`: one file per Maths illustration (copy, flat view, first-person scene and controls), registered with `Maths.scene`
-- `maths/learning-models.js`: the exact synthetic attention and gradient-descent calculations shared by the scenes and their teaching panels
+- `experiences.js`, `experiences.css`: shared experience layer — purpose labels and the nine-experience directory (see `enhancement_plan.md`)
+- `maths.js`: The Maths of AI page: the seven ideas' copy, the forward-pass map, and a live poster of each artwork linking into Interiors
+- `maths-art/`: Interiors — `host.js` (gallery, full-bleed frame, prompts, maths drawer, sound), `interiors.css`, and one file per artwork in `pieces/`
 - `scripts/generate-field-art.mjs`: regenerates the procedural SVG artwork in `assets/`
 - `PLAN.md`: interactive-site plan and progress
 - `assets/`: visual assets
