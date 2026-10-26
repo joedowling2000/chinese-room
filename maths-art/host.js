@@ -114,7 +114,7 @@ const Interiors = (() => {
         </a>`).join('')}
       </div>
       <p class="ir-note">Touch, mouse or keyboard. Everything runs in your browser; no model is called. Every moving thing is computed by the operation it depicts — the data are small and synthetic, and each piece says where.</p>
-      <a class="text-link" href="#maths">Read the ideas and flat diagrams →</a>
+      <a class="text-link" href="#maths">Read the ideas behind each piece →</a>
     </section>`;
   }
 
@@ -187,8 +187,13 @@ const Interiors = (() => {
     };
     let dims = canvases.map(size);
     const onResize = () => { dims = canvases.map(size); if (!motion) draw(4); };
+    // Only posters on screen are redrawn; the maths page holds seven down a long scroll.
+    const seen = new Set(canvases);
+    const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting ? seen.add(e.target) : seen.delete(e.target)), { rootMargin: '100px' });
+    canvases.forEach(c => io.observe(c));
     function draw(t) {
       canvases.forEach((c, i) => {
+        if (motion && !seen.has(c)) return;
         const p = pieces.find(p => p.id === c.dataset.poster), ctx = c.getContext('2d');
         const [w, h] = dims[i];
         ctx.save();
@@ -203,7 +208,7 @@ const Interiors = (() => {
     }
     addEventListener('resize', onResize);
     if (motion) raf = requestAnimationFrame(loop); else draw(4);
-    return { dispose() { alive = false; cancelAnimationFrame(raf); removeEventListener('resize', onResize); } };
+    return { dispose() { alive = false; cancelAnimationFrame(raf); io.disconnect(); removeEventListener('resize', onResize); } };
   }
 
   /* ---------- the full-bleed frame ---------- */
@@ -470,7 +475,7 @@ const Interiors = (() => {
   function gauss(r) { let u = 0, v = 0; while (!u) u = r(); v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
 
   return {
-    register, page, wire, draw, rng, gauss, clamp, lerp, fmt, esc,
+    register, page, wire, draw, posters: wireGallery, rng, gauss, clamp, lerp, fmt, esc,
     get games() { return pieces; },
     get lastGame() { return lastPiece; }
   };

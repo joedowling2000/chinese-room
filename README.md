@@ -29,7 +29,7 @@ The site includes browser-only interactive experiments and decorative mathematic
 
 ## The maths of AI
 
-- `http://localhost:8000/#maths` — the seven concepts and their flat diagrams.
+- `http://localhost:8000/#maths` — the seven concepts in prose, each beside a live preview of its Interiors artwork.
 - `http://localhost:8000/#maths/play` — **Interiors**, seven interactive artworks from inside a language model. Each is a full-screen piece drawn by the mathematics it depicts:
 
 | Route | Artwork | Concept | Interaction |
@@ -64,8 +64,7 @@ See [PLAN.md](PLAN.md) for the implementation status, source requirements and fo
 
 - `index.html`, `styles.css`, `field.css`, `app.js`, `field.js`: site shell, layout base, Field theme, and client-side navigation/content
 - `lab.js`: cube geometry, experiment pages and quantization calculations
-- `maths.js`: The Maths of AI page, flat diagram plumbing and full-screen diagrams; game launch links
-- `maths/*.js`: explanatory copy and flat illustrations; legacy Abstract renderers retained during migration
+- `maths.js`: The Maths of AI page: the seven ideas' copy, the forward-pass map, and a live poster of each artwork linking into Interiors
 - `maths-art/`: Interiors — `host.js` (gallery, full-bleed frame, prompts, maths drawer, sound), `interiors.css`, and one file per artwork in `pieces/`
 - `scripts/generate-field-art.mjs`: regenerates the procedural SVG artwork in `assets/`
 - `PLAN.md`: interactive-site plan and progress

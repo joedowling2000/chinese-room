@@ -11,10 +11,9 @@ else
   if [ -L "$output" ]; then echo 'Refusing to replace a symlinked dist directory' >&2; exit 1; fi
   rm -rf "$output"
 fi
-mkdir -p "$output/articles" "$output/assets" "$output/maths"
+mkdir -p "$output/articles" "$output/assets"
 cp index.html app.js lab.js field.js maths.js styles.css field.css favicon.svg robots.txt sitemap.xml feed.xml "$output/"
 cp articles/* "$output/articles/"
 cp assets/* "$output/assets/"
-cp maths/*.js "$output/maths/"
 cp -R maths-art "$output/maths-art"
 printf 'Prepared static site in %s\n' "$output"
