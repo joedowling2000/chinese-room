@@ -27,7 +27,7 @@ const Field = (() => {
   <div class="field-hero-copy">
     <p class="eyebrow">AI project notes</p>
     <h1>Inside the room</h1>
-    <p>I’m Joe Dowling. I’m learning how language models work by running experiments on a DGX Spark.<br>Here I write up the methods, results and things I couldn’t get working.</p>
+    <p>Experiments on how language models work, run on an NVIDIA DGX Spark.<br>Each write-up covers the method, the results and what did not work.</p>
     <a class="pill light" href="#research">Read the project notes <span>↗</span></a>
   </div>
   <div class="field-caption"><span>Chinese Room · Joe Dowling</span><span>An illustration of a residual stream</span><a href="#research" data-scroll-target="field-research">View the projects ↓</a></div>
