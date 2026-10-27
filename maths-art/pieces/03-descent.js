@@ -91,7 +91,7 @@
   };
 
   Interiors.register({
-    id: 'gradient-descent', no: '03', concept: 'Gradient descent', title: 'Descent', accent: '#ffb46a',
+    id: 'gradient-descent', no: '03', concept: 'Gradient descent', title: 'Descent', maths: 'Gradient descent', eq: 'θ ← θ − η ∇L(θ)', accent: '#ffb46a',
     caption: 'Learning is a blind walk downhill across a landscape of error.',
     label: 'Stacked ridgelines of a loss landscape with glowing seeds rolling into its valleys.',
     mathsTitle: 'Feeling for the bottom',

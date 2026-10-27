@@ -22,6 +22,8 @@ const Experiences = (() => {
     return `<span class="exp-badges">${c.labels.map(l => `<b class="exp-badge">${esc(l)}</b>`).join('')}<b class="exp-badge exp-badge-kind">${esc(c.kind)}</b></span>`;
   };
   const outcome = id => byId[id] ? byId[id].outcome : '';
+  // The seven maths topics are titled by the maths their Interiors artwork conveys.
+  const artwork = id => (typeof Interiors === 'undefined' ? [] : Interiors.games).find(g => g.id === id);
 
   const FILTERS = [['all','All'],['use','Using a model'],['train','Training and fine-tuning'],['inspect','Inspecting and changing a model']];
 
@@ -37,12 +39,12 @@ const Experiences = (() => {
     <p class="exp-filter-note">The filter changes this list only; every section below stays in place.</p>
   </div>
   <div class="exp-dir">
-    ${catalog.map(c=>`<a class="exp-card" href="${esc(c.href)}" ${c.anchor?`data-scroll-target="${c.anchor}"`:''} data-groups="${c.groups.join(' ')}">
-      <span class="exp-card-top"><b>${esc(c.title)}</b></span>
+    ${catalog.map(c=>{const art=artwork(c.id);return `<a class="exp-card" href="${esc(c.href)}" ${c.anchor?`data-scroll-target="${c.anchor}"`:''} data-groups="${c.groups.join(' ')}">
+      <span class="exp-card-top"><b>${esc(art?art.maths:c.title)}</b></span>
       ${badges(c.id)}
-      <span class="exp-card-outcome">${esc(c.outcome)}</span>
-      <span class="exp-card-go">Open →</span>
-    </a>`).join('')}
+      ${art?`<span class="exp-card-eq">${esc(art.eq)}</span>`:`<span class="exp-card-outcome">${esc(c.outcome)}</span>`}
+      <span class="exp-card-go">${art?`Open · ${esc(art.title)} →`:'Open →'}</span>
+    </a>`;}).join('')}
   </div>
 </nav>`;
   }

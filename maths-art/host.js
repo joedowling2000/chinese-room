@@ -107,8 +107,9 @@ const Interiors = (() => {
         <a class="ir-tile" href="#maths/play/${p.id}" style="--ir-accent:${p.accent}">
           <canvas class="ir-poster" data-poster="${p.id}" aria-hidden="true"></canvas>
           <span class="ir-tile-text">
-            <span class="ir-tile-no">${p.no} / ${esc(p.concept)}</span>
-            <span class="ir-tile-title">${esc(p.title)}</span>
+            <span class="ir-tile-no">${p.no} / ${esc(p.title)}</span>
+            <span class="ir-tile-title">${esc(p.maths)}</span>
+            <span class="ir-tile-eq">${esc(p.eq)}</span>
             <span class="ir-tile-cap">${esc(p.caption)}</span>
           </span>
         </a>`).join('')}
@@ -130,12 +131,12 @@ const Interiors = (() => {
 
   function frame(p) {
     const idx = pieces.indexOf(p), prev = pieces[(idx + pieces.length - 1) % pieces.length], next = pieces[(idx + 1) % pieces.length];
-    return `<section class="ir-piece" style="--ir-accent:${p.accent}" aria-label="${esc(p.title)}">
+    return `<section class="ir-piece" style="--ir-accent:${p.accent}" aria-label="${esc(p.maths)}: ${esc(p.title)}">
       <canvas class="ir-canvas ir-base" aria-hidden="true"></canvas>
       <canvas class="ir-canvas ir-over" tabindex="0" role="img" aria-label="${esc(p.label || p.caption)}"></canvas>
       <header class="ir-top ir-chrome">
         <a href="#maths/play" class="ir-back">← Interiors</a>
-        <span class="ir-where">${p.no} / ${esc(p.concept)}</span>
+        <span class="ir-where">${p.no} / ${esc(p.title)}</span>
         <span class="ir-top-actions">
           <button type="button" data-host="maths" aria-pressed="false"><span class="ir-wide">The </span>maths <kbd>M</kbd></button>
           <button type="button" data-host="sound" aria-pressed="false">Sound <kbd>S</kbd></button>
@@ -145,7 +146,8 @@ const Interiors = (() => {
         </span>
       </header>
       <div class="ir-caption ir-chrome">
-        <h1>${esc(p.title)}</h1>
+        <h1>${esc(p.maths)}</h1>
+        <p class="ir-eq">${esc(p.eq)}</p>
         <p class="ir-sub">${esc(p.caption)}</p>
         <div class="ir-guide" aria-live="polite">
           <p class="ir-insight" hidden></p>
@@ -156,7 +158,7 @@ const Interiors = (() => {
       ${(p.controls || []).length ? `<div class="ir-dock ir-chrome"><button type="button" class="ir-dock-toggle" data-host="dock" aria-expanded="true">Controls</button><div class="ir-dock-body">${p.controls.map(control).join('')}</div></div>` : ''}
       <aside class="ir-drawer" hidden aria-label="The maths">
         <button type="button" class="ir-drawer-close" data-host="maths" aria-label="Close the maths">✕</button>
-        <p class="ir-drawer-kicker">${p.no} / ${esc(p.concept)}</p>
+        <p class="ir-drawer-kicker">${p.no} / ${esc(p.maths)} · ${esc(p.title)}</p>
         <h2>${esc(p.mathsTitle || 'The maths')}</h2>
         <div class="ir-live"></div>
         <div class="ir-walk">${(p.walk || []).map(t => `<p>${t}</p>`).join('')}</div>

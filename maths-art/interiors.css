@@ -17,6 +17,7 @@
 .ir-tile-text{position:absolute;left:0;right:0;bottom:0;padding:60px 22px 20px;display:flex;flex-direction:column;gap:6px;background:linear-gradient(transparent,rgba(3,4,7,.92) 62%)}
 .ir-tile-no{font:10px/1.4 var(--mono);text-transform:uppercase;letter-spacing:.14em;color:var(--ir-accent)}
 .ir-tile-title{font:400 30px/1 var(--sans);letter-spacing:-.035em}
+.ir-tile-eq{font:12px/1.4 var(--mono);color:var(--ir-accent);opacity:.9}
 .ir-tile-cap{font:14px/1.5 var(--sans);color:#b9c0c7;max-width:44ch}
 .ir-note{margin:34px 0 16px;max-width:760px;font:12px/1.7 var(--mono);color:var(--muted)}
 
@@ -50,9 +51,10 @@ body.ir-playing main{min-height:100dvh}
 .ir-caption{position:absolute;left:28px;bottom:26px;max-width:min(560px,calc(100vw - 56px));pointer-events:none}
 .ir-caption>*{pointer-events:auto;position:relative}
 .ir-caption::before{content:'';position:absolute;left:-140px;bottom:-120px;width:calc(100% + 280px);height:calc(100% + 220px);background:radial-gradient(closest-side,rgba(5,6,10,.78),rgba(5,6,10,0));pointer-events:none}
-.ir-caption h1{font:400 clamp(44px,6vw,86px)/.9 var(--sans);letter-spacing:-.055em;margin:0 0 10px;text-shadow:0 2px 30px rgba(0,0,0,.6)}
+.ir-caption h1{font:400 clamp(40px,4.8vw,70px)/.95 var(--sans);letter-spacing:-.05em;margin:0 0 10px;text-shadow:0 2px 30px rgba(0,0,0,.6)}
 .ir-caption:has(.ir-insight:not([hidden])) h1{font-size:clamp(32px,3.6vw,48px)}
 .ir-caption h1{transition:font-size .6s ease}
+.ir-eq{font:15px/1.4 var(--mono);color:var(--ir-accent);margin:0 0 12px;text-shadow:0 1px 14px rgba(0,0,0,.9)}
 .ir-sub{font:17px/1.5 var(--sans);color:#d5dbe0;margin:0 0 16px;text-shadow:0 1px 14px rgba(0,0,0,.9)}
 .ir-guide{border-left:1px solid var(--ir-accent);padding:2px 0 2px 14px}
 .ir-prompt{font:13px/1.55 var(--mono);color:#f2f4f6;margin:0;text-shadow:0 1px 10px #000}
@@ -122,8 +124,9 @@ body.ir-playing main{min-height:100dvh}
   .ir-where,.ir-top-actions kbd{display:none}
   .ir-top-actions button{padding:8px 11px}
   .ir-caption{left:16px;right:16px;bottom:64px}
-  .ir-caption h1,.ir-caption:has(.ir-insight:not([hidden])) h1{font-size:34px;margin-bottom:6px}
+  .ir-caption h1,.ir-caption:has(.ir-insight:not([hidden])) h1{font-size:30px;margin-bottom:6px}
   .ir-sub{font-size:13px;margin-bottom:8px}
+  .ir-eq{font-size:12px;margin-bottom:6px}
   .ir-insight{font-size:13px;margin-bottom:6px}
   .ir-prompt{font-size:12px}
   .ir-top-actions .ir-step,.ir-wide{display:none}

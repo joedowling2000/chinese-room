@@ -126,7 +126,7 @@
   }
 
   Interiors.register({
-    id: 'dimensions', no: '06', concept: 'High dimensions', title: 'Crowded Sky', accent: '#c4b2ff',
+    id: 'dimensions', no: '06', concept: 'High dimensions', title: 'Crowded Sky', maths: 'Superposition', eq: 'z = Σ aᵢvᵢ  ·  âⱼ = vⱼ·z', accent: '#c4b2ff',
     caption: 'More concepts than dimensions. They share the space, and pay for it in interference.',
     label: 'Feature directions as stars on a rotating sphere, joined by glowing filaments where they interfere.',
     mathsTitle: 'Superposition',

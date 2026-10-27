@@ -132,7 +132,7 @@
   ];
 
   Interiors.register({
-    id: 'ablation', no: '07', concept: 'Projection / ablation', title: 'Nullspace', accent: '#ffb05c',
+    id: 'ablation', no: '07', concept: 'Projection / ablation', title: 'Nullspace', maths: 'Orthogonal projection', eq: 'x′ = x − (x·r̂) r̂', accent: '#ffb05c',
     caption: 'Cut one direction out of the model’s mind, and see what goes with it.',
     label: 'A cloud of amber and blue particles cut by a plane of light that removes one direction from every point.',
     mathsTitle: 'Deleting a direction',

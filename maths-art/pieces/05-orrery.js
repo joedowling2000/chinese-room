@@ -74,7 +74,7 @@
   }
 
   Interiors.register({
-    id: 'rotary', no: '05', concept: 'Rotary position', title: 'Orrery', accent: '#d9b36c',
+    id: 'rotary', no: '05', concept: 'Rotary position', title: 'Orrery', maths: 'Rotary position embedding', eq: '⟨R(mω)q, R(nω)k⟩ = ⟨q, R((n−m)ω)k⟩', accent: '#d9b36c',
     caption: 'A word’s position is written as rotation. Only the angle between two words matters.',
     label: 'A brass orrery: two words as planets on concentric orbits that rotate at different speeds with position.',
     mathsTitle: 'Position as rotation',

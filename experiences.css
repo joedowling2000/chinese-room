@@ -11,6 +11,7 @@
 .exp-card:hover{border-color:var(--muted)}
 .exp-card.is-hidden{display:none}
 .exp-card-top b{font:500 15px var(--sans)}
+.exp-card-eq{color:var(--body);font:400 12px/1.5 var(--mono)}
 .exp-card-outcome{color:var(--muted);font:400 12.5px/1.5 var(--sans)}
 .exp-card-go{margin-top:auto;color:var(--quiet);font:500 11px var(--sans);letter-spacing:.06em;text-transform:uppercase}
 .exp-badges{display:flex;flex-wrap:wrap;gap:6px}

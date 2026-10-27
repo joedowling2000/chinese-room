@@ -391,7 +391,7 @@ function render(initial=false){
     document.title = (r.id==='mindcuber'?'Mindcuber lab':r.id==='quantization'?'Quantisation lab':'The lab')+' — Chinese Room';
   }else if(page==='maths'){
     app.innerHTML = r.id==='play' ? Interiors.page(location.hash.split('/')[2]) : Maths.page();
-    document.title = (r.id==='play'?(Interiors.games.find(g=>g.id===location.hash.split('/')[2])?.title||'Interiors'):'The Maths of AI')+' — Chinese Room';
+    document.title = (r.id==='play'?((g=>g?`${g.maths} · ${g.title}`:'Interiors')(Interiors.games.find(g=>g.id===location.hash.split('/')[2]))):'The Maths of AI')+' — Chinese Room';
   }else if(page==='research'){
     app.innerHTML = research();
     document.title = 'Research — Chinese Room';
@@ -504,7 +504,7 @@ function search(){
     ...articles.map(a=>({kind:'RESEARCH',label:a.title,href:`#article/${a.id}`,text:a.title+' '+a.tag+' '+a.dek})),
     {kind:'PAGE',label:'The Maths of AI',href:'#maths',text:'maths mathematics linear algebra matrix gradient descent attention softmax rope rotary torus dimensions superposition ablation'},
     ...Maths.topics.map(t=>({kind:'MATHS',label:t.short,href:`#maths/${t.id}`,text:t.short+' '+t.tag+' '+t.title})),
-    ...Interiors.games.map(g=>({kind:'ART',label:g.title,href:'#maths/play/'+g.id,text:g.title+' '+g.caption+' '+g.concept})),
+    ...Interiors.games.map(g=>({kind:'ART',label:`${g.maths} · ${g.title}`,href:'#maths/play/'+g.id,text:g.title+' '+g.maths+' '+g.caption+' '+g.concept})),
     {kind:'PAGE',label:'Research index',href:'#research',text:'research index articles'},
     {kind:'PAGE',label:'Models and experiments',href:'#models',text:'models console registry experiments'},
     {kind:'PAGE',label:'About',href:'#about',text:'about joe'}

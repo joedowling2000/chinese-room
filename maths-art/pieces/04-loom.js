@@ -110,7 +110,7 @@
   }
 
   Interiors.register({
-    id: 'attention', no: '04', concept: 'Attention', title: 'Loom', accent: '#ff9a7c',
+    id: 'attention', no: '04', concept: 'Attention', title: 'Loom', maths: 'Softmax attention', eq: 'out = Σ softmax(q·kᵢ / τ) vᵢ', accent: '#ff9a7c',
     caption: 'Every word asks every earlier word a question, and becomes a blend of the answers.',
     label: 'Words of a sentence around a ring, connected by coloured threads whose thickness is the attention weight.',
     mathsTitle: 'Query, key, value',

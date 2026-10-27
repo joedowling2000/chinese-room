@@ -78,9 +78,9 @@ const Maths = (() => {
   function topic(t){
     const p=art(t.id);
     return `<section class="maths-topic" id="maths-${t.id}" aria-labelledby="maths-${t.id}-title" style="--ir-accent:${p.accent}">
-  <div class="maths-copy"><p class="eyebrow">${t.no} / ${t.tag}</p>${Experiences.badges(t.id)}<h2 id="maths-${t.id}-title">${t.title}</h2><p class="exp-card-outcome">Goal: ${Experiences.outcome(t.id)}</p>${t.body.map(x=>`<p>${x}</p>`).join('')}<div class="maths-llm"><p class="maths-why-label">In a language model</p><p>${t.llm.where}</p><p>${t.llm.role}</p></div><p class="maths-formula">${t.formula}</p>${t.sources?`<p class="maths-sources">${t.sources.map(l=>`<a class="text-link" href="${l.href}" target="_blank" rel="noopener">${l.label} ↗</a>`).join(' · ')}</p>`:''}</div>
+  <div class="maths-copy"><p class="eyebrow">${t.no} / ${t.tag}</p>${Experiences.badges(t.id)}<h2 id="maths-${t.id}-title">${p.maths}</h2><p class="maths-dek">${t.title}</p><p class="maths-formula">${t.formula}</p>${t.body.map(x=>`<p>${x}</p>`).join('')}<div class="maths-llm"><p class="maths-why-label">In a language model</p><p>${t.llm.where}</p><p>${t.llm.role}</p></div>${t.sources?`<p class="maths-sources">${t.sources.map(l=>`<a class="text-link" href="${l.href}" target="_blank" rel="noopener">${l.label} ↗</a>`).join(' · ')}</p>`:''}</div>
   <figure class="maths-figure">
-    <a class="maths-art maths-enter" href="#maths/play/${t.id}" aria-label="Step inside ${p.title}, the ${t.short.toLowerCase()} artwork">
+    <a class="maths-art maths-enter" href="#maths/play/${t.id}" aria-label="Step inside ${p.title}, the ${p.maths} artwork">
       <canvas class="ir-poster" data-poster="${t.id}" aria-hidden="true"></canvas>
       <span class="maths-art-text"><span class="maths-art-no">${p.no} / Interiors</span><span class="maths-art-title">${p.title}</span><span class="maths-art-cap">${p.caption}</span><span class="maths-art-go">Step inside →</span></span>
     </a>
@@ -121,7 +121,7 @@ const Maths = (() => {
   <div class="maths-hero-copy">
     <p class="eyebrow">The maths of AI</p>
     <h1>Step inside the maths.</h1>
-    <p>Seven ideas, seven rooms inside a language model. Bend the space words live in, crease it into stained glass, weave attention, roll down a loss landscape. Each is an interactive artwork drawn by the mathematics it depicts.</p>
+    <p>Seven ideas, seven rooms inside a language model. Bend the space words live in, fold it like a kaleidoscope, weave attention, roll down a loss landscape. Each is an interactive artwork drawn by the mathematics it depicts.</p>
     <p class="maths-hero-actions"><a class="pill light" href="#maths/play">Step inside ↗</a> <a class="text-link" href="#maths" data-scroll-target="maths-index">or find an experience ↓</a></p>
     <p class="maths-hero-note">Seven interactive artworks · no installation · keyboard &amp; touch</p>
   </div>

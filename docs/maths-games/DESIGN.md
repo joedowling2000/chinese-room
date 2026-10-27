@@ -27,7 +27,7 @@ The site is called Chinese Room — Searle's thought experiment about a person i
 | # | Concept (route id) | Artwork | Medium / aesthetic | The viewer is… |
 |---|---|---|---|---|
 | 01 | Linear maps (`linear-maps`) | **Lattice** | Infinite architectural grid of luminous word-stars, moiré of before/after grids | standing in embedding space as a weight matrix bends it |
-| 02 | Non-linearity (`folding`) | **Stained Glass** | Full-screen leaded-glass window whose panes are the linear regions of a ReLU network | inside a feed-forward block, drawing its creases |
+| 02 | Non-linearity (`folding`) | **Kaleidoscope** | A turning kaleidoscope whose mirrors are ReLU neurons; each mirrored copy is one linear region | inside a feed-forward block, painting on a plane its neurons fold |
 | 03 | Gradient descent (`gradient-descent`) | **Descent** | Ridgeline topography (Joy Division *Unknown Pleasures*) with long-exposure light trails | the training process, dropping seeds onto the loss landscape |
 | 04 | Attention (`attention`) | **Loom** | String art: words around a circle woven by weighted threads, one colour per head | a word asking every earlier word a question |
 | 05 | Rotary position (`rotary`) | **Orrery** | Brass-and-silver astrolabe of many-handed clocks, spirograph traces | a token whose position is written as rotation |
@@ -42,18 +42,19 @@ The artwork fills the viewport. Chrome is a thin overlay that fades after 4 s wi
 
 ```text
 ┌───────────────────────────────────────────────────────────────┐
-│ ← Interiors   04 / ATTENTION            maths  ·  sound  ·  ✕  │
+│ ← Interiors   04 / LOOM                 maths  ·  sound  ·  ✕  │
 │                                                               │
 │                       [ full-bleed artwork ]                  │
 │                                                               │
-│ LOOM                                                          │
+│ Softmax attention                                             │
+│ out = Σ softmax(q·kᵢ / τ) vᵢ                                  │
 │ Every word asks every earlier word a question.                │
 │ › tap a word to make it ask                     [ dock: ≤4    │
 │                                                   controls ]  │
 └───────────────────────────────────────────────────────────────┘
 ```
 
-- **Title + one-line caption** (bottom-left). The caption states the concept in plain words.
+- **Title + equation + one-line caption** (bottom-left). Since 27 Oct 2026 the title is the maths the piece conveys ("Softmax attention"), with its equation directly underneath; the artwork's own name (Loom) moves to the header label. The same maths-first titles lead the gallery tiles, the `#maths` topics and the directory cards. The caption states the concept in plain words.
 - **Prompt** (`›` line): a short instruction that tells you what to touch first. It changes as you go, so the piece guides you through 3–4 discoveries ("now drag ĵ onto î"), without blocking anything.
 - **Dock** (bottom-right): at most four controls — sliders, toggles or presets — each mapped to a named mathematical quantity.
 - **Maths drawer** (toggle, right side): the live equation with the viewer's current numbers, a 3–5 sentence plain-English walkthrough, an "Inside the model" paragraph and the primary reference. Updates in real time.
@@ -78,17 +79,19 @@ The **index** (`#maths/play`) is a dark gallery: seven large live thumbnails (ea
 
 **Truth.** Words' positions are illustrative 2D placements, labelled “illustrative positions — real embeddings have thousands of dimensions”.
 
-### 02 · Stained Glass — non-linearity (ReLU)
+### 02 · Kaleidoscope — the ReLU activation
 
-**Image.** A cathedral window. The plane is divided into convex panes of jewel-coloured glass separated by dark lead lines. Each pane is a **linear region** of a small ReLU network: inside it, the network is exactly linear; lead lines are where some neuron's pre-activation crosses zero (its "crease"). Pane colour = network output (two-tone warm/cold blend), brightness varies linearly within a pane like light through glass. Two interlocking spirals of data points glow over it.
+*Replaced Stained Glass on 27 Oct 2026 at the user's request; Stained Glass is in git history up to `49d5978`.*
 
-**Interaction.** Drag across the window to **draw a crease**: a new first-layer neuron whose zero-line is your stroke. New lead lines appear and existing panes shatter into smaller ones. Dock: **Train** (live gradient descent on the spiral data — the window re-leads itself until the warm and cold panes trace the spirals), **Activation: ReLU ↔ none**, depth (1–3 hidden layers), **Shuffle**.
+**Image.** A turning kaleidoscope of marbled ink and glass beads. Every mirror is one **ReLU neuron**: it measures which side of a line a point is on, z = n·x − b, and applies the hinge to −z, x′ = x + 2·ReLU(−z)·n. On the positive side the neuron is off and the point passes through; on the negative side it switches on and reflects it. Stacked one neuron per layer, the folds cut the plane into **linear regions**, and every region shows the same patch of the folded plane, so the picture is mirrored region by region. Fine light lines are the creases (each neuron's z = 0); deeper creases bend where they cross earlier ones.
 
-**Discoveries.** (1) draw a crease: one neuron = one straight fold; (2) draw more: creases multiply panes; deeper layers bend later creases at earlier lead lines; (3) switch activation to "none" → the entire window becomes a *single* pane, a smooth gradient, however many layers — stacked linear maps are one linear map; (4) Train → only with the hinge can it wrap the spirals.
+**Interaction.** Drag on empty glass to **paint**: the stroke is written into the folded plane, so it appears once in every region that covers that spot. Drag a bright crease to slide that neuron's mirror; hovering one labels it ("neuron 3: z = 0 · max(0, z) bends here") with a hinge glyph. Dock: **Activation: ReLU ↔ none**, **Layers** 1–8 (default 5), **Turn the kaleidoscope**, **Show the creases**, **Clear the paint**, **New mirrors**.
 
-**Maths drawer.** `h = ReLU(Wx + b)`, `ReLU(z) = max(0, z)`; live: neuron count, pane count estimate, current loss; a mini plot of ReLU. Inside the model: the MLP block (≈⅔ of parameters) is this; real models use GELU/SwiGLU, smooth cousins of the hinge.
+**Discoveries.** (1) paint → one stroke, many copies, all with the same network output; (2) add a layer → one more fold can double the regions; (3) drag a crease → a crease is the hinge of max(0, z), and every copy moves together; (4) ReLU off → every neuron reflects the whole plane, reflections compose into one rigid motion: one region, one copy; (5) ReLU on, 8 layers → the live region count against the at-most-37 that eight neurons side by side in one layer could make (depth multiplies, width adds).
 
-**Rendering.** WebGL fragment shader evaluates the network per pixel (weights as uniforms), computes the activation pattern, draws lead where the pattern changes across neighbouring pixels (via derivatives of pre-activations), and shades the pane. Canvas 2D fallback at reduced resolution.
+**Maths drawer.** `z = n·x − b`, `x′ = x + 2·ReLU(−z)·n`, `ReLU(u) = max(0, u)`; live: activation, layers, regions in view, the 2ᵏ depth bound, the 1 + k + k(k−1)/2 one-layer bound, and which neurons are on at the pointer (● ○). Inside the model: the feed-forward block; GELU/SwiGLU are smooth cousins of the hinge.
+
+**Rendering.** WebGL2 fragment shader applies up to eight folds per pixel (fold parameters as a `vec3` uniform array), draws creases from |z|/fwidth(z), shades marbled fbm ink in the folded coordinates and samples a 1536² paint texture (updated by dirty rectangle with `texSubImage2D`). Mirrors are chosen greedily so each new one leaves the most regions big enough to see. Canvas 2D fallback at quarter resolution. Poster: offscreen WebGL2 canvas.
 
 ### 03 · Descent — gradient descent
 
@@ -145,7 +148,7 @@ The **index** (`#maths/play`) is a dark gallery: seven large live thumbnails (ea
 ## 5. Visual system
 
 - Background `#05060a` with subtle film grain/vignette; additive (`lighter`) compositing for light.
-- Each piece owns an accent pair: Lattice mint/rose · Stained Glass jewel palette · Descent amber/ice · Loom multi-head (cyan, coral, gold, violet) · Orrery brass/silver · Crowded Sky lavender/white · Nullspace amber/blue.
+- Each piece owns an accent pair: Lattice mint/rose · Kaleidoscope marbled jewel inks with a pink accent · Descent amber/ice · Loom multi-head (cyan, coral, gold, violet) · Orrery brass/silver · Crowded Sky lavender/white · Nullspace amber/blue.
 - Type: DM Sans for titles/captions, IBM Plex Mono for numbers and labels, matching Field.
 - Labels have dark halos; colour always paired with shape or label.
 

@@ -184,7 +184,7 @@
   }
 
   Interiors.register({
-    id: 'linear-maps', no: '01', concept: 'Linear maps', title: 'Lattice', accent: '#9ee6d4',
+    id: 'linear-maps', no: '01', concept: 'Linear maps', title: 'Lattice', maths: 'Matrix multiplication', eq: 'x′ = W x', accent: '#9ee6d4',
     caption: 'Two arrows decide where every word in the space goes.',
     label: 'A luminous grid of word-points that bends as two basis arrows are dragged.',
     mathsTitle: 'A matrix is two arrows',
