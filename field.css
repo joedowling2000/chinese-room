@@ -312,11 +312,6 @@ body[data-page="article"] .button.primary:hover{background:#333;border-color:#33
 }
 @media(prefers-reduced-motion:reduce){.maths-art .ir-poster{transition:none}}
 
-/* Maths: inside a language model */
-.maths-why-label{margin:0 0 8px;color:var(--text);font:500 11px var(--sans);letter-spacing:.12em;text-transform:uppercase}
-.maths-llm{margin:16px 0 0;padding:18px 20px;border:1px solid var(--line);border-radius:12px;background:#0d0e0f;display:grid;gap:14px}
-.maths-llm p{margin:0;color:var(--body);font:400 14px/1.65 var(--sans)}
-.maths-llm b{display:block;margin:0 0 4px;color:var(--quiet);font:500 10px var(--sans);letter-spacing:.12em;text-transform:uppercase}
 
 .maths-hero-copy>p.maths-hero-note:not(.eyebrow){margin:18px 0 0;color:var(--dim);font:400 11px/1.6 var(--mono);letter-spacing:.08em}
 .maths-sources{margin:10px 0 0;font-size:13px}

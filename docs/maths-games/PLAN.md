@@ -4,7 +4,7 @@ Version 2 · 25 October 2026. Read with [DESIGN.md](DESIGN.md). Supersedes the v
 
 ## Live checkpoint (resume point)
 
-- **Current task:** milestones A–M complete; M (transit map, no directory, no hero links) committed 27 Oct 2026, not yet merged to `main` or deployed. Next: user review; topic body text still describes some of the old instruments and is awaiting the user's rewrite (see §4).
+- **Current task:** milestones A–N complete. N (one narrative per topic) committed 27 Oct 2026, not yet merged to `main` or deployed. Next: user review of the new topic text.
 - **Run locally:** `python3 -m http.server 8000` from the repo root, open `http://localhost:8000/#maths/play`.
 - **Commit policy:** commit after each piece is working, with this file updated in the same commit. No push or deploy without separate authorisation.
 
@@ -95,9 +95,11 @@ Browser check at 1440×900 and 820×1180 (Chrome via automation): no console err
 
 - **M — 27 Oct 2026.** User feedback: drop the hero's Step inside / find-an-experience links and the experience directory (done; `experiences.js` now only supplies the purpose badges used by the topics and lab pages). "Where each idea lives" re-imagined as a transit map of a transformer (`maths-map.js`, `maths-map.css`). The main line is the residual stream; the attention branch (Q·K·V → RoPE on q, k only → softmax → W_O) and the feed-forward branch (W_in → ReLU/GELU → W_out) leave it and rejoin at ⊕, inside a block frame stacked ×32. Then come the probe (07) and Unembed, ending at an illustrative next-token distribution; the gradient-descent loop runs underneath. Each idea is a station in its piece's accent; all six matrix multiplications are squares. A token rides the line with a narrating card, the layer counter runs to 32, and the prompt advances one predicted token at a time. Training step mode shows the loss, and the gradient rides back, turning each matrix amber. Hover, tap or keyboard (or the legend) pins an idea: every station it lives at lights up, and the card shows that piece's live poster with links to the topic and the artwork. Wide (horizontal) and phone (vertical) layouts; pause button; reduced motion starts paused; animation runs only while on screen. Verified in Chrome at 1242px and in 375px iframes with zero console errors.
 
+- **N — 27 Oct 2026.** User feedback: each topic's text read as disjointed (body paragraphs plus a separate "In a language model" box). Each of the seven topics now has one three-paragraph narrative (about 220–280 words): the maths, then what its artwork shows, then where it sits in a language model and what the example does not establish. The `llm` fields, the box markup and its CSS are gone. All references to the old instruments (point clouds, "the values are the keys themselves", "shown here", "Here, two clusters…") are replaced by descriptions of the Interiors artworks. The accuracy corrections from `human-idiom.md` §7 are kept: rank vs determinant, LoRA as a low-rank update, GELU/SwiGLU described rather than oversold, training vs inference, dot products depending on length, prompt vs cached-decoding cost, RoPE's distance dependence qualified for fixed content, superposition as a hypothesis, ablation vs steering.
+
 ## 4. Known limits and polish backlog
 
-- **Topic text describes old instruments in places** (e.g. 02's "The two point clouds show what happens to an inner disc and an outer ring"). Left for the user's editorial pass, as asked.
+- **Some artwork prompts state conclusions more strongly than the topic text** (e.g. Lattice: "No later layer can separate them again"; Orrery: "The score depends only on how far apart the words are"; Nullspace: "everything perpendicular to it is untouched"). `human-idiom.md` §7 asks for these qualifications; worth a pass so the artworks match the topics.
 
 - **Not yet seen on real devices.** Verified in desktop Chrome (1117×613 viewport) and 360px-wide iframes only. iPad Safari touch, WebGL2 availability (Safari 15+ has it; Stained Glass falls back to a lower-resolution CPU renderer otherwise) and frame rate on the iPad need the user's review.
 - **Prompts are sequential.** A discovery done out of order (e.g. pressing *Collapse* before hovering a word in Lattice) doesn't count until its turn comes round; the coda line still appears at the end. Could be made order-independent.
