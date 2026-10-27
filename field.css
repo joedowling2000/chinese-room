@@ -276,10 +276,6 @@ body[data-page="article"] .button.primary:hover{background:#333;border-color:#33
 .maths-hero-copy{position:relative;z-index:1;max-width:1440px;margin:0 auto;padding:120px 7vw 100px}
 .maths-hero-copy h1{margin:0;font:500 clamp(48px,6.8vw,96px)/1.02 var(--sans);letter-spacing:-.045em;max-width:760px}
 .maths-hero-copy>p:not(.eyebrow){margin:26px 0 0;max-width:470px;color:#c9c9c9;font:400 18px/1.6 var(--sans)}
-.maths-index{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:0 32px;max-width:1440px;margin:0 auto;padding:24px 7vw 72px}
-.maths-index a{display:flex;align-items:baseline;gap:16px;padding:18px 0;border-top:1px solid var(--line);color:var(--muted);font:500 17px var(--sans);letter-spacing:-.01em;text-decoration:none}
-.maths-index a:hover{color:var(--text)}
-.maths-index span{color:var(--dim);font:400 12px var(--mono)}
 .maths-topic{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);grid-template-areas:"copy figure";gap:0 64px;max-width:1440px;margin:0 auto;padding:96px 7vw;border-top:1px solid var(--line)}
 .maths-topic:nth-child(even){grid-template-columns:minmax(0,7fr) minmax(0,5fr);grid-template-areas:"figure copy"}
 .maths-copy{grid-area:copy}
@@ -309,8 +305,7 @@ body[data-page="article"] .button.primary:hover{background:#333;border-color:#33
   .maths-hero{min-height:480px}
   .maths-hero-art{right:-60%;width:150%;opacity:.5}
   .maths-hero-copy{padding:80px 24px 72px}
-  .maths-index{padding:16px 24px 48px}
-}
+  }
 @media(max-width:480px){
   .maths-art{aspect-ratio:4/5;border-radius:18px}
   .maths-art-text{padding:60px 18px 18px}
@@ -323,38 +318,6 @@ body[data-page="article"] .button.primary:hover{background:#333;border-color:#33
 .maths-llm p{margin:0;color:var(--body);font:400 14px/1.65 var(--sans)}
 .maths-llm b{display:block;margin:0 0 4px;color:var(--quiet);font:500 10px var(--sans);letter-spacing:.12em;text-transform:uppercase}
 
-/* Maths: the pipeline map */
-.maths-map{max-width:1440px;margin:0 auto;padding:0 7vw 80px}
-.maths-map-intro{max-width:620px;margin:0 0 30px}
-.maths-map-intro h2{margin:0 0 14px;font:500 clamp(28px,3.4vw,44px)/1.08 var(--sans);letter-spacing:-.03em}
-.maths-map-intro p:not(.eyebrow){margin:0;color:var(--muted);font:400 15px/1.7 var(--sans)}
-.maths-flow{display:flex;align-items:stretch;flex-wrap:wrap;gap:10px;list-style:none;margin:0;padding:0}
-.maths-flow li{display:flex}
-.mf-arrow{align-items:center;color:var(--dim);font:400 15px var(--mono)}
-.mf-node{display:grid;align-content:center;gap:3px;min-width:132px;padding:12px 16px;border:1px solid var(--line);border-radius:14px;background:#0d0e0f;color:var(--text);text-decoration:none;transition:border-color .2s,background .2s}
-.mf-node:hover{border-color:var(--muted);background:#111214}
-.mf-node b{font:500 14px var(--sans);letter-spacing:-.01em}
-.mf-node span{color:var(--dim);font:400 10px var(--mono);letter-spacing:.04em}
-.mf-end{display:grid;align-content:center;gap:3px;min-width:96px;padding:12px 16px;border:1px dashed var(--line2);border-radius:14px;color:var(--muted)}
-.mf-end b{font:500 14px var(--sans);color:var(--text)}
-.mf-tag{color:var(--dim);font:400 9px var(--mono);letter-spacing:.16em;text-transform:uppercase}
-.maths-flow > .mf-block{display:grid;gap:10px;min-width:0;flex-basis:100%;padding:12px;border:1px solid var(--line2);border-radius:18px;background:#0a0b0c}
-.mf-block-label{margin:0;color:var(--quiet);font:500 9px var(--sans);letter-spacing:.14em;text-transform:uppercase}
-.mf-block-row{display:flex;gap:10px;flex-wrap:wrap;align-items:stretch}
-.mf-side{margin-top:14px;align-items:center}
-.mf-side-label{margin:0;padding:0 8px 0 2px;color:var(--quiet);font:500 9px var(--sans);letter-spacing:.14em;text-transform:uppercase;align-self:center}
-.mf-side .mf-node{border-style:dashed;background:transparent}
-.mf-stream{margin:0;color:var(--dim);font:400 10px var(--mono);letter-spacing:.02em}
-.mf-attention{display:grid;gap:8px;padding:10px;border:1px dashed var(--line2);border-radius:14px}
-.mf-attention .mf-node{min-width:0}
-@media(max-width:760px){
-  .maths-map{padding:0 24px 56px}
-  .mf-arrow{display:none}
-  .maths-flow{flex-direction:column}
-  .mf-node{min-width:0}
-}
-.maths-hero-actions{display:flex;align-items:center;gap:22px;margin-top:34px}
 .maths-hero-copy>p.maths-hero-note:not(.eyebrow){margin:18px 0 0;color:var(--dim);font:400 11px/1.6 var(--mono);letter-spacing:.08em}
 .maths-sources{margin:10px 0 0;font-size:13px}
 .maths-sources .text-link{white-space:normal}
-@media(max-width:760px){.maths-hero-actions{flex-wrap:wrap;row-gap:14px}}

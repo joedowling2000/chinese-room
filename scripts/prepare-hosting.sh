@@ -12,7 +12,7 @@ else
   rm -rf "$output"
 fi
 mkdir -p "$output/articles" "$output/assets"
-cp index.html app.js lab.js field.js maths.js experiences.js styles.css field.css experiences.css favicon.svg robots.txt sitemap.xml feed.xml "$output/"
+cp index.html app.js lab.js field.js maths.js maths-map.js experiences.js styles.css field.css experiences.css maths-map.css favicon.svg robots.txt sitemap.xml feed.xml "$output/"
 cp articles/* "$output/articles/"
 cp assets/* "$output/assets/"
 cp -R maths-art "$output/maths-art"

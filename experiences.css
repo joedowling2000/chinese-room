@@ -1,19 +1,4 @@
-/* ---------- Experience directory ---------- */
-.maths-index{display:block;padding:56px 7vw 8px;max-width:1440px;margin:0 auto}
-.maths-index-head{max-width:720px}
-.maths-index-head h2{margin:0 0 12px;font:500 clamp(28px,3.4vw,40px)/1.1 var(--sans);letter-spacing:-.03em}
-.maths-index-head p{color:var(--muted);font:400 15px/1.65 var(--sans)}
-.exp-filters{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 8px}
-.exp-filter[aria-pressed="true"]{background:#fff;border-color:#fff;color:#111}
-.exp-filter-note{margin:0;color:var(--dim);font:400 12px var(--sans)}
-.exp-dir{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;margin-top:24px}
-.exp-card{display:flex;flex-direction:column;gap:10px;padding:18px;border:1px solid var(--line);border-radius:16px;background:#0b0c0d;text-decoration:none;color:var(--text)}
-.exp-card:hover{border-color:var(--muted)}
-.exp-card.is-hidden{display:none}
-.exp-card-top b{font:500 15px var(--sans)}
-.exp-card-eq{color:var(--body);font:400 12px/1.5 var(--mono)}
-.exp-card-outcome{color:var(--muted);font:400 12.5px/1.5 var(--sans)}
-.exp-card-go{margin-top:auto;color:var(--quiet);font:500 11px var(--sans);letter-spacing:.06em;text-transform:uppercase}
+/* ---------- Purpose labels ---------- */
 .exp-badges{display:flex;flex-wrap:wrap;gap:6px}
 .exp-badge{padding:3px 8px;border:1px solid var(--line2);border-radius:999px;color:var(--muted);font:500 10px var(--sans);letter-spacing:.06em;text-transform:uppercase}
 .exp-badge-kind{border-style:dashed;color:var(--dim)}
@@ -22,7 +7,3 @@
 .lab-purpose{display:flex;flex-direction:column;gap:8px;margin:14px 0}
 .lab-purpose p{margin:0;color:var(--muted);font:400 13px/1.55 var(--sans)}
 
-@media(max-width:760px){
-  .maths-index{padding:40px 20px 8px}
-  .exp-dir{grid-template-columns:1fr}
-}

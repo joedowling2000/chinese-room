@@ -88,32 +88,6 @@ const Maths = (() => {
 </section>`;
   }
 
-  // The anatomy map: every idea is one stage of a real forward pass.
-  function pipeline(){
-    const chip=(id,name,sub)=>`<a class="mf-node" href="#maths/${id}" data-scroll-target="maths-${id}" data-stage="${id}"><b>${name}</b><span>${sub}</span></a>`;
-    const arrow=`<li class="mf-arrow" aria-hidden="true">→</li>`;
-    return `<section class="maths-map" id="maths-map" aria-label="How the seven ideas fit inside one forward pass">
-  <div class="maths-map-intro"><p class="eyebrow">One token’s journey</p><h2>Where each idea lives.</h2><p>Every idea below is one stage of a real forward pass. Follow a token through the pipeline, then step inside whichever stage you want to feel from within.</p></div>
-  <ol class="maths-flow">
-    <li class="mf-end"><span class="mf-tag">input</span><b>a word</b></li>
-    ${arrow}
-    <li>${chip('linear-maps','Embed','word → vector · 01')}</li>
-    ${arrow}
-    <li class="mf-block"><p class="mf-block-label">transformer block · <span class="mf-depth"><button type="button" class="mf-depth-btn" data-depth="-1" aria-label="Fewer layers">−</button><b id="mf-depth">32</b><button type="button" class="mf-depth-btn" data-depth="1" aria-label="More layers">+</button> layers deep</span></p><div class="mf-block-row">${chip('attention','Attention','words listen · 04')}${chip('rotary','RoPE','position · 05')}${chip('folding','Feed-forward','the fold · 02')}</div></li>
-    ${arrow}
-    <li>${chip('linear-maps','Unembed','vector → scores · 01')}</li>
-    ${arrow}
-    <li class="mf-end"><span class="mf-tag">output</span><b>the next word</b></li>
-  </ol>
-  <ol class="maths-flow mf-side">
-    <li><p class="mf-side-label">around it</p></li>
-    <li>${chip('gradient-descent','Training','writes every weight · 03')}</li>
-    <li>${chip('dimensions','Residual stream','carries the token · 06')}</li>
-    <li>${chip('ablation','Interpretability','reads & edits the stream · 07')}</li>
-  </ol>
-</section>`;
-  }
-
   function page(){
     return `<section class="maths-hero">
   <div class="maths-hero-art" aria-hidden="true">${Field.art('manifold','dark',{eager:true})}</div>
@@ -122,12 +96,10 @@ const Maths = (() => {
     <p class="eyebrow">The maths of AI</p>
     <h1>Step inside the maths.</h1>
     <p>Seven ideas, seven rooms inside a language model. Bend the space words live in, fold it like a kaleidoscope, weave attention, roll down a loss landscape. Each is an interactive artwork drawn by the mathematics it depicts.</p>
-    <p class="maths-hero-actions"><a class="pill light" href="#maths/play">Step inside ↗</a> <a class="text-link" href="#maths" data-scroll-target="maths-index">or find an experience ↓</a></p>
     <p class="maths-hero-note">Seven interactive artworks · no installation · keyboard &amp; touch</p>
   </div>
 </section>
-${Experiences.directory()}
-${pipeline()}
+${MathsMap.markup()}
 <div class="maths-topics">${topics.map(topic).join('')}</div>
 <section class="section-dark maths-outro">
   <div class="field-exp-intro"><p class="eyebrow">Keep going</p><h2>See the ideas at work.</h2><p>Every artwork here is a small synthetic example computed in your browser. No model is run.</p></div>
@@ -146,25 +118,10 @@ ${pipeline()}
     if(!on)return;
     const controller=new AbortController(),{signal}=controller;
     disposers.push(()=>controller.abort());
-    Experiences.wireDirectory(document.getElementById('maths-index'),signal);
     const posters=Interiors.posters(document.querySelector('.maths-topics'));
     disposers.push(()=>posters.dispose());
-    // "You are here": the pipeline chip matching the topic in view lights up.
-    const here=new Set();
-    const syncHere=()=>document.querySelectorAll('.mf-node[data-stage]').forEach(n=>n.classList.toggle('here',here.has(n.dataset.stage)));
-    const hereObs=new IntersectionObserver(es=>{
-      es.forEach(e=>{const id=e.target.id.slice(6);e.isIntersecting?here.add(id):here.delete(id);});
-      syncHere();
-    },{rootMargin:'-35% 0px -55% 0px'});
-    document.querySelectorAll('.maths-topic').forEach(s=>hereObs.observe(s));
-    disposers.push(()=>{hereObs.disconnect();here.clear();});
-    // Layer depth stepper on the transformer block chip.
-    const depthEl=document.getElementById('mf-depth'),DEPTHS=[4,12,24,32,48,80,121];
-    let di=3;
-    document.querySelectorAll('[data-depth]').forEach(b=>b.addEventListener('click',()=>{
-      di=(di+Number(b.dataset.depth)+DEPTHS.length)%DEPTHS.length;
-      depthEl.textContent=DEPTHS[di];
-    },{signal}));
+    const map=MathsMap.wire(document.getElementById('maths-map'),signal);
+    disposers.push(()=>map.dispose());
   }
 
   return {page,wire,get topics(){return topics;}};

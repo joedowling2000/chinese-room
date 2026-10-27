@@ -64,8 +64,9 @@ See [PLAN.md](PLAN.md) for the implementation status, source requirements and fo
 
 - `index.html`, `styles.css`, `field.css`, `app.js`, `field.js`: site shell, layout base, Field theme, and client-side navigation/content
 - `lab.js`: cube geometry, experiment pages and quantisation calculations
-- `experiences.js`, `experiences.css`: shared experience layer — purpose labels and the nine-experience directory (see `enhancement_plan.md`)
-- `maths.js`: The Maths of AI page: the seven ideas' copy, the forward-pass map, and a live poster of each artwork linking into Interiors
+- `experiences.js`, `experiences.css`: purpose labels for the maths topics and lab pages (see `enhancement_plan.md`)
+- `maths.js`: The Maths of AI page: the seven ideas' copy and a live poster of each artwork linking into Interiors
+- `maths-map.js`, `maths-map.css`: "Where each idea lives", an animated transit map of one token's trip through a transformer, with the seven ideas as stations
 - `maths-art/`: Interiors — `host.js` (gallery, full-bleed frame, prompts, maths drawer, sound), `interiors.css`, and one file per artwork in `pieces/`
 - `scripts/generate-field-art.mjs`: regenerates the procedural SVG artwork in `assets/`
 - `PLAN.md`: interactive-site plan and progress
