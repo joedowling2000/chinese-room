@@ -33,7 +33,7 @@ const Field = (() => {
   <div class="field-caption"><span>Chinese Room · Joe Dowling</span><span>An illustration of a residual stream</span><a href="#research" data-scroll-target="field-research">View the projects ↓</a></div>
 </section>
 <section class="field-research section-dark" id="field-research">
-  <div class="section-head"><div><p class="eyebrow">Projects</p><h2>Recent experiments</h2></div><div class="section-head-side"><a class="text-link" href="#research">Full research index ↗</a>${railControls('field-rail')}</div></div>
+  <div class="section-head"><div><p class="eyebrow">Projects</p><h2>Recent experiments</h2></div><div class="section-head-side">${railControls('field-rail')}</div></div>
   <div class="card-rail field-rail" id="field-rail" tabindex="0" aria-label="Research projects">${articles.map(card).join('')}${labCard}</div>
   <p class="rail-note">Scroll to explore ↔</p>
 </section>
