@@ -28,7 +28,7 @@ const Field = (() => {
   <div class="field-hero-copy">
     <p class="eyebrow">AI project notes</p>
     <h1>Inside the room</h1>
-    <p>Experiments on how language models work, run on an NVIDIA DGX Spark.<br>Each write-up covers the method, the results and what did not work.</p>
+    <p>Experiments on how language models work, run on an NVIDIA DGX Spark.</p>
     <a class="cta cta-lg" href="#research">Read the project notes</a>
   </div>
 </section>
