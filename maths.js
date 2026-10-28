@@ -75,7 +75,7 @@ const Maths = (() => {
   <figure class="maths-figure">
     <a class="maths-art maths-enter" href="#maths/play/${t.id}" aria-label="Step inside ${p.title}, the ${p.maths} artwork">
       <canvas class="ir-poster" data-poster="${t.id}" aria-hidden="true"></canvas>
-      <span class="maths-art-text"><span class="maths-art-no">${p.no} / Interiors</span><span class="maths-art-title">${p.title}</span><span class="maths-art-cap">${p.caption}</span><span class="maths-art-go">Step inside →</span></span>
+      <span class="maths-art-text"><span class="maths-art-no">${p.no} / Interiors</span><span class="maths-art-title">${p.title}</span><span class="maths-art-cap">${p.caption}</span><span class="cta cta-sm maths-art-go">Step inside</span></span>
     </a>
   </figure>
 </section>`;

@@ -34,7 +34,7 @@ body.ir-playing main{min-height:100dvh}
 .ir-chrome{transition:opacity .9s ease}
 .ir-piece.ir-idle .ir-chrome{opacity:.12}
 .ir-piece.ir-idle .ir-dock{opacity:.35}
-.ir-piece button{font:12px var(--sans);min-height:40px;padding:9px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(10,12,16,.55);color:#e6eaee;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.ir-piece button{font:12px var(--sans);min-height:40px;padding:9px 14px;border-radius:6px;border:1px solid rgba(255,255,255,.16);background:rgba(10,12,16,.55);color:#e6eaee;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .ir-piece button:hover{border-color:var(--ir-accent);color:#fff}
 .ir-piece button[aria-pressed=true]{border-color:var(--ir-accent);color:var(--ir-accent);background:rgba(20,22,30,.75)}
 .ir-piece kbd{font:10px var(--mono);opacity:.55;margin-left:4px}

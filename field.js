@@ -12,7 +12,7 @@ const Field = (() => {
 
   function card(a, i=0){
     const tone = i%2 ? 'light' : 'dark';
-    return `<a class="field-card card-${tone}" href="#article/${esc(a.id)}"><span class="field-card-topic">${esc(a.tag)}</span><h3>${esc(a.title)}</h3><p class="field-card-dek">${esc(a.dek)}</p><span class="field-card-art">${art(kinds[a.id]||'surface',tone)}</span><span class="field-card-bottom"><span class="field-card-action">Read the article ↗</span><small>${esc(a.read.toLowerCase())} read</small></span></a>`;
+    return `<a class="field-card card-${tone}" href="#article/${esc(a.id)}"><span class="field-card-topic">${esc(a.tag)}</span><h3>${esc(a.title)}</h3><p class="field-card-dek">${esc(a.dek)}</p><span class="field-card-art">${art(kinds[a.id]||'surface',tone)}</span><span class="field-card-bottom"><span class="cta cta-sm">Read the article</span><small>${esc(a.read.toLowerCase())} read</small></span></a>`;
   }
 
   function railControls(id){
@@ -20,7 +20,7 @@ const Field = (() => {
   }
 
   function home(articles){
-    const labCard = `<a class="field-card card-light" href="#lab"><span class="field-card-topic">The lab</span><h3>Try an experiment</h3><span class="field-card-art">${art('surface','light')}</span><span class="field-card-bottom"><span class="field-card-action">Two experiments ↗</span><small>In your browser</small></span></a>`;
+    const labCard = `<a class="field-card card-light" href="#lab"><span class="field-card-topic">The lab</span><h3>Try an experiment</h3><span class="field-card-art">${art('surface','light')}</span><span class="field-card-bottom"><span class="cta cta-sm">Two experiments</span><small>In your browser</small></span></a>`;
     return `<section class="field-hero">
   <div class="field-hero-art" aria-hidden="true">${art('stream','dark',{eager:true})}</div>
   <div class="field-hero-shade" aria-hidden="true"></div>
@@ -28,7 +28,7 @@ const Field = (() => {
     <p class="eyebrow">AI project notes</p>
     <h1>Inside the room</h1>
     <p>Experiments on how language models work, run on an NVIDIA DGX Spark.<br>Each write-up covers the method, the results and what did not work.</p>
-    <a class="pill light" href="#research">Read the project notes <span>↗</span></a>
+    <a class="cta cta-lg" href="#research">Read the project notes</a>
   </div>
   <div class="field-caption"><span>Chinese Room · Joe Dowling</span><span>An illustration of a residual stream</span><a href="#research" data-scroll-target="field-research">View the projects ↓</a></div>
 </section>

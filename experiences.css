@@ -1,6 +1,6 @@
 /* ---------- Purpose labels ---------- */
 .exp-badges{display:flex;flex-wrap:wrap;gap:6px}
-.exp-badge{padding:3px 8px;border:1px solid var(--line2);border-radius:999px;color:var(--muted);font:500 10px var(--sans);letter-spacing:.06em;text-transform:uppercase}
+.exp-badge{padding:3px 7px;border:1px solid var(--line2);border-radius:3px;color:var(--muted);font:500 10px var(--sans);letter-spacing:.06em;text-transform:uppercase}
 .exp-badge-kind{border-style:dashed;color:var(--dim)}
 .maths-copy .exp-badges{margin:0 0 16px}
 .maths-sub .exp-badges{margin-top:6px}

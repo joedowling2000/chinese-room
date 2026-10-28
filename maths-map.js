@@ -346,7 +346,7 @@ const MathsMap = (() => {
         const g = idea(show);
         card.innerHTML = `<a class="ml-art" href="#maths/play/${g.id}" aria-label="Open ${esc(g.title)}" style="--ir-accent:${g.accent}"><canvas class="ir-poster" data-poster="${g.id}" aria-hidden="true"></canvas></a>
           <div class="ml-card-body"><p class="ml-kicker"><i></i>${g.no} · ${esc(g.title)}</p><h3>${esc(g.maths)}</h3><p class="ml-eq">${esc(g.eq)}</p><p class="ml-text">${WHERE[show]}</p>
-          <p class="ml-links"><a href="#maths/${g.id}" data-ml-scroll="maths-${g.id}">Read about it ↓</a><a href="#maths/play/${g.id}">Open ${esc(g.title)} →</a></p></div>`;
+          <p class="ml-links"><a class="cta cta-sm cta-down cta-quiet" href="#maths/${g.id}" data-ml-scroll="maths-${g.id}">Read about it</a><a class="cta cta-sm" href="#maths/play/${g.id}">Open ${esc(g.title)}</a></p></div>`;
         card.classList.add('has-art');
         art = Interiors.posters(card);
       } else {
