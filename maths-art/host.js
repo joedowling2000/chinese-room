@@ -95,7 +95,7 @@ const Interiors = (() => {
   }
 
   /* ---------- markup ---------- */
-  // The introduction, the wall of seven live posters and the note. It lives on the home page
+  // The wall of seven live posters, then the introduction and the note. It lives on the home page
   // (#interiors); gallery() wraps it for any route that still renders the old page.
   function showcase() {
     return `<div class="ir-wall">${pieces.map(p => `
