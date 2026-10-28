@@ -93,14 +93,30 @@ main{min-height:75vh}
 .text-link{color:var(--muted);font:500 12px var(--sans);letter-spacing:.04em;text-decoration:none}
 .text-link:hover{color:var(--text)}
 .section-dark{background:#101112;padding:80px 7vw}
-.section-dark h2{margin:0;font:500 clamp(36px,4.5vw,52px)/1.06 var(--sans);letter-spacing:-.035em;color:var(--text)}
+.section-dark h2,.home-flow h2{margin:0;font:500 clamp(36px,4.5vw,52px)/1.06 var(--sans);letter-spacing:-.035em;color:var(--text)}
 .section-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 32px;max-width:1440px;margin:0 auto 44px}
 .section-head-side{display:flex;align-items:center;gap:22px}
 .field-interiors-body{max-width:1440px;margin:0 auto}
+/* Home: one surface and one spine. The residual stream drawn in the hero continues down the
+   page as a hairline, and each section is a numbered stop on it. */
+.home-flow{--spine:calc(max(7vw,(100% - 1440px) / 2) - 36px);position:relative;padding-bottom:120px;background:#08090a}
+.home-flow>section{padding:104px 7vw 0;background:transparent}
+.home-flow>section:first-child{padding-top:40px}
+.home-flow .eyebrow{position:relative}
+.flow-no{margin-right:14px;color:var(--dim);font:400 11px var(--mono);letter-spacing:.04em}
+@media(min-width:1000px){
+  .home-flow::before{content:"";position:absolute;top:0;bottom:120px;left:var(--spine);width:1px;background:linear-gradient(var(--line2),var(--line2) 90%,rgba(47,52,60,0))}
+  .home-flow .eyebrow::before{content:"";position:absolute;top:50%;left:-40.5px;width:9px;height:9px;margin-top:-5px;border:1px solid var(--quiet);border-radius:50%;background:#08090a}
+}
+@media(max-width:760px){
+  .home-flow{padding-bottom:72px}
+  .home-flow>section{padding:72px 24px 0}
+  .home-flow>section:first-child{padding-top:24px}
+}
 .field-interiors .ir-intro{margin-bottom:44px}
 .field-interiors .ir-intro p{font-size:17px}
 .field-interiors .ir-note{margin:30px 0 18px}
-.field-interiors+.field-research{padding-top:24px}
+
 .rail-controls{display:flex;gap:8px}
 .rail-controls button{width:40px;height:40px;border:1px solid var(--line2);border-radius:50%;background:transparent;color:var(--text);font:400 15px var(--sans);cursor:pointer}
 .rail-controls button:hover:not(:disabled){border-color:var(--muted);background:#1b1c1e}
@@ -110,7 +126,7 @@ main{min-height:75vh}
 .card-rail:focus-visible{outline-offset:6px}
 
 /* Field cards — stable stacked layout, alternating dark/light */
-.field-card{display:flex;flex-direction:column;flex:0 0 min(360px,82vw);height:auto;min-height:480px;padding:28px;border-radius:24px;overflow:hidden;text-decoration:none;min-width:0;scroll-snap-align:start}
+.field-card{display:flex;flex-direction:column;flex:0 0 min(360px,82vw);height:auto;min-height:480px;padding:28px;border-radius:12px;overflow:hidden;text-decoration:none;min-width:0;scroll-snap-align:start}
 .field-card.card-dark{background:#1b1c1e;color:#fff}
 .field-card.card-light{background:#f4f4f4;color:#111;color-scheme:light}
 .field-card.card-dark:hover{color:#fff}
@@ -130,7 +146,8 @@ main{min-height:75vh}
 .article-links .text-link,.model-links .text-link{white-space:normal;overflow-wrap:anywhere}
 
 /* ---------- Home ---------- */
-.field-hero{position:relative;min-height:640px;height:calc(100svh - 76px);max-height:900px;overflow:hidden;background:#08090a}
+.field-hero{position:relative;min-height:560px;height:calc(88svh - 76px);max-height:820px;overflow:hidden;background:#08090a}
+.field-hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:220px;background:linear-gradient(rgba(8,9,10,0),#08090a);pointer-events:none}
 .field-hero-art{position:absolute;top:-5%;right:-8%;width:85%;height:110%}
 .field-hero-art img{width:100%;height:100%;object-fit:cover;object-position:center}
 .field-hero-shade{position:absolute;inset:0;background:linear-gradient(90deg,#08090a 0%,#08090acc 34%,#08090a22 62%,transparent 80%)}
@@ -138,9 +155,6 @@ main{min-height:75vh}
 .field-hero-copy h1{margin:0;color:#fff;font:500 clamp(56px,6.8vw,100px)/1.02 var(--sans);letter-spacing:-.045em;max-width:640px}
 .field-hero-copy>p:not(.eyebrow){margin:28px 0 0;color:#c9c9c9;font:400 18px/1.6 var(--sans);max-width:440px}
 .field-hero-copy .cta{margin-top:40px;align-self:flex-start;color:#fff}
-.field-caption{position:absolute;z-index:1;left:7vw;right:7vw;bottom:28px;display:flex;justify-content:space-between;gap:16px;color:#8b8b8b;font:400 11px var(--mono)}
-.field-caption a{color:#8b8b8b;text-decoration:none}
-.field-caption a:hover{color:#fff}
 .field-research .field-rail{max-width:1440px;margin:0 auto}
 .field-experiments{max-width:none}
 .field-experiments .field-exp-intro{max-width:1440px;margin:0 auto}
@@ -151,7 +165,8 @@ main{min-height:75vh}
 .experiment-link:hover{color:#fff}
 .experiment-link .exp-no{color:var(--dim);font:400 12px var(--mono)}
 .experiment-link .exp-name{font:500 clamp(30px,4vw,46px)/1.05 var(--sans);letter-spacing:-.03em}
-.experiment-link .exp-arrow{margin-left:auto;font-size:24px}
+.experiment-link .exp-arrow{flex:none;align-self:center;margin-left:auto;width:34px;height:14px;font-size:0;background:currentColor;-webkit-mask:var(--arrow-right) center/contain no-repeat;mask:var(--arrow-right) center/contain no-repeat;opacity:.65;transition:transform .35s cubic-bezier(.2,.7,.2,1),opacity .25s}
+.experiment-link:hover .exp-arrow,.experiment-link:focus-visible .exp-arrow{transform:translateX(6px);opacity:1}
 
 /* ---------- Generic pages ---------- */
 .page{max-width:1440px;margin:0 auto;padding:72px 7vw 100px}
@@ -263,13 +278,12 @@ body[data-page="article"] .button.primary:hover{background:#333;border-color:#33
   .topbar-inner{height:64px;padding:0 20px}
   .topbar #mobile-menu:not([hidden]){max-height:calc(100dvh - 64px)}
   .brand{font-size:18px}
-  .field-hero{min-height:620px;height:auto}
+  .field-hero{min-height:520px;height:auto}
   .field-hero-art{right:-65%;width:160%;opacity:.55}
   .field-hero-shade{background:linear-gradient(90deg,#08090a 0%,#08090add 60%,#08090a99 100%)}
-  .field-hero-copy{min-height:620px;padding:60px 24px 150px}
+  .field-hero-copy{min-height:520px;padding:60px 24px 64px}
   .field-hero-copy h1{font-size:clamp(44px,12vw,64px)}
-  .field-caption{left:24px;right:24px;bottom:24px;flex-direction:column;gap:6px}
-  .section-dark{padding:64px 24px}
+    .section-dark{padding:64px 24px}
   .page{padding:56px 24px 80px}
   .field-grid{grid-template-columns:1fr}
   .field-grid .field-card{height:auto;min-height:440px}

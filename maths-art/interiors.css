@@ -8,7 +8,7 @@
 .ir-intro p{font-size:18px;line-height:1.65;color:var(--muted);margin:0}
 .ir-intro p:first-child{color:var(--body)}
 .ir-wall{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
-.ir-tile{grid-column:span 2;position:relative;display:block;aspect-ratio:4/3.1;border-radius:6px;overflow:hidden;background:#05060a;border:1px solid #23262b;color:#f2f4f6;text-decoration:none;isolation:isolate}
+.ir-tile{grid-column:span 2;position:relative;display:block;aspect-ratio:4/3.1;border-radius:12px;overflow:hidden;background:#05060a;border:1px solid #23262b;color:#f2f4f6;text-decoration:none;isolation:isolate}
 .ir-tile:nth-child(1),.ir-tile:nth-child(2),.ir-tile:nth-child(6),.ir-tile:nth-child(7){grid-column:span 3;aspect-ratio:16/9.5}
 .ir-tile:hover,.ir-tile:focus-visible{border-color:var(--ir-accent);color:#fff}
 .ir-tile:focus-visible{outline:2px solid var(--ir-accent);outline-offset:3px}

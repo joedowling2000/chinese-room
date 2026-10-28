@@ -19,8 +19,9 @@ const Field = (() => {
     return `<div class="rail-controls"><button type="button" data-rail="${id}" data-step="-1" aria-label="Previous research cards">←</button><button type="button" data-rail="${id}" data-step="1" aria-label="Next research cards">→</button></div>`;
   }
 
+  // One surface, one spine: the residual stream drawn in the hero continues down the page as
+  // a hairline, and each section below is a numbered stop on it (see .home-flow in field.css).
   function home(articles){
-    const labCard = `<a class="field-card card-light" href="#lab"><span class="field-card-topic">The lab</span><h3>Try an experiment</h3><span class="field-card-art">${art('surface','light')}</span><span class="field-card-bottom"><span class="cta cta-sm">Two experiments</span><small>In your browser</small></span></a>`;
     return `<section class="field-hero">
   <div class="field-hero-art" aria-hidden="true">${art('stream','dark',{eager:true})}</div>
   <div class="field-hero-shade" aria-hidden="true"></div>
@@ -30,24 +31,24 @@ const Field = (() => {
     <p>Experiments on how language models work, run on an NVIDIA DGX Spark.<br>Each write-up covers the method, the results and what did not work.</p>
     <a class="cta cta-lg" href="#research">Read the project notes</a>
   </div>
-  <div class="field-caption"><span>Chinese Room · Joe Dowling</span><span>An illustration of a residual stream</span><a href="#research" data-scroll-target="field-research">View the projects ↓</a></div>
 </section>
-<section class="field-interiors section-dark" id="interiors" aria-labelledby="interiors-title">
-  <div class="section-head"><div><p class="eyebrow">The maths of AI</p><h2 id="interiors-title">Interiors</h2></div></div>
+<div class="home-flow">
+<section class="field-interiors" id="interiors" aria-labelledby="interiors-title">
+  <div class="section-head"><div><p class="eyebrow"><span class="flow-no">01</span>The maths of AI</p><h2 id="interiors-title">Interiors</h2></div></div>
   <div class="field-interiors-body">${Interiors.showcase()}</div>
 </section>
-<section class="field-research section-dark" id="field-research">
-  <div class="section-head"><div><p class="eyebrow">Projects</p><h2>Recent experiments</h2></div><div class="section-head-side">${railControls('field-rail')}</div></div>
-  <div class="card-rail field-rail" id="field-rail" tabindex="0" aria-label="Research projects">${articles.map(card).join('')}${labCard}</div>
-  <p class="rail-note">Scroll to explore ↔</p>
+<section class="field-research" id="field-research" aria-labelledby="research-title">
+  <div class="section-head"><div><p class="eyebrow"><span class="flow-no">02</span>Projects</p><h2 id="research-title">Recent experiments</h2></div><div class="section-head-side">${railControls('field-rail')}</div></div>
+  <div class="card-rail field-rail" id="field-rail" tabindex="0" aria-label="Research projects">${articles.map(a => card(a)).join('')}</div>
 </section>
-<section class="field-experiments section-dark" id="field-experiments">
-  <div class="field-exp-intro"><p class="eyebrow">The lab</p><h2>Interactive examples</h2><p>Undo a cube scramble, or compare what happens when weights are stored with fewer bits.</p></div>
+<section class="field-experiments" id="field-experiments" aria-labelledby="lab-title">
+  <div class="field-exp-intro"><p class="eyebrow"><span class="flow-no">03</span>The lab</p><h2 id="lab-title">Interactive examples</h2><p>Undo a cube scramble, or compare what happens when weights are stored with fewer bits.</p></div>
   <div class="field-exp-links">
-    <a class="experiment-link" href="#lab/mindcuber"><span class="exp-no">01</span> <span class="exp-name">Mindcuber</span> <span class="exp-arrow">↗</span></a>
-    <a class="experiment-link" href="#lab/quantization"><span class="exp-no">02</span> <span class="exp-name">Quantisation</span> <span class="exp-arrow">↗</span></a>
+    <a class="experiment-link" href="#lab/mindcuber"><span class="exp-no">01</span> <span class="exp-name">Mindcuber</span> <span class="exp-arrow" aria-hidden="true"></span></a>
+    <a class="experiment-link" href="#lab/quantization"><span class="exp-no">02</span> <span class="exp-name">Quantisation</span> <span class="exp-arrow" aria-hidden="true"></span></a>
   </div>
-</section>`;
+</section>
+</div>`;
   }
 
   function research(articles){
