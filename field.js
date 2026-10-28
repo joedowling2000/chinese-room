@@ -33,8 +33,8 @@ const Field = (() => {
   </div>
 </section>
 <div class="home-flow">
-<section class="field-interiors" id="interiors" aria-labelledby="interiors-title">
-  <div class="section-head"><div><p class="eyebrow"><span class="flow-no">01</span>The maths of AI</p><h2 id="interiors-title">Interiors</h2></div></div>
+<section class="field-interiors" id="interiors" aria-label="Interiors: seven interactive artworks">
+  <div class="section-head"><div><p class="eyebrow"><span class="flow-no">01</span>The maths of AI</p></div></div>
   <div class="field-interiors-body">${Interiors.showcase()}</div>
 </section>
 <section class="field-research" id="field-research" aria-labelledby="research-title">

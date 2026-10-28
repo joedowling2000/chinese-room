@@ -98,11 +98,7 @@ const Interiors = (() => {
   // The introduction, the wall of seven live posters and the note. It lives on the home page
   // (#interiors); gallery() wraps it for any route that still renders the old page.
   function showcase() {
-    return `<div class="ir-intro">
-        <p>In Searle's thought experiment, a person sits in a closed room. Symbols come in under the door. They follow a rulebook, push other symbols back out, and never understand a word.</p>
-        <p>A language model is that room. These are seven of its rules, made visible. Step inside each one and touch the mathematics directly: you are the token being transformed, the word asking a question, the training process feeling for the bottom of the valley.</p>
-      </div>
-      <div class="ir-wall">${pieces.map(p => `
+    return `<div class="ir-wall">${pieces.map(p => `
         <a class="ir-tile" href="#maths/play/${p.id}" style="--ir-accent:${p.accent}">
           <canvas class="ir-poster" data-poster="${p.id}" aria-hidden="true"></canvas>
           <span class="ir-tile-text">
@@ -112,6 +108,10 @@ const Interiors = (() => {
             <span class="ir-tile-cap">${esc(p.caption)}</span>
           </span>
         </a>`).join('')}
+      </div>
+      <div class="ir-intro">
+        <p>In Searle's thought experiment, a person sits in a closed room. Symbols come in under the door. They follow a rulebook, push other symbols back out, and never understand a word.</p>
+        <p>A language model is that room. These are seven of its rules, made visible. Step inside each one and touch the mathematics directly: you are the token being transformed, the word asking a question, the training process feeling for the bottom of the valley.</p>
       </div>
       <p class="ir-note">Touch, mouse or keyboard. Everything runs in your browser; no model is called. Every moving thing is computed by the operation it depicts — the data are small and synthetic, and each piece says where.</p>
       <a class="cta cta-sm cta-quiet" href="#maths">Read the ideas behind each piece</a>`;
