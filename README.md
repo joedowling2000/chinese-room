@@ -30,7 +30,7 @@ The site includes browser-only interactive experiments and decorative mathematic
 ## The maths of AI
 
 - `http://localhost:8000/#maths` — the seven concepts in prose, each beside a live preview of its Interiors artwork.
-- `http://localhost:8000/#maths/play` — **Interiors**, seven interactive artworks from inside a language model. Each is a full-screen piece drawn by the mathematics it depicts:
+- `http://localhost:8000/#interiors` — **Interiors** on the home page (the old `#maths/play` gallery route redirects here): seven interactive artworks from inside a language model. Each opens as a full-screen piece at `#maths/play/<id>`, drawn by the mathematics it depicts:
 
 | Route | Artwork | Maths | Interaction |
 | --- | --- | --- | --- |

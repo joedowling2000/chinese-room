@@ -368,8 +368,14 @@ function articlePage(a){
 function modelsPage(){return `<section class="page model-page"><div class="page-index">[02] Models · research registry</div><h1 class="page-title">Models & experiments.</h1><p class="page-intro">Models used or produced in these projects. The entries describe their status and link to the relevant write-up. You can’t run these models on this website.</p><div class="model-registry">${models.map(m=>`<article class="model-item"><div class="model-state"><span class="${m.cls}"><i></i>${m.status}</span><span>${m.version}</span></div><h3>${m.name}</h3><p>${esc(m.desc)}</p><div class="model-specs">${m.specs.map(s=>`<span><small>${s[0]}</small>${s[1]}</span>`).join('')}</div>${m.note?`<p class="model-note">${esc(m.note)}</p>`:''}<div class="model-links">${m.article?`<a class="text-link" href="${href('article/'+m.article)}">Read the article →</a>`:''}${m.url?`<a class="text-link" href="${esc(m.url)}" target="_blank" rel="noopener">${esc(m.urlLabel||'Model repository ↗')}</a>`:''}</div></article>`).join('')}</div><div class="lab-next"><div><h2>Explore Mindcuber</h2><p>Turn the cube, step through a scramble reversal and inspect the reported training results.</p></div><a class="cta" href="#lab/mindcuber">Open the experiment</a></div></section>`}
 function aboutPage(){return `<section class="page"><div class="page-index">[03] About</div><h1 class="page-title">Inside the room.</h1><div class="about-grid"><div class="about-visual">${Field.art('surface','dark',{alt:'A mathematical surface, drawn as a wire mesh'})}</div><div class="about-copy"><h2>About Joe</h2><p>My longer-term aim is to build and train a language model from scratch. The projects here cover things I’m learning along the way: training a cube-solving network, reducing model memory use, and inspecting internal representations.</p><p>I run these experiments on a DGX Spark and write up what happened, including the attempts that didn’t work.</p><div class="setup-grid">${[['Hardware','NVIDIA DGX Spark · GB10 · 128 GB'],['Long project','An LLM built and trained from scratch'],['Interests','Interpretability, quantisation, RL, agents'],['Contact','hello@chineseroom.io']].map(x=>`<div class="setup"><small>${x[0]}</small><b>${x[1]==='hello@chineseroom.io'?`<a href="mailto:${x[1]}">${x[1]}</a>`:x[1]}</b></div>`).join('')}</div></div></div></section>`}
 let lastRoute = null;
+let homeArt = null;
 function render(initial=false){
   const r = route();
+  // The Interiors gallery now lives on the home page; the old route jumps there.
+  if(r.page==='maths'&&r.id==='play'&&!Interiors.games.some(g=>g.id===location.hash.split('/')[2])){
+    history.replaceState(null,'','#interiors');
+    return render(initial);
+  }
   let page = r.page;
   if(!['home','research','article','lab','maths','models','about'].includes(page)) page = 'home';
   document.body.dataset.page = page;
@@ -382,6 +388,7 @@ function render(initial=false){
   Lab.wire(null);
   Maths.wire(false);
   Interiors.wire(null);
+  homeArt?.dispose(); homeArt = null;
   if(page==='article'){
     const a = articles.find(x=>x.id===r.id)||articles[0];
     app.innerHTML = articlePage(a);
@@ -410,6 +417,7 @@ function render(initial=false){
   Lab.wire(page==='lab'?r.id:null);
   Maths.wire(page==='maths'&&r.id!=='play');
   if(page==='maths'&&r.id==='play')Interiors.wire(location.hash.split('/')[2]);
+  if(page==='home')homeArt = Interiors.posters(document.getElementById('interiors'));
   document.querySelector('#nav-sweep').style.width = '0%';
   closeMenu();
   const wasPlay = lastRoute === 'play';
@@ -419,7 +427,12 @@ function render(initial=false){
     if(page==='maths'&&r.id==='play'&&location.hash.split('/')[2]) document.querySelector('.ir-over')?.focus({preventScroll:true});
     else if(!(page==='maths'&&r.id==='play')) document.querySelector('#main').focus({preventScroll:true});
   }
-  if(page==='maths'&&r.id&&r.id!=='play') document.getElementById(`maths-${r.id}`)?.scrollIntoView({behavior:'instant'});
+  if(page==='home'&&location.hash==='#interiors'){
+    const sec = document.getElementById('interiors');
+    sec?.scrollIntoView({behavior:'instant'});
+    if(wasPlay&&Interiors.lastGame) sec?.querySelector(`[href="#maths/play/${Interiors.lastGame}"]`)?.focus({preventScroll:true});
+  }
+  else if(page==='maths'&&r.id&&r.id!=='play') document.getElementById(`maths-${r.id}`)?.scrollIntoView({behavior:'instant'});
   else if(page==='maths'&&!r.id&&wasPlay&&Interiors.lastGame){
     const topic = document.getElementById(`maths-${Interiors.lastGame}`);
     topic?.scrollIntoView({behavior:'instant'});

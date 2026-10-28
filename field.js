@@ -32,6 +32,10 @@ const Field = (() => {
   </div>
   <div class="field-caption"><span>Chinese Room · Joe Dowling</span><span>An illustration of a residual stream</span><a href="#research" data-scroll-target="field-research">View the projects ↓</a></div>
 </section>
+<section class="field-interiors section-dark" id="interiors" aria-labelledby="interiors-title">
+  <div class="section-head"><div><p class="eyebrow">The maths of AI</p><h2 id="interiors-title">Interiors</h2></div></div>
+  <div class="field-interiors-body">${Interiors.showcase()}</div>
+</section>
 <section class="field-research section-dark" id="field-research">
   <div class="section-head"><div><p class="eyebrow">Projects</p><h2>Recent experiments</h2></div><div class="section-head-side">${railControls('field-rail')}</div></div>
   <div class="card-rail field-rail" id="field-rail" tabindex="0" aria-label="Research projects">${articles.map(card).join('')}${labCard}</div>

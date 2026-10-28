@@ -96,6 +96,11 @@ main{min-height:75vh}
 .section-dark h2{margin:0;font:500 clamp(36px,4.5vw,52px)/1.06 var(--sans);letter-spacing:-.035em;color:var(--text)}
 .section-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 32px;max-width:1440px;margin:0 auto 44px}
 .section-head-side{display:flex;align-items:center;gap:22px}
+.field-interiors-body{max-width:1440px;margin:0 auto}
+.field-interiors .ir-intro{margin-bottom:44px}
+.field-interiors .ir-intro p{font-size:17px}
+.field-interiors .ir-note{margin:30px 0 18px}
+.field-interiors+.field-research{padding-top:24px}
 .rail-controls{display:flex;gap:8px}
 .rail-controls button{width:40px;height:40px;border:1px solid var(--line2);border-radius:50%;background:transparent;color:var(--text);font:400 15px var(--sans);cursor:pointer}
 .rail-controls button:hover:not(:disabled){border-color:var(--muted);background:#1b1c1e}

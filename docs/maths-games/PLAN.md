@@ -4,7 +4,7 @@ Version 2 · 25 October 2026. Read with [DESIGN.md](DESIGN.md). Supersedes the v
 
 ## Live checkpoint (resume point)
 
-- **Current task:** milestones A–O complete. N and the home-page rewording are deployed (release `6e3665d4`); O (tighter topic narratives) committed 27 Oct 2026, not yet merged to `main` or deployed.
+- **Current task:** milestones A–P complete. P (Interiors gallery moved to the home page) committed 28 Oct 2026, not yet pushed or deployed.
 - **Run locally:** `python3 -m http.server 8000` from the repo root, open `http://localhost:8000/#maths/play`.
 - **Commit policy:** commit after each piece is working, with this file updated in the same commit. No push or deploy without separate authorisation.
 
@@ -98,6 +98,8 @@ Browser check at 1440×900 and 820×1180 (Chrome via automation): no console err
 - **N — 27 Oct 2026.** User feedback: each topic's text read as disjointed (body paragraphs plus a separate "In a language model" box). Each of the seven topics now has one three-paragraph narrative (about 220–280 words): the maths, then what its artwork shows, then where it sits in a language model and what the example does not establish. The `llm` fields, the box markup and its CSS are gone. All references to the old instruments (point clouds, "the values are the keys themselves", "shown here", "Here, two clusters…") are replaced by descriptions of the Interiors artworks. The accuracy corrections from `human-idiom.md` §7 are kept: rank vs determinant, LoRA as a low-rank update, GELU/SwiGLU described rather than oversold, training vs inference, dot products depending on length, prompt vs cached-decoding cost, RoPE's distance dependence qualified for fixed content, superposition as a hypothesis, ablation vs steering.
 
 - **O — 27 Oct 2026.** Duplication pass on the seven narratives. The text no longer restates the formula box (det = ad − bc, θ ← θ − η∇L(θ), max(0, z), spread ≈ 1/√d, x′ = x − α(x·r̂)r̂) or the artwork caption ("folds the plane like a mirror"), and wordy connectives are cut. Every fact and qualification is kept. 1,445 → 1,149 words (20% shorter; per topic 151–188). On a 1242px window the text is now about 1.8–2× the height of the pinned artwork.
+
+- **P — 28 Oct 2026.** The seven-tile Interiors gallery moved to the home page, between the hero and Recent experiments (`#interiors`). The section has a home-style heading ("The maths of AI" / "Interiors") instead of a second "Inside the room", then the gallery's introduction, wall of live posters, note and a link to the maths page. `Interiors.showcase()` provides that markup to both places. `#maths/play` now redirects to `#interiors`. The pieces' ← Interiors link and Esc return there, focusing the tile you left; the maths page's "All seven Interiors" link points there too. Home posters are wired and disposed in `app.js` like the maths page's.
 
 ## 4. Known limits and polish backlog
 

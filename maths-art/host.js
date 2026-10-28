@@ -95,11 +95,10 @@ const Interiors = (() => {
   }
 
   /* ---------- markup ---------- */
-  function gallery() {
-    return `<section class="ir-gallery">
-      <p class="eyebrow">The maths of AI / Interiors</p>
-      <h1>Inside the <em>room.</em></h1>
-      <div class="ir-intro">
+  // The introduction, the wall of seven live posters and the note. It lives on the home page
+  // (#interiors); gallery() wraps it for any route that still renders the old page.
+  function showcase() {
+    return `<div class="ir-intro">
         <p>In Searle's thought experiment, a person sits in a closed room. Symbols come in under the door. They follow a rulebook, push other symbols back out, and never understand a word.</p>
         <p>A language model is that room. These are seven of its rules, made visible. Step inside each one and touch the mathematics directly: you are the token being transformed, the word asking a question, the training process feeling for the bottom of the valley.</p>
       </div>
@@ -115,8 +114,11 @@ const Interiors = (() => {
         </a>`).join('')}
       </div>
       <p class="ir-note">Touch, mouse or keyboard. Everything runs in your browser; no model is called. Every moving thing is computed by the operation it depicts — the data are small and synthetic, and each piece says where.</p>
-      <a class="text-link" href="#maths">Read the ideas behind each piece →</a>
-    </section>`;
+      <a class="cta cta-sm cta-quiet" href="#maths">Read the ideas behind each piece</a>`;
+  }
+
+  function gallery() {
+    return `<section class="ir-gallery"><p class="eyebrow">The maths of AI / Interiors</p><h1>Inside the <em>room.</em></h1>${showcase()}</section>`;
   }
 
   function control(c) {
@@ -135,7 +137,7 @@ const Interiors = (() => {
       <canvas class="ir-canvas ir-base" aria-hidden="true"></canvas>
       <canvas class="ir-canvas ir-over" tabindex="0" role="img" aria-label="${esc(p.label || p.caption)}"></canvas>
       <header class="ir-top ir-chrome">
-        <a href="#maths/play" class="ir-back">← Interiors</a>
+        <a href="#interiors" class="ir-back">← Interiors</a>
         <span class="ir-where">${p.no} / ${esc(p.title)}</span>
         <span class="ir-top-actions">
           <button type="button" data-host="maths" aria-pressed="false"><span class="ir-wide">The </span>maths <kbd>M</kbd></button>
@@ -405,7 +407,7 @@ const Interiors = (() => {
       const key = e.key.toLowerCase();
       if (key === 'm') { toggleDrawer(); e.preventDefault(); }
       else if (key === 's') { toggleSound(); e.preventDefault(); }
-      else if (key === 'escape') { if (!drawer.hidden) toggleDrawer(false); else location.hash = 'maths/play'; e.preventDefault(); }
+      else if (key === 'escape') { if (!drawer.hidden) toggleDrawer(false); else location.hash = 'interiors'; e.preventDefault(); }
       else if (key === ' ' && (document.activeElement === over || document.activeElement === document.body)) { paused = !paused; e.preventDefault(); }
       else inst.key?.(e);
       wake();
@@ -477,7 +479,7 @@ const Interiors = (() => {
   function gauss(r) { let u = 0, v = 0; while (!u) u = r(); v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
 
   return {
-    register, page, wire, draw, posters: wireGallery, rng, gauss, clamp, lerp, fmt, esc,
+    register, page, wire, draw, showcase, posters: wireGallery, rng, gauss, clamp, lerp, fmt, esc,
     get games() { return pieces; },
     get lastGame() { return lastPiece; }
   };
