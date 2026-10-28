@@ -1,0 +1,186 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" font-family="'SF Mono', 'Fira Code', 'Consolas', monospace">
+  <defs>
+    <linearGradient id="bezelGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a3a3c"/>
+      <stop offset="100%" stop-color="#1c1c1e"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="screenReflect" x1="0" y1="0" x2="0.3" y2="0.3">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.03"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- MONITOR -->
+  <ellipse cx="450" cy="608" rx="120" ry="12" fill="#2c2c2e"/>
+  <rect x="430" y="555" width="40" height="55" rx="4" fill="url(#bezelGrad)"/>
+  <rect x="50" y="20" width="800" height="540" rx="16" fill="url(#bezelGrad)"/>
+  <rect x="70" y="40" width="760" height="500" rx="6" fill="#1a1a2e"/>
+  <rect x="70" y="40" width="760" height="500" rx="6" fill="url(#screenReflect)"/>
+  <circle cx="450" cy="30" r="3" fill="#48484a"/>
+
+  <!-- Title bar -->
+  <rect x="70" y="40" width="760" height="28" rx="6" fill="#16213e"/>
+  <rect x="70" y="56" width="760" height="12" fill="#16213e"/>
+  <circle cx="92" cy="54" r="5.5" fill="#ff5f57"/>
+  <circle cx="110" cy="54" r="5.5" fill="#febc2e"/>
+  <circle cx="128" cy="54" r="5.5" fill="#28c840"/>
+  <text x="450" y="58" text-anchor="middle" fill="#8e8e93" font-size="12">mindcuber-rl -- ADI v3 Training Simulation</text>
+
+  <!-- ==================== ISOMETRIC RUBIK'S CUBE ==================== -->
+  <!-- True isometric: cos(30)=0.866, sin(30)=0.5, cell=30 => dx=26, dy=15 -->
+  <!-- Front vertex at origin, top goes up-back, sides go down-left/right -->
+  <g transform="translate(270, 310)">
+
+    <!-- ===== TOP FACE ===== -->
+    <polygon points="0,0 26,-15 0,-30 -26,-15" fill="#ffffff" stroke="#111" stroke-width="1.5"/>
+    <polygon points="26,-15 52,-30 26,-45 0,-30" fill="#ffffff" stroke="#111" stroke-width="1.5"/>
+    <polygon points="52,-30 78,-45 52,-60 26,-45" fill="#ff6b35" stroke="#111" stroke-width="1.5"/>
+    <polygon points="-26,-15 0,-30 -26,-45 -52,-30" fill="#3b82f6" stroke="#111" stroke-width="1.5"/>
+    <polygon points="0,-30 26,-45 0,-60 -26,-45" fill="#ffffff" stroke="#111" stroke-width="1.5"/>
+    <polygon points="26,-45 52,-60 26,-75 0,-60" fill="#ffffff" stroke="#111" stroke-width="1.5"/>
+    <polygon points="-52,-30 -26,-45 -52,-60 -78,-45" fill="#22c55e" stroke="#111" stroke-width="1.5"/>
+    <polygon points="-26,-45 0,-60 -26,-75 -52,-60" fill="#ef4444" stroke="#111" stroke-width="1.5"/>
+    <polygon points="0,-60 26,-75 0,-90 -26,-75" fill="#ffffff" stroke="#111" stroke-width="1.5"/>
+
+    <!-- ===== LEFT FACE ===== -->
+    <polygon points="-78,-45 -52,-60 -52,-30 -78,-15" fill="#ef4444" stroke="#111" stroke-width="1.5"/>
+    <polygon points="-52,-60 -26,-75 -26,-45 -52,-30" fill="#22c55e" stroke="#111" stroke-width="1.5"/>
+    <polygon points="-26,-75 0,-90 0,-60 -26,-45" fill="#ef4444" stroke="#111" stroke-width="1.5"/>
+    <polygon points="-78,-15 -52,-30 -52,0 -78,15" fill="#fbbf24" stroke="#111" stroke-width="1.5"/>
+    <polygon points="-52,-30 -26,-45 -26,-15 -52,0" fill="#ef4444" stroke="#111" stroke-width="1.5"/>
+    <polygon points="-26,-45 0,-60 0,-30 -26,-15" fill="#ff6b35" stroke="#111" stroke-width="1.5"/>
+    <polygon points="-78,15 -52,0 -52,30 -78,45" fill="#3b82f6" stroke="#111" stroke-width="1.5"/>
+    <polygon points="-52,0 -26,-15 -26,15 -52,30" fill="#fbbf24" stroke="#111" stroke-width="1.5"/>
+    <polygon points="-26,-15 0,-30 0,0 -26,15" fill="#22c55e" stroke="#111" stroke-width="1.5"/>
+
+    <!-- ===== RIGHT FACE ===== -->
+    <polygon points="78,-45 52,-60 52,-30 78,-15" fill="#ff6b35" stroke="#111" stroke-width="1.5"/>
+    <polygon points="52,-60 26,-75 26,-45 52,-30" fill="#3b82f6" stroke="#111" stroke-width="1.5"/>
+    <polygon points="26,-75 0,-90 0,-60 26,-45" fill="#fbbf24" stroke="#111" stroke-width="1.5"/>
+    <polygon points="78,-15 52,-30 52,0 78,15" fill="#3b82f6" stroke="#111" stroke-width="1.5"/>
+    <polygon points="52,-30 26,-45 26,-15 52,0" fill="#3b82f6" stroke="#111" stroke-width="1.5"/>
+    <polygon points="26,-45 0,-60 0,-30 26,-15" fill="#ef4444" stroke="#111" stroke-width="1.5"/>
+    <polygon points="78,15 52,0 52,30 78,45" fill="#ffffff" stroke="#111" stroke-width="1.5"/>
+    <polygon points="52,0 26,-15 26,15 52,30" fill="#22c55e" stroke="#111" stroke-width="1.5"/>
+    <polygon points="26,-15 0,-30 0,0 26,15" fill="#3b82f6" stroke="#111" stroke-width="1.5"/>
+  </g>
+
+  <!-- ==================== TRAINING PARAMETERS PANEL ==================== -->
+  <rect x="500" y="80" width="310" height="445" rx="8" fill="#0f1729" fill-opacity="0.85" stroke="#1e3a5f" stroke-width="1"/>
+
+  <text x="520" y="108" fill="#60a5fa" font-size="14" font-weight="bold">ADI v3 — Training Monitor</text>
+  <line x1="520" y1="116" x2="790" y2="116" stroke="#1e3a5f" stroke-width="1"/>
+
+  <text x="520" y="140" fill="#6b7280" font-size="11">MODEL</text>
+  <text x="520" y="158" fill="#9ca3af" font-size="12">Architecture</text>
+  <text x="790" y="158" text-anchor="end" fill="#34d399" font-size="12">ResNet + Dual Head</text>
+  <text x="520" y="176" fill="#9ca3af" font-size="12">Parameters</text>
+  <text x="790" y="176" text-anchor="end" fill="#fbbf24" font-size="12">44,700,672</text>
+  <text x="520" y="194" fill="#9ca3af" font-size="12">Residual Blocks</text>
+  <text x="790" y="194" text-anchor="end" fill="#e2e8f0" font-size="12">4 x 2048</text>
+  <text x="520" y="212" fill="#9ca3af" font-size="12">Input Size</text>
+  <text x="790" y="212" text-anchor="end" fill="#e2e8f0" font-size="12">324 (one-hot)</text>
+
+  <line x1="520" y1="224" x2="790" y2="224" stroke="#1e3a5f" stroke-width="0.5"/>
+
+  <text x="520" y="246" fill="#6b7280" font-size="11">TRAINING</text>
+  <text x="520" y="264" fill="#9ca3af" font-size="12">Epoch</text>
+  <text x="790" y="264" text-anchor="end" fill="#60a5fa" font-size="12">50 / 100</text>
+  <text x="520" y="282" fill="#9ca3af" font-size="12">Samples</text>
+  <text x="790" y="282" text-anchor="end" fill="#e2e8f0" font-size="12">20,000,000</text>
+  <text x="520" y="300" fill="#9ca3af" font-size="12">Batch Size</text>
+  <text x="790" y="300" text-anchor="end" fill="#e2e8f0" font-size="12">1,024</text>
+  <text x="520" y="318" fill="#9ca3af" font-size="12">Learning Rate</text>
+  <text x="790" y="318" text-anchor="end" fill="#e2e8f0" font-size="12">1e-3 to 1e-5</text>
+  <text x="520" y="336" fill="#9ca3af" font-size="12">Value Loss</text>
+  <text x="790" y="336" text-anchor="end" fill="#34d399" font-size="12">0.0847</text>
+  <text x="520" y="354" fill="#9ca3af" font-size="12">Policy Loss</text>
+  <text x="790" y="354" text-anchor="end" fill="#34d399" font-size="12">1.2341</text>
+
+  <line x1="520" y1="366" x2="790" y2="366" stroke="#1e3a5f" stroke-width="0.5"/>
+
+  <text x="520" y="388" fill="#6b7280" font-size="11">SOLVE RATE (BW=1000)</text>
+
+  <text x="520" y="408" fill="#9ca3af" font-size="11">5-move</text>
+  <rect x="600" y="397" width="170" height="14" rx="3" fill="#1e293b"/>
+  <rect x="600" y="397" width="170" height="14" rx="3" fill="#22c55e" fill-opacity="0.8"/>
+  <text x="780" y="408" text-anchor="end" fill="#fff" font-size="10" font-weight="bold">100%</text>
+
+  <text x="520" y="428" fill="#9ca3af" font-size="11">10-move</text>
+  <rect x="600" y="417" width="170" height="14" rx="3" fill="#1e293b"/>
+  <rect x="600" y="417" width="170" height="14" rx="3" fill="#22c55e" fill-opacity="0.8"/>
+  <text x="780" y="428" text-anchor="end" fill="#fff" font-size="10" font-weight="bold">100%</text>
+
+  <text x="520" y="448" fill="#9ca3af" font-size="11">15-move</text>
+  <rect x="600" y="437" width="170" height="14" rx="3" fill="#1e293b"/>
+  <rect x="600" y="437" width="168" height="14" rx="3" fill="#60a5fa" fill-opacity="0.8"/>
+  <text x="780" y="448" text-anchor="end" fill="#fff" font-size="10" font-weight="bold">99.0%</text>
+
+  <text x="520" y="468" fill="#9ca3af" font-size="11">20-move</text>
+  <rect x="600" y="457" width="170" height="14" rx="3" fill="#1e293b"/>
+  <rect x="600" y="457" width="159" height="14" rx="3" fill="#fbbf24" fill-opacity="0.8"/>
+  <text x="769" y="468" text-anchor="end" fill="#1a1a2e" font-size="10" font-weight="bold">93.5%</text>
+
+  <text x="520" y="488" fill="#9ca3af" font-size="11">25-move</text>
+  <rect x="600" y="477" width="170" height="14" rx="3" fill="#1e293b"/>
+  <rect x="600" y="477" width="148" height="14" rx="3" fill="#f97316" fill-opacity="0.8"/>
+  <text x="758" y="488" text-anchor="end" fill="#1a1a2e" font-size="10" font-weight="bold">87.0%</text>
+
+  <line x1="520" y1="500" x2="790" y2="500" stroke="#1e3a5f" stroke-width="0.5"/>
+
+  <text x="520" y="518" fill="#6b7280" font-size="11">HARDWARE</text>
+  <text x="520" y="534" fill="#76b900" font-size="11" font-weight="bold">NVIDIA</text>
+  <text x="568" y="534" fill="#9ca3af" font-size="11">DGX Spark . GB10 . 128GB</text>
+
+  <!-- BEAM SEARCH PANEL -->
+  <rect x="90" y="80" width="175" height="130" rx="8" fill="#0f1729" fill-opacity="0.85" stroke="#1e3a5f" stroke-width="1"/>
+  <text x="108" y="104" fill="#60a5fa" font-size="12" font-weight="bold">Beam Search</text>
+  <text x="108" y="120" fill="#6b7280" font-size="10">width=1000 . max_depth=30</text>
+
+  <circle cx="177" cy="140" r="4" fill="#fbbf24" filter="url(#glow)"/>
+  <line x1="177" y1="144" x2="137" y2="158" stroke="#334155" stroke-width="0.8"/>
+  <line x1="177" y1="144" x2="157" y2="158" stroke="#334155" stroke-width="0.8"/>
+  <line x1="177" y1="144" x2="177" y2="158" stroke="#60a5fa" stroke-width="1.2"/>
+  <line x1="177" y1="144" x2="197" y2="158" stroke="#334155" stroke-width="0.8"/>
+  <line x1="177" y1="144" x2="217" y2="158" stroke="#334155" stroke-width="0.8"/>
+  <circle cx="137" cy="160" r="3" fill="#334155"/>
+  <circle cx="157" cy="160" r="3" fill="#334155"/>
+  <circle cx="177" cy="160" r="3" fill="#60a5fa"/>
+  <circle cx="197" cy="160" r="3" fill="#334155"/>
+  <circle cx="217" cy="160" r="3" fill="#334155"/>
+  <line x1="177" y1="163" x2="147" y2="177" stroke="#334155" stroke-width="0.8"/>
+  <line x1="177" y1="163" x2="167" y2="177" stroke="#334155" stroke-width="0.8"/>
+  <line x1="177" y1="163" x2="187" y2="177" stroke="#60a5fa" stroke-width="1.2"/>
+  <line x1="177" y1="163" x2="207" y2="177" stroke="#334155" stroke-width="0.8"/>
+  <circle cx="147" cy="179" r="3" fill="#334155"/>
+  <circle cx="167" cy="179" r="3" fill="#334155"/>
+  <circle cx="187" cy="179" r="3" fill="#60a5fa"/>
+  <circle cx="207" cy="179" r="3" fill="#334155"/>
+  <line x1="187" y1="182" x2="167" y2="195" stroke="#334155" stroke-width="0.8"/>
+  <line x1="187" y1="182" x2="187" y2="195" stroke="#22c55e" stroke-width="1.2"/>
+  <line x1="187" y1="182" x2="207" y2="195" stroke="#334155" stroke-width="0.8"/>
+  <circle cx="167" cy="197" r="3" fill="#334155"/>
+  <circle cx="187" cy="197" r="3.5" fill="#22c55e" filter="url(#glow)"/>
+  <circle cx="207" cy="197" r="3" fill="#334155"/>
+  <text x="197" y="200" fill="#22c55e" font-size="8">SOLVED</text>
+
+  <!-- SOLUTION BAR -->
+  <rect x="90" y="420" width="395" height="45" rx="6" fill="#0f1729" fill-opacity="0.85" stroke="#1e3a5f" stroke-width="1"/>
+  <text x="108" y="439" fill="#6b7280" font-size="10">SOLUTION</text>
+  <text x="108" y="455" fill="#34d399" font-size="13" font-weight="bold" filter="url(#glow)">L F' U L2 U R2 D F B' R2 U R' U' R'2 B U</text>
+
+  <!-- STATUS BAR -->
+  <rect x="90" y="475" width="395" height="30" rx="6" fill="#0f1729" fill-opacity="0.85" stroke="#1e3a5f" stroke-width="1"/>
+  <circle cx="108" cy="490" r="4" fill="#22c55e" opacity="0.9">
+    <animate attributeName="opacity" values="0.4;1;0.4" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <text x="120" y="494" fill="#9ca3af" font-size="11">Solving... 26 moves found in</text>
+  <text x="320" y="494" fill="#fbbf24" font-size="11" font-weight="bold">4.41s</text>
+  <text x="360" y="494" fill="#9ca3af" font-size="11">. Scramble depth: 20</text>
+
+  <text x="270" y="405" text-anchor="middle" fill="#475569" font-size="10">Scrambled State . 20 moves from solved</text>
+</svg>

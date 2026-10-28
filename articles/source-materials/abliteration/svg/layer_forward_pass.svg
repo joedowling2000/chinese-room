@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="760" viewBox="0 0 1500 760" role="img" aria-labelledby="title desc">
+  <title id="title">Data flow through a single transformer layer: seven weight matrices</title>
+  <desc id="desc">A horizontal schematic of one transformer layer. The residual stream flows left to right. An attention block (q_proj, k_proj, v_proj, o_proj) taps the stream, mixes information between tokens, and adds its result back at a plus node. An MLP block (up_proj, gate_proj expanding to 49,152 dimensions, a nonlinearity, then down_proj) adds its result back at a second plus node. The block repeats 88 times.</desc>
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+    </marker>
+    <marker id="arr-blue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/>
+    </marker>
+    <marker id="arr-amber" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b45309"/>
+    </marker>
+    <marker id="arr-res" markerWidth="11" markerHeight="11" refX="8" refY="5.5" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 11 5.5 L 0 11 z" fill="#1d4ed8"/>
+    </marker>
+    <symbol id="grid" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <line x1="25" y1="4" x2="25" y2="96"/>
+      <line x1="50" y1="4" x2="50" y2="96"/>
+      <line x1="75" y1="4" x2="75" y2="96"/>
+      <line x1="4" y1="33" x2="96" y2="33"/>
+      <line x1="4" y1="66" x2="96" y2="66"/>
+    </symbol>
+    <style>
+      .title { font: 700 28px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #0f172a; }
+      .sub   { font: 400 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #475569; }
+      .lbl   { font: 700 16px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #0f172a; }
+      .role  { font: 400 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #475569; }
+      .cap   { font: 700 18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .capsm { font: 400 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .dim   { font: 600 13px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #334155; }
+      .vals  { font: 500 13px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #64748b; }
+      .note  { font: 400 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #64748b; }
+      .plus  { font: 700 22px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #1d4ed8; }
+      .gridln { stroke: #cbd5e1; stroke-width: 1.5; fill: none; }
+      .flow-b { stroke: #93c5fd; stroke-width: 2; fill: none; }
+      .flow-a { stroke: #fcd34d; stroke-width: 2; fill: none; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1500" height="760" fill="#ffffff"/>
+
+  <!-- Title -->
+  <text x="60" y="48" class="title">Data flow through one transformer layer</text>
+  <text x="60" y="76" class="sub">Seven weight matrices, arranged into an attention block and an MLP block. The same block repeats 88 times.</text>
+
+  <!-- ===================== RESIDUAL STREAM SPINE ===================== -->
+  <!-- drawn first so blocks/boxes sit on top of it -->
+  <line x1="40" y1="430" x2="1450" y2="430" stroke="#1d4ed8" stroke-width="5" marker-end="url(#arr-res)"/>
+
+  <!-- Left entry label -->
+  <text x="46" y="410" class="lbl" fill="#1d4ed8">residual stream</text>
+  <text x="46" y="470" class="note">12,288 numbers</text>
+  <text x="46" y="490" class="vals">0.0342  −0.771  1.058  …</text>
+
+  <!-- ===================== ATTENTION BLOCK ===================== -->
+  <rect x="150" y="196" width="500" height="470" rx="16" fill="#eff6ff" stroke="#2563eb" stroke-width="2" fill-opacity="0.55"/>
+
+  <!-- faint "between tokens" annotation -->
+  <g opacity="0.7">
+    <path d="M330 250 C 360 224, 430 224, 460 250" stroke="#93c5fd" stroke-width="1.5" fill="none" marker-end="url(#arr-blue)"/>
+    <text x="322" y="246" text-anchor="end" class="note" fill="#2563eb">it</text>
+    <text x="468" y="246" class="note" fill="#2563eb">the engine</text>
+  </g>
+
+  <!-- tap from residual into the three projections -->
+  <circle cx="180" cy="430" r="5" fill="#1d4ed8"/>
+  <path d="M180 430 C 200 350, 195 331, 214 331" class="flow-b"/>
+  <path d="M180 430 H214" class="flow-b"/>
+  <path d="M180 430 C 200 510, 195 529, 214 529" class="flow-b"/>
+
+  <!-- q_proj -->
+  <rect x="214" y="301" width="92" height="60" rx="8" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+  <use href="#grid" x="222" y="309" width="76" height="44" class="gridln"/>
+  <text x="260" y="293" text-anchor="middle" class="lbl">q_proj</text>
+  <text x="316" y="326" class="role">query — "what am I looking for?"</text>
+
+  <!-- k_proj -->
+  <rect x="214" y="400" width="92" height="60" rx="8" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+  <use href="#grid" x="222" y="408" width="76" height="44" class="gridln"/>
+  <text x="260" y="392" text-anchor="middle" class="lbl">k_proj</text>
+  <text x="316" y="425" class="role">key — "what do I offer?"</text>
+
+  <!-- v_proj -->
+  <rect x="214" y="499" width="92" height="60" rx="8" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+  <use href="#grid" x="222" y="507" width="76" height="44" class="gridln"/>
+  <text x="260" y="579" text-anchor="middle" class="lbl">v_proj</text>
+  <text x="316" y="524" class="role">value — "what will I contribute?"</text>
+
+  <!-- q/k/v feed o_proj -->
+  <path d="M306 331 C 380 331, 400 420, 470 425" class="flow-b" marker-end="url(#arr-blue)"/>
+  <path d="M306 430 H470" class="flow-b" marker-end="url(#arr-blue)"/>
+  <path d="M306 529 C 380 529, 400 440, 470 435" class="flow-b" marker-end="url(#arr-blue)"/>
+
+  <!-- o_proj (write-head) -->
+  <rect x="474" y="388" width="92" height="84" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="2.5"/>
+  <use href="#grid" x="482" y="398" width="76" height="64" class="gridln"/>
+  <text x="520" y="380" text-anchor="middle" class="lbl">o_proj</text>
+
+  <!-- o_proj output to plus node -->
+  <path d="M566 430 H642" class="flow-b" marker-end="url(#arr-blue)"/>
+
+  <!-- PLUS NODE 1 -->
+  <circle cx="662" cy="430" r="16" fill="#ffffff" stroke="#1d4ed8" stroke-width="2.5"/>
+  <text x="662" y="438" text-anchor="middle" class="plus">+</text>
+
+  <!-- Attention caption -->
+  <text x="400" y="702" text-anchor="middle" class="cap" fill="#1e40af">Attention</text>
+  <text x="400" y="726" text-anchor="middle" class="capsm" fill="#334155">mixes information <tspan font-weight="700">between</tspan> tokens</text>
+
+  <!-- ===================== MLP BLOCK ===================== -->
+  <rect x="770" y="196" width="560" height="470" rx="16" fill="#fffbeb" stroke="#d97706" stroke-width="2" fill-opacity="0.55"/>
+
+  <!-- tap from residual into up/gate -->
+  <circle cx="800" cy="430" r="5" fill="#1d4ed8"/>
+  <path d="M800 430 C 815 340, 812 331, 828 331" class="flow-a"/>
+  <path d="M800 430 C 815 520, 812 529, 828 529" class="flow-a"/>
+
+  <!-- up_proj -->
+  <rect x="828" y="301" width="92" height="60" rx="8" fill="#ffffff" stroke="#d97706" stroke-width="2"/>
+  <use href="#grid" x="836" y="309" width="76" height="44" class="gridln"/>
+  <text x="874" y="293" text-anchor="middle" class="lbl">up_proj</text>
+
+  <!-- gate_proj -->
+  <rect x="828" y="499" width="92" height="60" rx="8" fill="#ffffff" stroke="#d97706" stroke-width="2"/>
+  <use href="#grid" x="836" y="507" width="76" height="44" class="gridln"/>
+  <text x="874" y="579" text-anchor="middle" class="lbl">gate_proj</text>
+
+  <!-- expand into wide hidden space -->
+  <path d="M920 331 C 970 331, 980 350, 1002 350" class="flow-a" marker-end="url(#arr-amber)"/>
+  <path d="M920 529 C 970 529, 980 510, 1002 510" class="flow-a" marker-end="url(#arr-amber)"/>
+
+  <!-- hidden 49,152 band -->
+  <rect x="1004" y="322" width="74" height="216" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+  <!-- nonlinear activation curve inside -->
+  <path d="M1018 486 C 1041 486, 1041 374, 1064 374" stroke="#b45309" stroke-width="2.5" fill="none"/>
+  <text x="1041" y="312" text-anchor="middle" class="dim">49,152</text>
+  <text x="1041" y="558" text-anchor="middle" class="note">4× wider</text>
+  <text x="1041" y="578" text-anchor="middle" class="note">+ nonlinearity</text>
+
+  <!-- compress back into down_proj -->
+  <path d="M1078 360 C 1120 360, 1130 425, 1168 428" class="flow-a" marker-end="url(#arr-amber)"/>
+  <path d="M1078 500 C 1120 500, 1130 435, 1168 432" class="flow-a" marker-end="url(#arr-amber)"/>
+
+  <!-- down_proj (write-head) -->
+  <rect x="1172" y="388" width="92" height="84" rx="8" fill="#fde68a" stroke="#d97706" stroke-width="2.5"/>
+  <use href="#grid" x="1180" y="398" width="76" height="64" class="gridln"/>
+  <text x="1218" y="380" text-anchor="middle" class="lbl">down_proj</text>
+
+  <!-- down_proj output to plus node -->
+  <path d="M1264 430 H1300" class="flow-a" marker-end="url(#arr-amber)"/>
+
+  <!-- PLUS NODE 2 -->
+  <circle cx="1320" cy="430" r="16" fill="#ffffff" stroke="#1d4ed8" stroke-width="2.5"/>
+  <text x="1320" y="438" text-anchor="middle" class="plus">+</text>
+
+  <!-- MLP caption -->
+  <text x="1050" y="702" text-anchor="middle" class="cap" fill="#b45309">MLP</text>
+  <text x="1050" y="726" text-anchor="middle" class="capsm" fill="#334155">heavier processing <tspan font-weight="700">within</tspan> each token</text>
+
+  <!-- ===================== x88 LAYERS GHOSTS ===================== -->
+  <g opacity="0.5">
+    <rect x="1360" y="360" width="30" height="140" rx="8" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="1372" y="372" width="30" height="140" rx="8" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="1384" y="384" width="30" height="140" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  </g>
+  <text x="1400" y="352" text-anchor="middle" class="note" fill="#64748b">× 88 layers</text>
+
+  <!-- ===================== WEIGHTED-SUM CALLOUT ===================== -->
+  <rect x="600" y="110" width="540" height="52" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="618" y="132" class="note" fill="#334155">Every matrix works the same way: each output number is a <tspan font-weight="700">weighted sum of all</tspan></text>
+  <text x="618" y="152" class="note" fill="#334155"><tspan font-weight="700">12,288 inputs</tspan> — a dot product of the input vector with that row of weights.</text>
+  <path d="M700 162 C 730 210, 800 300, 872 301" stroke="#94a3b8" stroke-width="1.5" fill="none" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+
+  <!-- dimension labels on spine -->
+  <text x="712" y="418" class="dim">12,288</text>
+  <text x="1370" y="418" class="dim" fill="#64748b"></text>
+</svg>

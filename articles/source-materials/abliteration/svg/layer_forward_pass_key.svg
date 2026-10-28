@@ -1,0 +1,221 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="920" viewBox="0 0 1500 920" role="img" aria-labelledby="title desc">
+  <title id="title">Data flow through a single transformer layer with a key</title>
+  <desc id="desc">A left-to-right schematic of one transformer layer. The residual stream flows across the top. An attention block (q_proj, k_proj, v_proj, o_proj) and an MLP block (up_proj, gate_proj, down_proj) tap the stream and add their results back at plus nodes. Each matrix is drawn as a labelled grid box with a numbered badge, and a key below defines all seven matrices. o_proj and down_proj are marked as write-heads.</desc>
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+    </marker>
+    <marker id="arr-blue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/>
+    </marker>
+    <marker id="arr-amber" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#d9686d"/>
+    </marker>
+    <marker id="arr-res" markerWidth="14" markerHeight="14" refX="10" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 14 7 L 0 14 z" fill="#1d4ed8"/>
+    </marker>
+    <symbol id="grid" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <line x1="25" y1="4" x2="25" y2="96"/>
+      <line x1="50" y1="4" x2="50" y2="96"/>
+      <line x1="75" y1="4" x2="75" y2="96"/>
+      <line x1="4" y1="33" x2="96" y2="33"/>
+      <line x1="4" y1="66" x2="96" y2="66"/>
+    </symbol>
+    <symbol id="star" viewBox="0 0 40 40">
+      <path d="M20 1.5 L25 14.5 L38.5 15 L27.7 23.6 L31.5 36.5 L20 28.8 L8.5 36.5 L12.3 23.6 L1.5 15 L15 14.5 Z"/>
+    </symbol>
+    <style>
+      .title { font: 700 28px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #0f172a; }
+      .sub   { font: 400 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #475569; }
+      .mtxlbl{ font: 700 15px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #0f172a; }
+      .cap   { font: 700 18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .capsm { font: 400 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #334155; }
+      .dim   { font: 600 13px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #334155; }
+      .note  { font: 400 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #64748b; }
+      .plus  { font: 700 22px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #1d4ed8; }
+      .badge { font: 700 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #ffffff; }
+      .keyh  { font: 700 17px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .keyn  { font: 700 15px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #0f172a; }
+      .keyd  { font: 400 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #334155; }
+      .star  { font: 700 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #475569; }
+      .gridln { stroke: #cbd5e1; stroke-width: 1.5; fill: none; }
+      .flow-b { stroke: #93c5fd; stroke-width: 2.5; fill: none; }
+      .flow-a { stroke: #f2a8ab; stroke-width: 2.5; fill: none; }
+    </style>
+  </defs>
+
+  <rect width="1500" height="920" fill="#ffffff"/>
+
+  <!-- Title -->
+  <text x="60" y="46" class="title">Data flow through one transformer layer</text>
+  <text x="60" y="74" class="sub">Seven weight matrices in two blocks. Information flows left to right; each block adds its result back onto the residual stream.</text>
+
+  <!-- ===================== RESIDUAL STREAM SPINE ===================== -->
+  <line x1="40" y1="330" x2="1462" y2="330" stroke="#1d4ed8" stroke-width="5" marker-end="url(#arr-res)"/>
+  <text x="46" y="300" class="mtxlbl" fill="#1d4ed8" font-size="14px">residual</text>
+  <text x="46" y="320" class="mtxlbl" fill="#1d4ed8" font-size="14px">stream</text>
+  <text x="46" y="360" class="note">12,288 numbers</text>
+
+  <!-- ===================== ATTENTION BLOCK ===================== -->
+  <rect x="170" y="150" width="470" height="380" rx="16" fill="#eff6ff" stroke="#2563eb" stroke-width="2" fill-opacity="0.5"/>
+
+  <!-- tap -->
+  <circle cx="188" cy="330" r="5" fill="#1d4ed8"/>
+  <path d="M188 330 C 205 240, 200 225, 214 225" class="flow-b"/>
+  <path d="M188 330 H214" class="flow-b"/>
+  <path d="M188 330 C 205 440, 200 455, 214 455" class="flow-b"/>
+
+  <!-- q_proj  (badge 1) -->
+  <rect x="214" y="185" width="120" height="80" rx="10" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+  <use href="#grid" x="234" y="200" width="80" height="34" class="gridln"/>
+  <text x="274" y="256" text-anchor="middle" class="mtxlbl">q_proj</text>
+  <circle cx="230" cy="201" r="13" fill="#2563eb"/>
+  <text x="230" y="206" text-anchor="middle" class="badge">1</text>
+
+  <!-- k_proj (badge 2) -->
+  <rect x="214" y="290" width="120" height="80" rx="10" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+  <use href="#grid" x="234" y="305" width="80" height="34" class="gridln"/>
+  <text x="274" y="361" text-anchor="middle" class="mtxlbl">k_proj</text>
+  <circle cx="230" cy="306" r="13" fill="#2563eb"/>
+  <text x="230" y="311" text-anchor="middle" class="badge">2</text>
+
+  <!-- v_proj (badge 3) -->
+  <rect x="214" y="395" width="120" height="80" rx="10" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+  <use href="#grid" x="234" y="410" width="80" height="34" class="gridln"/>
+  <text x="274" y="466" text-anchor="middle" class="mtxlbl">v_proj</text>
+  <circle cx="230" cy="411" r="13" fill="#2563eb"/>
+  <text x="230" y="416" text-anchor="middle" class="badge">3</text>
+
+  <!-- q/k/v -> o_proj -->
+  <path d="M334 225 C 405 225, 424 304, 466 304" class="flow-b" marker-end="url(#arr-blue)"/>
+  <path d="M334 330 H466" class="flow-b" marker-end="url(#arr-blue)"/>
+  <path d="M334 455 C 405 455, 424 356, 466 356" class="flow-b" marker-end="url(#arr-blue)"/>
+
+  <!-- o_proj write-head (badge 4) -->
+  <rect x="472" y="288" width="120" height="84" rx="10" fill="#dbeafe" stroke="#2563eb" stroke-width="2.5"/>
+  <use href="#grid" x="492" y="303" width="80" height="36" class="gridln"/>
+  <text x="532" y="362" text-anchor="middle" class="mtxlbl">o_proj</text>
+  <use href="#star" x="469" y="285" width="38" height="38" fill="#2563eb"/>
+  <text x="488" y="306" text-anchor="middle" dominant-baseline="central" class="badge">4</text>
+
+  <!-- o_proj -> plus1 -->
+  <path d="M592 330 H646" class="flow-b" marker-end="url(#arr-blue)"/>
+
+  <!-- PLUS 1 -->
+  <circle cx="666" cy="330" r="16" fill="#ffffff" stroke="#1d4ed8" stroke-width="2.5"/>
+  <text x="666" y="338" text-anchor="middle" class="plus">+</text>
+
+  <!-- Attention caption -->
+  <text x="405" y="560" text-anchor="middle" class="cap" fill="#1e40af">Attention block</text>
+
+  <!-- ===================== MLP BLOCK ===================== -->
+  <rect x="745" y="150" width="460" height="380" rx="16" fill="#fef2f2" stroke="#d9686d" stroke-width="2" fill-opacity="0.5"/>
+
+  <!-- tap -->
+  <circle cx="762" cy="330" r="5" fill="#1d4ed8"/>
+  <path d="M762 330 C 778 250, 774 235, 788 235" class="flow-a"/>
+  <path d="M762 330 C 778 410, 774 425, 788 425" class="flow-a"/>
+
+  <!-- up_proj (badge 5) -->
+  <rect x="788" y="195" width="120" height="80" rx="10" fill="#ffffff" stroke="#d9686d" stroke-width="2"/>
+  <use href="#grid" x="808" y="210" width="80" height="34" class="gridln"/>
+  <text x="848" y="266" text-anchor="middle" class="mtxlbl">up_proj</text>
+  <circle cx="804" cy="211" r="13" fill="#d9686d"/>
+  <text x="804" y="216" text-anchor="middle" class="badge">5</text>
+
+  <!-- gate_proj (badge 6) -->
+  <rect x="788" y="385" width="120" height="80" rx="10" fill="#ffffff" stroke="#d9686d" stroke-width="2"/>
+  <use href="#grid" x="808" y="400" width="80" height="34" class="gridln"/>
+  <text x="848" y="456" text-anchor="middle" class="mtxlbl">gate_proj</text>
+  <circle cx="804" cy="401" r="13" fill="#d9686d"/>
+  <text x="804" y="406" text-anchor="middle" class="badge">6</text>
+
+  <!-- expand into hidden -->
+  <path d="M908 235 C 940 235, 948 300, 968 300" class="flow-a" marker-end="url(#arr-amber)"/>
+  <path d="M908 425 C 940 425, 948 360, 968 360" class="flow-a" marker-end="url(#arr-amber)"/>
+
+  <!-- hidden 49,152 band -->
+  <rect x="970" y="248" width="66" height="164" rx="8" fill="#fde4e4" stroke="#d9686d" stroke-width="2"/>
+  <path d="M982 396 C 1003 396, 1003 264, 1024 264" stroke="#b23b40" stroke-width="2.5" fill="none"/>
+  <text x="1003" y="240" text-anchor="middle" class="dim">49,152</text>
+  <text x="1003" y="432" text-anchor="middle" class="note">4× wider</text>
+
+  <!-- compress into down_proj -->
+  <path d="M1036 285 C 1065 285, 1072 315, 1090 315" class="flow-a" marker-end="url(#arr-amber)"/>
+  <path d="M1036 375 C 1065 375, 1072 345, 1090 345" class="flow-a" marker-end="url(#arr-amber)"/>
+
+  <!-- down_proj write-head (badge 7) -->
+  <rect x="1092" y="288" width="120" height="84" rx="10" fill="#fbcdcd" stroke="#d9686d" stroke-width="2.5"/>
+  <use href="#grid" x="1112" y="303" width="80" height="36" class="gridln"/>
+  <text x="1152" y="362" text-anchor="middle" class="mtxlbl">down_proj</text>
+  <use href="#star" x="1089" y="285" width="38" height="38" fill="#d9686d"/>
+  <text x="1108" y="306" text-anchor="middle" dominant-baseline="central" class="badge">7</text>
+
+  <!-- down_proj -> plus2 -->
+  <path d="M1212 330 H1266" class="flow-a" marker-end="url(#arr-amber)"/>
+
+  <!-- PLUS 2 -->
+  <circle cx="1286" cy="330" r="16" fill="#ffffff" stroke="#1d4ed8" stroke-width="2.5"/>
+  <text x="1286" y="338" text-anchor="middle" class="plus">+</text>
+
+  <!-- x88 ghosts -->
+  <g opacity="0.5">
+    <rect x="1330" y="270" width="26" height="120" rx="7" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="1342" y="282" width="26" height="120" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  </g>
+  <text x="1360" y="262" text-anchor="middle" class="note">× 88 layers</text>
+
+  <!-- MLP caption -->
+  <text x="975" y="560" text-anchor="middle" class="cap" fill="#b23b40">MLP block</text>
+
+  <!-- ===================== KEY / LEGEND ===================== -->
+  <line x1="60" y1="600" x2="1440" y2="600" stroke="#e2e8f0" stroke-width="2"/>
+  <text x="60" y="636" class="title" font-size="22px">Key — the seven matrices of a layer</text>
+
+  <!-- Left column: attention -->
+  <text x="60" y="676" class="keyh" fill="#1e40af">Attention block &#8212; mixes information between tokens</text>
+
+  <g>
+    <circle cx="76" cy="706" r="13" fill="#2563eb"/><text x="76" y="711" text-anchor="middle" class="badge">1</text>
+    <text x="100" y="711" class="keyn">q_proj</text>
+    <text x="190" y="711" class="keyd">Query — "what am I looking for?"</text>
+  </g>
+  <g>
+    <circle cx="76" cy="746" r="13" fill="#2563eb"/><text x="76" y="751" text-anchor="middle" class="badge">2</text>
+    <text x="100" y="751" class="keyn">k_proj</text>
+    <text x="190" y="751" class="keyd">Key — "what do I offer?"</text>
+  </g>
+  <g>
+    <circle cx="76" cy="786" r="13" fill="#2563eb"/><text x="76" y="791" text-anchor="middle" class="badge">3</text>
+    <text x="100" y="791" class="keyn">v_proj</text>
+    <text x="190" y="791" class="keyd">Value — "what will I contribute if selected?"</text>
+  </g>
+  <g>
+    <use href="#star" x="57" y="807" width="38" height="38" fill="#2563eb"/><text x="76" y="828" text-anchor="middle" dominant-baseline="central" class="badge">4</text>
+    <text x="100" y="831" class="keyn">o_proj</text>
+    <text x="190" y="831" class="keyd">Output — assembles the attention result and writes it in.</text>
+  </g>
+
+  <!-- Right column: MLP -->
+  <text x="770" y="676" class="keyh" fill="#b23b40">MLP block &#8212; heavier processing within each token</text>
+
+  <g>
+    <circle cx="786" cy="706" r="13" fill="#d9686d"/><text x="786" y="711" text-anchor="middle" class="badge">5</text>
+    <text x="810" y="711" class="keyn">up_proj</text>
+    <text x="915" y="711" class="keyd">Expands 12,288 → 49,152 (the wider hidden space).</text>
+  </g>
+  <g>
+    <circle cx="786" cy="746" r="13" fill="#d9686d"/><text x="786" y="751" text-anchor="middle" class="badge">6</text>
+    <text x="810" y="751" class="keyn">gate_proj</text>
+    <text x="915" y="751" class="keyd">Gates which parts of the expansion pass the nonlinearity.</text>
+  </g>
+  <g>
+    <use href="#star" x="767" y="767" width="38" height="38" fill="#d9686d"/><text x="786" y="788" text-anchor="middle" dominant-baseline="central" class="badge">7</text>
+    <text x="810" y="791" class="keyn">down_proj</text>
+    <text x="915" y="791" class="keyd">Compresses 49,152 → 12,288 and writes it in.</text>
+  </g>
+
+  <!-- write-head note -->
+  <text x="770" y="831" class="keyd" fill="#334155"><tspan class="star">&#9733;</tspan> Star badges mark write-heads — the two matrices whose output</text>
+  <text x="770" y="853" class="keyd" fill="#334155">is added to the residual stream. These are the abliteration targets.</text>
+</svg>
