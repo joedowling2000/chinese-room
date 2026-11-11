@@ -134,7 +134,7 @@
     ],
     prompts: [
       { do: 'Tap the word <b>tired</b>.', saw: 'Its strongest thread runs back to <b>animal</b>. The adjective asks “who could be tired?” and every earlier word answers; <b>animal</b> matches best. The orb at the centre is <b>tired</b>’s new meaning: a blend of the words it listened to.' },
-      { do: 'Switch the sentence to <b>…too wide</b>, then tap <b>wide</b>.', saw: 'Same position, new question: “what could be wide?” The thread swings to <b>street</b>. Attention is recomputed from the content of the words every time.' },
+      { do: 'Tap <b>tired</b> again to change the word to <b>wide</b>.', saw: 'Same position, new question: “what could be wide?” The thread swings to <b>street</b>. Attention is recomputed from the content of the words every time.' },
       { do: 'Tap <b>it</b>.', saw: 'At <b>it</b>, the model hasn’t read <i>tired</i> or <i>wide</i> yet, so its attention is split between the nouns. Threads only run backwards: no word may look into the future. This is the causal mask.' },
       { do: 'Drag the temperature right down, then right up.', saw: 'Low temperature makes one taut thread, a hard choice. High temperature makes a haze, and the word becomes an average of everything before it.' },
       { do: 'Try <b>Ada met Turing…</b> and tap the last <b>met</b>.', saw: 'The violet copying head finds the earlier <b>met</b> and looks at the word that came after it: <b>Turing</b>. That is how a model continues a pattern it has seen once (an “induction head”).' }
@@ -172,6 +172,13 @@
           if (d < bd) { bd = d; best = i; }
         });
         return best;
+      }
+      function setSentence(v) {
+        sentence = v; toks = SENTENCES[v].toks; relayout(); shown = null; flows.length = 0;
+        query = Math.min(query, toks.length - 1);
+        if (v === 'copy') query = toks.length - 1;
+        const target = v === 'tired' ? 'tired' : v === 'wide' ? 'wide' : v === 'keys' ? 'are' : null;
+        if (target) query = toks.findIndex(x => x[0] === target);
       }
       function select(i) {
         query = i;
@@ -260,6 +267,7 @@
             const col = future ? 'rgba(200,205,215,.28)' : sel ? '#fff' : i === hover ? '#fff' : `rgba(236,240,244,${0.55 + 0.45 * Math.min(1, (wsum || 0) * 3)})`;
             draw.label(octx, word, lx, ly, col, `${sel ? 600 : 400} ${(sel ? 19 : 15) - (k.w < 760 ? 3 : 0)}px "DM Sans", sans-serif`, right ? 'left' : 'right');
             if (!sel && !future && wsum > 0.06) draw.label(octx, `${Math.round(wsum * 100)}%`, lx + (right ? 1 : -1) * (octx.measureText(word).width + 8), ly, rgba(wcol, 1), '11px "IBM Plex Mono", monospace', right ? 'left' : 'right');
+            if (sel && (word === 'tired' || word === 'wide')) draw.label(octx, `tap again: ${word === 'tired' ? 'wide' : 'tired'}`, lx, ly + 20, 'rgba(255,154,124,.8)', '10px "IBM Plex Mono", monospace', right ? 'left' : 'right');
             if (future && i === query + 1) draw.label(octx, 'masked: not yet read →', lx, ly + 18, 'rgba(200,205,215,.35)', '10px "IBM Plex Mono", monospace', right ? 'left' : 'right');
           });
           draw.label(octx, `“${toks[query][0]}” becomes`, L.cx, L.cy + L.R * 0.2 + 22, 'rgba(236,240,244,.7)', '11px "IBM Plex Mono", monospace', 'center');
@@ -290,17 +298,17 @@
           voices.forEach((v, j) => v.set(k.sound.note(j), j < w0.length && j !== query ? w0[j] * 0.09 : 0));
           k.over.style.cursor = hover >= 0 ? 'pointer' : 'default';
         },
-        tap(p) { const i = pick(p); if (i >= 0) select(i); },
+        tap(p) {
+          const i = pick(p); if (i < 0) return;
+          // tapping the chosen last word again swaps it: one word changes, and the threads swing
+          const word = toks[i][0];
+          if (i === query && (word === 'tired' || word === 'wide')) { const v = word === 'tired' ? 'wide' : 'tired'; k.set('sentence', v); setSentence(v); }
+          select(i);
+        },
         move(p) { hover = pick(p); },
         leave() { hover = -1; },
         control(id, v) {
-          if (id === 'sentence') {
-            sentence = v; toks = SENTENCES[v].toks; relayout(); shown = null; flows.length = 0;
-            query = Math.min(query, toks.length - 1);
-            if (v === 'copy') query = toks.length - 1;
-            const target = v === 'tired' ? 'tired' : v === 'wide' ? 'wide' : v === 'keys' ? 'are' : null;
-            if (target) query = toks.findIndex(x => x[0] === target);
-          }
+          if (id === 'sentence') setSentence(v);
           if (id === 'head') shown = null;
           if (id === 'tau') {
             if (v < 0.4) sawLow = true;
