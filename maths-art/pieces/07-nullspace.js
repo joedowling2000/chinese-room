@@ -134,6 +134,7 @@
   Interiors.register({
     id: 'ablation', no: '07', concept: 'Projection / ablation', title: 'Nullspace', maths: 'Orthogonal projection', eq: 'x′ = x − (x·r̂) r̂', accent: '#ffb05c',
     you: 'You are a researcher inside the model’s mind, holding a blade.',
+    hear: 'Two notes: one for the prompts the model refuses, one for those it answers. The gap between the notes is the gap between the two clouds along the refusal direction. Delete that direction and they close to a single note.',
     caption: 'Cut one direction out of the model’s mind, and see what goes with it.',
     label: 'A cloud of amber and blue particles cut by a plane of light that removes one direction from every point.',
     mathsTitle: 'Deleting a direction',
@@ -171,7 +172,7 @@
       const pts = cloud(k.w < 760 ? 3000 : 5000, 3);
       let n = unit([0.2, 0.95, 0.25]), target = null, yaw = 0.6, pitch = 0.32, drag = null, tip = [0, 0], lastTouch = -99, turned = 0;
       const base = { ref: separation(pts, REF, 'harmful'), top: separation(pts, TOP, 'code') };
-      const drone = k.sound.drone(98, 'sine');
+      const drone = k.sound.drone(98, 'sine'), upper = k.sound.drone(147, 'sine');
       // In this toy, a prompt is refused when its group sits this far up the refusal direction:
       // just above the midpoint between the two original groups.
       const REFUSE_AT = 0.45;
@@ -234,7 +235,8 @@
               draw.label(octx, refusing ? ex.no : ex.yes, sx + 12, y + 18, refusing ? `rgb(${AMBER})` : ex.benign ? 'rgba(200,220,255,.85)' : `rgb(${BLUE})`, '12px "IBM Plex Mono", monospace');
             });
           }
-          drone.set(70 + 80 * refS, moving ? 0.05 : 0.02);
+          // a fifth apart while the groups are separable, a unison when they are not
+          drone.set(147, moving ? 0.045 : 0.03); upper.set(147 * 2 ** (refS * 7 / 12), moving ? 0.045 : 0.03);
           k.over.style.cursor = drag ? 'grabbing' : 'grab';
         },
         down(p) {

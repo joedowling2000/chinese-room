@@ -186,6 +186,7 @@
   Interiors.register({
     id: 'linear-maps', no: '01', concept: 'Linear maps', title: 'Lattice', maths: 'Matrix multiplication', eq: 'x′ = W x', accent: '#9ee6d4',
     you: 'You are a word, standing in the space where meanings are kept.',
+    hear: 'The low hum is the determinant: it rises as the space stretches and drops, with a rush of noise, when the plane collapses. Each arrow you let go of plays its own length as a note.',
     caption: 'Two arrows decide where every word in the space goes.',
     label: 'A luminous grid of word-points that bends as two basis arrows are dragged.',
     mathsTitle: 'A matrix is two arrows',
@@ -220,7 +221,7 @@
       const { ctx, octx } = k;
       const field = stars(3200, 7);
       let target = [1, 0, 0, 1], shown = [1, 0, 0, 1], trail = [1, 0, 0, 1], breathe = 0;
-      let drag = null, hover = -1, hoverHandle = null, ptr = null;
+      let drag = null, hover = -1, hoverHandle = null, ptr = null, wasCollapsed = 0;
       let cx = 0, cy = 0, u = 60;
       const drone = k.sound.drone(110, 'triangle');
       const layout = () => { u = Math.min(k.w, k.h) / 7.2; cx = k.w * 0.5; cy = k.h * 0.47; };
@@ -321,6 +322,8 @@
           }
 
           const collapse = Math.abs(D) < 0.06 ? 1 : 0;
+          if (collapse && !wasCollapsed) k.sound.noise(0.9, 0.06, 240);
+          wasCollapsed = collapse;
           drone.set(55 + 30 * Math.min(4, Math.abs(D)), collapse ? 0.12 : 0.03);
           k.over.style.cursor = drag ? 'grabbing' : hoverHandle ? 'grab' : 'crosshair';
         },
@@ -343,7 +346,11 @@
             sawAnalogy();
           }
         },
-        up() { if (drag) k.sound.tone(330 + 110 * Math.abs(det(target)), 0.3, 0.04); drag = null; },
+        up() {
+          // each arrow sounds its own length: longer is lower, like a longer string
+          if (drag) { const v = drag === 'i' ? [target[0], target[2]] : [target[1], target[3]]; k.sound.pluck(330 / Math.max(0.35, Math.hypot(...v)), 0.07); }
+          drag = null;
+        },
         leave() { hover = -1; hoverHandle = null; },
         control(id, v) {
           if (id === 'preset' && PRESETS[v]) { target = [...PRESETS[v]]; check(); k.sound.tone(392, 0.5, 0.04); }

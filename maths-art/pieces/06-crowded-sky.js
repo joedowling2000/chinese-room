@@ -128,6 +128,7 @@
   Interiors.register({
     id: 'dimensions', no: '06', concept: 'High dimensions', title: 'Crowded Sky', maths: 'Superposition', eq: 'z = Σ aᵢvᵢ  ·  âⱼ = vⱼ·z', accent: '#c4b2ff',
     you: 'You are one concept among too many, sharing too few dimensions.',
+    hear: 'Each concept is a note. The ones you light sound clearly; a ghost — a concept the model wrongly reads back — sounds too, faint and slightly out of tune. A clean chord means a clean readout.',
     caption: 'More concepts than dimensions. They share the space, and pay for it in interference.',
     label: 'Feature directions as stars on a rotating sphere, joined by glowing filaments where they interfere.',
     mathsTitle: 'Superposition',
@@ -168,7 +169,7 @@
       let yaw = 0.4, pitch = 0.35, drag = null, lastTouch = -99, tips = [], stream = { timer: 0, log: [] }, sawLo = false, sawHi = false;
       const stars = Array.from({ length: 260 }, () => ({ x: r(), y: r(), r: r() < 0.1 ? 1.6 : 1, a: 0.15 + r() * 0.5, f: 0.5 + r() * 2, p: r() * 6 }));
       let hd = null;
-      const drone = k.sound.drone(196, 'sine');
+      const drone = k.sound.drone(196, 'sine'), voices = Array.from({ length: 16 }, () => k.sound.drone(196, 'sine'));
 
       const view = () => { const R = Math.min(k.w * 0.3, k.h * (k.w < 760 ? 0.26 : 0.34)); return { cx: k.w * (k.w > 900 ? 0.47 : 0.5), cy: k.h * 0.52, R, R3: rot3(yaw, pitch) }; };
       function readout() {
@@ -227,7 +228,7 @@
             });
             ctx.globalCompositeOperation = 'source-over';
             draw.label(octx, `${H.dims} dimensions · ${H.angles.length} pairs of random directions · typical distance from 90°: ${fmt(H.spread * 180 / Math.PI, 1)}°`, k.w / 2, 86, 'rgba(236,232,255,.85)', '12px "IBM Plex Mono", monospace', 'center');
-            drone.set(110 + 300 / Math.sqrt(H.dims), 0.02);
+            drone.set(110 + 300 / Math.sqrt(H.dims), 0.02); voices.forEach(v => v.set(196, 0));
             return;
           }
 
@@ -288,7 +289,9 @@
               : 'and the model reads back exactly that', vw.cx, y + 18, ghosts.length || missed.length ? `rgb(${GHOST})` : `rgba(${LAV},.85)`, '12px "IBM Plex Mono", monospace', 'center');
           }
           const meanAbs = (() => { let s = 0, c = 0; for (let i = 0; i < V.length; i++) for (let j = i + 1; j < V.length; j++) { s += Math.abs(dot(V[i], V[j])); c++; } return c ? s / c : 0; })();
-          drone.set(150 + meanAbs * 200, 0.02);
+          drone.set(98, 0.012 + meanAbs * 0.03);
+          // lit concepts sing in tune; ghosts sing faintly and a little sharp
+          voices.forEach((v, i) => { const st = state[i]; v.set(k.sound.note(i, 196) * (st && st.ghost ? 1.035 : 1), st && st.on ? 0.045 : st && st.ghost ? 0.03 : 0); });
           if (k.stage === 2 && state.some(s => s.ghost) && active.size >= 3) k.reach(2);
           k.over.style.cursor = drag ? 'grabbing' : 'pointer';
         },

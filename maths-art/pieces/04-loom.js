@@ -123,6 +123,7 @@
   Interiors.register({
     id: 'attention', no: '04', concept: 'Attention', title: 'Loom', maths: 'Softmax attention', eq: 'out = Σ softmax(q·kᵢ / τ) vᵢ', accent: '#ff9a7c',
     you: 'You are a word, asking every earlier word a question.',
+    hear: 'Every word in the sentence is a note, and its loudness is the attention it is getting from the word you chose. One taut thread is a single clear note; a spread of attention is a chord. Drag the temperature and listen to it blur.',
     caption: 'Every word asks every earlier word a question, and becomes a blend of the answers.',
     label: 'Words of a sentence around a ring, connected by coloured threads whose thickness is the attention weight.',
     mathsTitle: 'Query, key, value',
@@ -158,7 +159,7 @@
       let query = 6, hover = -1, sawLow = false, sawHigh = false;
       let shown = null; // eased weights for the selected query, per head
       const flows = []; // particles carrying value colour from key to query
-      const drone = k.sound.drone(220, 'sine');
+      const voices = Array.from({ length: 12 }, () => k.sound.drone(220, 'sine'));
 
       const heads = () => k.values.head === 'all' ? HEADS : HEADS.filter(h => h.id === k.values.head);
       const relayout = () => { L = layout(toks.length, k.w, k.h); };
@@ -179,7 +180,7 @@
         if (k.stage === 1 && sentence === 'wide' && word === 'wide') k.reach(1);
         if (k.stage === 2 && word === 'it') k.reach(2);
         if (k.stage === 4 && sentence === 'copy' && i === toks.length - 1) k.reach(4);
-        k.sound.tone(196 * 2 ** ((i % 8) / 8), 0.6, 0.05);
+        k.sound.pluck(k.sound.note(i), 0.06);
       }
       function mix(i) {
         const col = [0, 0, 0], hs = heads();
@@ -285,7 +286,8 @@
 
           // entropy of attention drives a soft drone
           const ent = -w0.reduce((s, v) => s + (v > 0 ? v * Math.log(v) : 0), 0);
-          drone.set(110 + ent * 70, 0.025);
+          // each word is a note; its loudness is its share of the attention
+          voices.forEach((v, j) => v.set(k.sound.note(j), j < w0.length && j !== query ? w0[j] * 0.09 : 0));
           k.over.style.cursor = hover >= 0 ? 'pointer' : 'default';
         },
         tap(p) { const i = pick(p); if (i >= 0) select(i); },

@@ -76,6 +76,7 @@
   Interiors.register({
     id: 'rotary', no: '05', concept: 'Rotary position', title: 'Orrery', maths: 'Rotary position embedding', eq: '⟨R(mω)q, R(nω)k⟩ = ⟨q, R((n−m)ω)k⟩', accent: '#d9b36c',
     you: 'You are a word whose place in the sentence is written as a turn.',
+    hear: 'Each orbit is a note, sounding only while its arc pulls the two words together. Drag the sentence and the gears tick past, but the chord does not change, because the arcs have not. Tap a different word and it does.',
     caption: 'A word’s position is written as rotation. Only the angle between two words matters.',
     label: 'A brass orrery: two words as planets on concentric orbits that rotate at different speeds with position.',
     mathsTitle: 'Position as rotation',
@@ -108,7 +109,8 @@
       const { ctx, octx } = k;
       let offset = 0, offsetShown = 0, drag = null, A = 9, B = 1, last = { off: 0 };
       let cx = 0, cy = 0, R = 0, rail = { x0: 0, y: 0, sp: 60 };
-      const drone = k.sound.drone(110, 'sine');
+      const voices = Array.from({ length: 8 }, () => k.sound.drone(110, 'sine'));
+      let lastTick = 0;
       const layout = () => {
         const narrow = k.w < 760;
         R = Math.min(k.w * (narrow ? 0.4 : 0.26), k.h * (narrow ? 0.28 : 0.3));
@@ -187,7 +189,16 @@
             octx.fillStyle = '#fff'; octx.beginPath(); octx.arc(mx, py + ph / 2 - s * ph / 2, 4, 0, 7); octx.fill();
             draw.label(octx, 'score vs distance (−24 … +24)', px, py - 12, 'rgba(236,230,215,.6)', '10px "IBM Plex Mono", monospace');
           }
-          drone.set(90 + 40 * (s + 1), 0.025);
+          // one note per orbit, as loud as that orbit's (positive) share of the score
+          {
+            const th = thetas(K, base), ca = content(WORDS[A], K), cb = content(WORDS[B], K);
+            voices.forEach((v, i) => {
+              const term = i < K ? ca[i].mag * cb[i].mag * Math.cos((B - A) * th[i] + cb[i].phase - ca[i].phase) : 0;
+              v.set(k.sound.note(i * 2, 110), Math.max(0, term) * 0.06);
+            });
+            const tick = Math.round(offsetShown);
+            if (tick !== lastTick) { lastTick = tick; k.sound.tone(1400, 0.04, 0.02, 'square'); }
+          }
           k.over.style.cursor = drag ? 'grabbing' : 'grab';
         },
         down(p) { drag = { x0: p.x, off0: offset, word: pickWord(p) }; },

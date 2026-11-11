@@ -22,8 +22,12 @@ const Interiors = (() => {
   }
 
   /* ---------- sound: a quiet bus that pieces can play tones and drones on ---------- */
+  // Every sound a piece makes is one of its numbers: pitch, loudness or silence
+  // stands for a quantity on screen. Notes come from a pentatonic scale so any
+  // combination is consonant; a soft echo gives the room some air.
+  const PENT = [0, 2, 4, 7, 9];
   function makeSound() {
-    let ac = null, master = null, on = prefs.sound === true;
+    let ac = null, master = null, send = null, on = prefs.sound === true;
     const drones = [];
     function ensure() {
       if (ac) return ac;
@@ -33,9 +37,15 @@ const Interiors = (() => {
         master.gain.value = on ? 0.5 : 0;
         const comp = ac.createDynamicsCompressor();
         master.connect(comp); comp.connect(ac.destination);
+        // echo: a filtered feedback delay that everything can send a little of itself to
+        send = ac.createGain(); send.gain.value = 0.32;
+        const delay = ac.createDelay(1), fb = ac.createGain(), lp = ac.createBiquadFilter();
+        delay.delayTime.value = 0.31; fb.gain.value = 0.42; lp.type = 'lowpass'; lp.frequency.value = 1700;
+        send.connect(delay); delay.connect(lp); lp.connect(fb); fb.connect(delay); lp.connect(master);
       } catch { ac = null; }
       return ac;
     }
+    const out = g => { g.connect(master); g.connect(send); };
     return {
       get on() { return on; },
       set on(v) {
@@ -43,6 +53,8 @@ const Interiors = (() => {
         if (v) ensure()?.resume();
         if (master) master.gain.setTargetAtTime(v ? 0.5 : 0, ac.currentTime, 0.1);
       },
+      // degree n of a pentatonic scale: 0 is the root, 5 an octave up
+      note(n, root = 196) { const d = Math.round(n), o = Math.floor(d / 5); return root * 2 ** ((o * 12 + PENT[d - o * 5]) / 12); },
       tone(freq, dur = 0.4, gain = 0.06, type = 'sine') {
         if (!on || !ensure()) return;
         const t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain();
@@ -50,27 +62,52 @@ const Interiors = (() => {
         g.gain.setValueAtTime(0, t);
         g.gain.linearRampToValueAtTime(gain, t + 0.01);
         g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-        o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + 0.05);
+        o.connect(g); out(g); o.start(t); o.stop(t + dur + 0.05);
       },
+      // a struck string: a fundamental with two quieter overtones that die away faster
+      pluck(freq, gain = 0.07, dur = 1.4) {
+        if (!on || !ensure() || !(freq > 20)) return;
+        const t = ac.currentTime;
+        [[1, 1, 1], [2, 0.32, 0.55], [3, 0.14, 0.3]].forEach(([m, a, life]) => {
+          const o = ac.createOscillator(), g = ac.createGain();
+          o.type = m === 1 ? 'triangle' : 'sine'; o.frequency.value = freq * m;
+          g.gain.setValueAtTime(0, t);
+          g.gain.linearRampToValueAtTime(gain * a, t + 0.006);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + dur * life);
+          o.connect(g); out(g); o.start(t); o.stop(t + dur * life + 0.05);
+        });
+      },
+      // a breath of filtered noise, for things that break
+      noise(dur = 0.5, gain = 0.05, freq = 900) {
+        if (!on || !ensure()) return;
+        const t = ac.currentTime, n = Math.floor(ac.sampleRate * dur), buf = ac.createBuffer(1, n, ac.sampleRate), d = buf.getChannelData(0);
+        for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n) ** 2;
+        const src = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
+        src.buffer = buf; f.type = 'bandpass'; f.frequency.value = freq; f.Q.value = 0.8; g.gain.value = gain;
+        src.connect(f); f.connect(g); out(g); src.start(t);
+      },
+      // a held voice a piece retunes every frame: two oscillators a few cents apart, so it shimmers
       drone(freq = 110, type = 'sine') {
-        const d = { freq, gain: 0, o: null, g: null };
+        const d = { freq, gain: 0, o: null, o2: null, g: null };
         d.set = (f, gain) => {
           d.freq = f; d.gain = gain;
           if (!on || !ensure()) return;
           if (!d.o) {
-            d.o = ac.createOscillator(); d.g = ac.createGain();
-            d.o.type = type; d.g.gain.value = 0;
-            const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900;
-            d.o.connect(lp); lp.connect(d.g); d.g.connect(master); d.o.start();
+            if (gain <= 0) return;
+            d.o = ac.createOscillator(); d.o2 = ac.createOscillator(); d.g = ac.createGain();
+            d.o.type = d.o2.type = type; d.g.gain.value = 0;
+            const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1400;
+            d.o.connect(lp); d.o2.connect(lp); lp.connect(d.g); out(d.g); d.o.start(); d.o2.start();
           }
           d.o.frequency.setTargetAtTime(f, ac.currentTime, 0.08);
-          d.g.gain.setTargetAtTime(gain, ac.currentTime, 0.15);
+          d.o2.frequency.setTargetAtTime(f * 1.004, ac.currentTime, 0.08);
+          d.g.gain.setTargetAtTime(gain * 0.6, ac.currentTime, 0.15);
         };
         drones.push(d);
         return d;
       },
       dispose() {
-        drones.forEach(d => { try { d.o?.stop(); } catch {} });
+        drones.forEach(d => { try { d.o?.stop(); d.o2?.stop(); } catch {} });
         drones.length = 0;
         try { ac?.close(); } catch {}
         ac = null;
@@ -141,7 +178,7 @@ const Interiors = (() => {
         <span class="ir-where">${p.no} / ${esc(p.title)}</span>
         <span class="ir-top-actions">
           <button type="button" data-host="maths" aria-pressed="false"><span class="ir-wide">The </span>maths <kbd>M</kbd></button>
-          <button type="button" data-host="sound" aria-pressed="false">Sound <kbd>S</kbd></button>
+          <button type="button" data-host="sound" aria-pressed="false" title="${esc(p.hear || 'Sound')}">Sound <kbd>S</kbd></button>
           <a href="#maths/play/${prev.id}" class="ir-step" aria-label="Previous room: ${esc(prev.title)}">‹</a>
           <a href="#maths/play/${next.id}" class="ir-step" aria-label="Next room: ${esc(next.title)}">›</a>
           <a href="#maths" class="ir-close" aria-label="Exit to the maths page">✕</a>
@@ -168,6 +205,7 @@ const Interiors = (() => {
         <h3>Inside the model</h3>
         <div class="ir-inside">${(p.inside || []).map(t => `<p>${t}</p>`).join('')}</div>
         ${p.honest ? `<p class="ir-honest">${p.honest}</p>` : ''}
+        ${p.hear ? `<p class="ir-honest ir-hear"><b>What you hear (sound on).</b> ${p.hear}</p>` : ''}
         <p class="ir-refs">${(p.refs || []).map(([t, u]) => u.startsWith('#') ? `<a href="${u}">${esc(t)} →</a>` : `<a href="${u}" target="_blank" rel="noopener">${esc(t)} ↗</a>`).join('')}</p>
       </aside>
     </section>`;

@@ -122,6 +122,7 @@
   Interiors.register({
     id: 'gradient-descent', no: '03', concept: 'Gradient descent', title: 'Descent', maths: 'Gradient descent', eq: 'θ ← θ − η ∇L(θ)', accent: '#ffb46a',
     you: 'You are the training process, feeling for the way down.',
+    hear: 'The falling note is the loss of the seed you just dropped: it slides down as the seed descends and rings like a bell when it settles, lower for deeper valleys. A seed thrown off the map ends in a hiss.',
     caption: 'Learning is a blind walk downhill across a landscape of error.',
     label: 'Stacked ridgelines of a loss landscape with glowing seeds rolling into its valleys.',
     mathsTitle: 'Feeling for the bottom',
@@ -162,7 +163,7 @@
       let acc = 0, last = null, dragTrail = null;
       let shift = 0; // the canvases slide left when the maths drawer opens; the inset follows
       const valleys = new Set(); // which of the real model's two valleys seeds have settled in
-      const drone = k.sound.drone(80, 'sine');
+      const drone = k.sound.drone(80, 'sine'), voice = k.sound.drone(220, 'triangle');
 
       function bake() {
         cam = camera(k.w, k.h, surf);
@@ -202,7 +203,7 @@
           const speed = Math.hypot(s.vx, s.vy);
           if (!Number.isFinite(s.x) || Math.abs(s.x) > EXTENT * 1.5 || Math.abs(s.y) > EXTENT * 1.5) {
             s.state = 'gone'; s.goneAt = k.t;
-            k.sound.tone(140, 0.4, 0.04, 'sawtooth');
+            k.sound.noise(0.6, 0.05, 1400);
             if (k.stage === 1 && eta > 0.2) k.reach(1);
             continue;
           }
@@ -210,7 +211,7 @@
           if (s.still > 30) {
             s.state = 'settled';
             const depth = (surf.L(s.x, s.y) - surf.lo) / (surf.hi - surf.lo);
-            k.sound.tone(220 * 2 ** ((1 - depth) * 1.5), 0.9, 0.025);
+            k.sound.pluck(110 * 2 ** (depth * 2.5), 0.05, 2.2);
             if (k.stage === 2 && mu < 0.3 && eta < 0.04 && depth > 0.12) k.reach(2);
             if (surf.model && surf.L(s.x, s.y) < 0.05) {
               valleys.add(Math.sign(s.x));
@@ -302,7 +303,10 @@
           if (surf.model) inset(t);
           const running = seeds.filter(s => s.state === 'run');
           const meanL = running.length ? running.reduce((a, s) => a + surf.L(s.x, s.y), 0) / running.length : surf.lo;
-          drone.set(70 + 60 * (meanL - surf.lo) / (surf.hi - surf.lo), running.length ? 0.04 : 0);
+          drone.set(55, running.length ? 0.03 : 0.012);
+          // the latest seed sings its own loss: the pitch slides down as it descends
+          const lz = last && last.state === 'run' ? clamp((surf.Z(last.x, last.y) - surf.zlo) / (surf.zhi - surf.zlo), 0, 1) : 0;
+          voice.set(110 * 2 ** (lz * 2.5), last && last.state === 'run' ? 0.05 : 0);
         },
         down(p) { const q = unproject(p); if (q) { drop(q[0], q[1]); dragTrail = [p.x, p.y]; if (k.stage === 0) setTimeout(() => k.reach(0), 1200); } },
         move(p) {

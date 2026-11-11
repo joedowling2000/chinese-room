@@ -158,6 +158,7 @@
     id: 'folding', no: '02', concept: 'Non-linearity', title: 'Origami', maths: 'ReLU activation', eq: 'h = max(0, z)',
     accent: '#ff8ad0',
     you: 'You are inside a feed-forward layer, deciding which words to leave alone.',
+    hear: 'Each neuron is a string. Point at a word and you hear only the neurons that fire for it, louder the harder they push; a word every neuron is silent on makes no sound at all. That silence is the zero in max(0, z).',
     caption: 'A neuron is silent on one side of a line. Enough of them fold the space into shapes no matrix can draw.',
     label: 'A dark sheet of word-points creased by bright lines; the region the neurons leave alone glows and keeps its words lit.',
     mathsTitle: 'A bend at zero',
@@ -243,9 +244,12 @@
         if (k.stage === 5 && act === 'gelu') k.reach(5);
       }
       function touchWord(i) {
+        const fresh = i !== hover;
         hover = i;
         if (i < 0) return;
         const zs = neurons.map(N => zOf(N, WORDS[i][1], WORDS[i][2]));
+        // the firing neurons sound; the silent ones are silent
+        if (fresh) zs.forEach((z, n) => { const h = ACT[k.values.act](z); if (h > 0.02) k.sound.pluck(k.sound.note(n * 2, 147), 0.03 + 0.05 * Math.min(1, h), 1.1); });
         if (zs.some(z => z > 0.05)) sawFiring = true; else sawSilent = true;
       }
 
@@ -310,7 +314,7 @@
             draw.label(octx, `${word}: y = ${act === 'none' ? '' : 'max(0, '}1 − ${fmt(out.r)}${act === 'none' ? '' : ')'} = ${fmt(out.y)}  ·  ${out.y > KEEP ? 'kept' : 'pushed away'}`, lx, ly + rows.length * 16 + 4, '#fff', '500 12px "IBM Plex Mono", monospace', left ? 'right' : 'left');
           }
           check();
-          drone.set(110 + 110 * (sc.kept / sc.total) - 30 * Math.min(3, sc.wrong), sc.perfect ? 0.05 : 0.025);
+          drone.set(73.5, sc.perfect ? 0.05 : 0.02);
           k.over.style.cursor = drag ? 'grabbing' : hot >= 0 ? 'grab' : hover >= 0 ? 'help' : 'default';
         },
         down(p) {
