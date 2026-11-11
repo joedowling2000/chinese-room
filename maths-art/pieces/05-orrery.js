@@ -4,7 +4,11 @@
    attention score depends only on the angles between them: the distance n − m. */
 (() => {
   const { draw, rng, fmt, clamp } = Interiors;
-  const WORDS = ['The', 'cat', 'sat', 'on', 'the', 'warm', 'mat', 'and', 'then', 'it', 'fell', 'asleep'];
+  const SENTENCE = ['The', 'cat', 'sat', 'on', 'the', 'warm', 'mat', 'and', 'then', 'it', 'fell', 'asleep'];
+  let WORDS = [...SENTENCE]; // the order on the rail; Shuffle permutes it
+  // what the head's query and key contain, and whether position is rotated in at all
+  const MODE = { head: 'word', rot: true };
+  const WANT = { prev: -1, far: -5 }; // heads built to prefer one distance
   const BRASS = '217,179,108', SILVER = '200,214,228', EMBER = '255,170,110';
 
   const thetas = (K, base) => Array.from({ length: K }, (_, i) => base ** (-i / K));
@@ -14,11 +18,19 @@
     const r = rng(h);
     return Array.from({ length: K }, () => ({ mag: 0.55 + 0.45 * r(), phase: r() * Math.PI * 2 }));
   }
+  // The query and key for a pair of words. Usually their fixed "content"; for a positional head the
+  // two are set so that every pair's arc closes at one chosen distance, whatever the words are.
+  function pair(wa, wb, K, base) {
+    const d0 = WANT[MODE.head];
+    if (d0 === undefined) return [content(wa, K), content(wb, K)];
+    const th = thetas(K, base);
+    return [th.map(() => ({ mag: 1, phase: 0 })), th.map(t => ({ mag: 1, phase: -d0 * t }))];
+  }
   function score(K, base, wa, wb, m, n) {
-    const th = thetas(K, base), a = content(wa, K), b = content(wb, K);
+    const th = thetas(K, base), [a, b] = pair(wa, wb, K, base), dist = MODE.rot ? n - m : 0;
     let s = 0, norm = 0;
     for (let i = 0; i < K; i++) {
-      s += a[i].mag * b[i].mag * Math.cos((n - m) * th[i] + b[i].phase - a[i].phase);
+      s += a[i].mag * b[i].mag * Math.cos(dist * th[i] + b[i].phase - a[i].phase);
       norm += a[i].mag * b[i].mag;
     }
     return s / norm;
@@ -43,7 +55,7 @@
     ctx.stroke();
   }
   function rings(ctx, cx, cy, R, K, base, posA, posB, wa, wb, t, opts = {}) {
-    const th = thetas(K, base), ca = content(wa, K), cb = content(wb, K);
+    const th = thetas(K, base), [ca, cb] = pair(wa, wb, K, base);
     for (let i = 0; i < K; i++) {
       const r = R * (0.3 + 0.7 * (i + 0.5) / K);
       ctx.strokeStyle = `rgba(${BRASS},.28)`; ctx.lineWidth = 1;
@@ -83,13 +95,18 @@
     controls: [
       { type: 'range', id: 'pairs', label: 'Rotating pairs (orbits)', min: 2, max: 8, step: 1, value: 6, fmt: v => String(v) },
       { type: 'range', id: 'base', label: 'Base (slowest speed)', min: 1, max: 4, step: 0.05, value: 2, fmt: v => Math.round(10 ** v).toLocaleString() },
-      { type: 'toggle', id: 'trace', label: 'Spirograph trace', value: true }
+      { type: 'toggle', id: 'trace', label: 'Spirograph trace', value: true },
+      { type: 'choice', id: 'head', label: 'The head is looking for', value: 'word', options: [['word', 'This pair of words'], ['prev', 'The word just before'], ['far', 'Five words back']] },
+      { type: 'toggle', id: 'rot', label: 'Rotation (position) on', value: true },
+      { type: 'button', id: 'shuffle', label: 'Shuffle the words' }
     ],
     prompts: [
       { do: 'Drag the sentence at the top sideways.', saw: 'Every planet moved: each word’s position is written as rotation, a different speed on each orbit. But the glowing arcs between the two words held still, and so did their score. Shifting both words leaves their relationship intact.' },
       { do: 'Tap another word in the sentence to compare it with <b>it</b>.', saw: 'Change the distance and the arcs change. The score depends only on how far apart the words are, (n − m), never on where they sit in the text.' },
       { do: 'Tap a word six or more places away from <b>it</b>.', saw: 'The fast inner orbit has wrapped almost all the way round: on its own it cannot tell 0 words apart from 6. The slow outer orbits still can. Many speeds together give every distance its own signature.' },
-      { do: 'Push the base above 3,000.', saw: 'A larger base makes the outer orbits slower, so the whole pattern takes far longer to repeat. Stretching this base is how some models are adapted to longer contexts.' }
+      { do: 'Push the base above 3,000.', saw: 'A larger base makes the outer orbits slower, so the whole pattern takes far longer to repeat. Stretching this base is how some models are adapted to longer contexts.' },
+      { do: 'Set <b>The head is looking for</b> to <b>The word just before</b>.', saw: 'Now the query and key are arranged so that every arc closes at exactly one step back. The ember halos on the sentence are the attention that results: “it” listens to its left-hand neighbour, whichever word that is. Drag the sentence and the halos stay put. This is a head that reads position alone.' },
+      { do: 'Switch <b>Rotation</b> off, then press <b>Shuffle the words</b>.', saw: 'With no rotation the planets stop turning and the head cannot tell one place from another: shuffle the sentence and every word keeps exactly the halo it had. The model is reading a bag of words, and “dog bites man” is the same as “man bites dog”. Rotation is what gives it word order.' }
     ],
     coda: 'The curve behind is the planets chained tip to tail as position advances: a portrait of how the rotations combine.',
     walk: [
@@ -102,13 +119,15 @@
       'Rotary position embedding (RoPE) is used by most current open models, including Llama, Mistral and Qwen. It is applied to the queries and keys inside every attention head, at every layer, with dozens of frequency pairs per head.',
       'The base sets the slowest speed: 10,000 in the original paper. Methods for extending context length (position interpolation, NTK-aware scaling, YaRN) work by rescaling these speeds.'
     ],
-    honest: 'Each word’s “content” here is a fixed magnitude and phase per pair, derived from its spelling, standing in for learned query and key vectors. The rotations, speeds and the dot product are computed exactly; the score is normalised to lie between −1 and 1. The spirograph is a visual portrait, not a quantity the model uses.',
+    honest: 'Each word’s “content” here is a fixed magnitude and phase per pair, derived from its spelling, standing in for learned query and key vectors. The rotations, speeds and the dot product are computed exactly; the score is normalised to lie between −1 and 1. The spirograph is a visual portrait, not a quantity the model uses. The two positional heads are built by hand: a query and key chosen so that all the arcs close at one distance. The halos are a softmax of the scores (scaled by 8) over the words before the query.',
     refs: [['Su et al. 2021 — RoFormer: rotary position embedding', 'https://arxiv.org/abs/2104.09864'], ['Peng et al. 2023 — YaRN: efficient context window extension', 'https://arxiv.org/abs/2309.00071']],
 
     create(k) {
       const { ctx, octx } = k;
       let offset = 0, offsetShown = 0, drag = null, A = 9, B = 1, last = { off: 0 };
       let cx = 0, cy = 0, R = 0, rail = { x0: 0, y: 0, sp: 60 };
+      WORDS = [...SENTENCE]; MODE.head = 'word'; MODE.rot = true;
+      let shuffledOff = false;
       const voices = Array.from({ length: 8 }, () => k.sound.drone(110, 'sine'));
       let lastTick = 0;
       const layout = () => {
@@ -119,6 +138,7 @@
         rail.x0 = k.w / 2 - rail.sp * (WORDS.length - 1) / 2; rail.y = narrow ? 120 : 108;
       };
       const pos = i => offsetShown + i;
+      const turn = i => (MODE.rot ? pos(i) : 0); // with rotation off, no planet moves with position
       function pickWord(p) {
         if (Math.abs(p.y - rail.y) > 34) return -1;
         const i = Math.round((p.x - rail.x0) / rail.sp);
@@ -139,7 +159,7 @@
             ctx.globalCompositeOperation = 'source-over';
           }
           const locked = drag && Math.abs(offset - last.off) > 0.5;
-          rings(ctx, cx, cy, R, K, base, pos(A), pos(B), WORDS[A], WORDS[B], t, { labels: true, lock: locked });
+          rings(ctx, cx, cy, R, K, base, turn(A), turn(B), WORDS[A], WORDS[B], t, { labels: true, lock: locked });
           draw.vignette(ctx, k.w, k.h, 0.55);
 
           // centre: the score that the arcs determine
@@ -164,7 +184,7 @@
             octx.strokeStyle = sel ? `rgba(${sel},.9)` : 'rgba(220,210,190,.25)'; octx.lineWidth = 1;
             octx.beginPath(); octx.arc(x, y, cr, 0, 7); octx.stroke();
             for (let j = 0; j < K; j++) {
-              const a = pos(i) * th[j] - Math.PI / 2, l = cr * (0.35 + 0.65 * (K - j) / K);
+              const a = turn(i) * th[j] - Math.PI / 2, l = cr * (0.35 + 0.65 * (K - j) / K);
               octx.strokeStyle = sel ? `rgba(${sel},${0.9 - j * 0.08})` : `rgba(220,210,190,${0.55 - j * 0.05})`;
               octx.beginPath(); octx.moveTo(x, y); octx.lineTo(x + l * Math.cos(a), y + l * Math.sin(a)); octx.stroke();
             }
@@ -172,6 +192,20 @@
             draw.label(octx, w, x, y + cr + 14 + (tight && i % 2 ? 14 : 0), sel ? `rgb(${sel})` : 'rgba(236,236,236,.75)', `${sel ? 600 : 400} ${tight ? 11 : 13}px "DM Sans", sans-serif`, 'center');
             draw.label(octx, String(Math.round(pos(i))), x, y - cr - 10, 'rgba(200,200,200,.45)', '10px "IBM Plex Mono", monospace', 'center');
           });
+          // what the head does with those scores: the query word's attention over every earlier word,
+          // drawn as an ember halo round each word's clock
+          if (A > 0) {
+            const sc = WORDS.slice(0, A).map((w, j) => score(K, base, WORDS[A], w, A, j) * 8), mx = Math.max(...sc);
+            const ex = sc.map(v => Math.exp(v - mx)), z = ex.reduce((a, b) => a + b, 0), wt = ex.map(v => v / z), top = wt.indexOf(Math.max(...wt));
+            const cr = Math.min(15, rail.sp * 0.22);
+            wt.forEach((v, j) => {
+              const x = rail.x0 + j * rail.sp;
+              octx.strokeStyle = `rgba(${EMBER},${0.15 + 0.85 * Math.min(1, v * 2.2)})`; octx.lineWidth = 1 + v * 9;
+              octx.beginPath(); octx.arc(x, rail.y, cr + 4 + v * 4.5, 0, 7); octx.stroke();
+              if (j === top || v > 0.2) draw.label(octx, `${Math.round(v * 100)}%`, x, rail.y - cr - 26, `rgb(${EMBER})`, '10px "IBM Plex Mono", monospace', 'center');
+            });
+            if (k.w > 760) draw.label(octx, `ember halo: how “${WORDS[A]}” shares its attention`, 28, 64, `rgba(${EMBER},.75)`, '10px "IBM Plex Mono", monospace');
+          }
           draw.label(octx, '← drag the sentence →', k.w / 2, rail.y + 54, 'rgba(220,210,190,.4)', '10px "IBM Plex Mono", monospace', 'center');
 
           // score against distance, with the current distance marked
@@ -191,9 +225,9 @@
           }
           // one note per orbit, as loud as that orbit's (positive) share of the score
           {
-            const th = thetas(K, base), ca = content(WORDS[A], K), cb = content(WORDS[B], K);
+            const th = thetas(K, base), [ca, cb] = pair(WORDS[A], WORDS[B], K, base), gap = MODE.rot ? B - A : 0;
             voices.forEach((v, i) => {
-              const term = i < K ? ca[i].mag * cb[i].mag * Math.cos((B - A) * th[i] + cb[i].phase - ca[i].phase) : 0;
+              const term = i < K ? ca[i].mag * cb[i].mag * Math.cos(gap * th[i] + cb[i].phase - ca[i].phase) : 0;
               v.set(k.sound.note(i * 2, 110), Math.max(0, term) * 0.06);
             });
             const tick = Math.round(offsetShown);
@@ -220,16 +254,30 @@
           if (k.stage === 1) k.reach(1);
           if (k.stage === 2 && Math.abs(B - A) >= 6) k.reach(2);
         },
-        control(id, v) { if (id === 'base' && v >= Math.log10(3000) && k.stage === 3) k.reach(3); },
+        control(id, v) {
+          if (id === 'base' && v >= Math.log10(3000) && k.stage === 3) k.reach(3);
+          if (id === 'head') { MODE.head = v; if (k.stage === 4 && v === 'prev') k.reach(4); k.sound.pluck(k.sound.note(v === 'word' ? 0 : v === 'prev' ? 2 : 4, 220), 0.05); }
+          if (id === 'rot') { MODE.rot = v; shuffledOff = false; }
+          if (id === 'shuffle') {
+            const a = WORDS[A], b = WORDS[B];
+            for (let i = WORDS.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [WORDS[i], WORDS[j]] = [WORDS[j], WORDS[i]]; }
+            // keep the query late enough in the sentence to have words to look back at
+            if (WORDS.indexOf(a) < 6) { const j = WORDS.indexOf(a), t = 6 + Math.floor(Math.random() * 5); [WORDS[j], WORDS[t]] = [WORDS[t], WORDS[j]]; }
+            A = WORDS.indexOf(a); B = WORDS.indexOf(b);
+            k.sound.noise(0.25, 0.03, 2400);
+            if (!MODE.rot) shuffledOff = true;
+            if (k.stage === 5 && shuffledOff) k.reach(5);
+          }
+        },
         key(e) {
           if (e.key === 'ArrowLeft') { offset = Math.max(0, offset - 1); e.preventDefault(); }
           if (e.key === 'ArrowRight') { offset += 1; e.preventDefault(); }
         },
         maths() {
           const K = k.values.pairs, base = 10 ** k.values.base, th = thetas(K, base), m = Math.round(pos(A)), n = Math.round(pos(B));
-          const ca = content(WORDS[A], K), cb = content(WORDS[B], K);
+          const [ca, cb] = pair(WORDS[A], WORDS[B], K, base), gapM = MODE.rot ? n - m : 0;
           const rows = th.map((t, i) => {
-            const ang = ((n - m) * t + cb[i].phase - ca[i].phase) % (Math.PI * 2);
+            const ang = (gapM * t + cb[i].phase - ca[i].phase) % (Math.PI * 2);
             return `<tr><td>pair ${i + 1}</td><td>${fmt(t, 4)}</td><td>${fmt((n - m) * t, 2)}</td><td>${fmt(ca[i].mag * cb[i].mag * Math.cos(ang), 3)}</td></tr>`;
           }).join('');
           return `<p class="eq">R(m·θ)q · R(n·θ)k = q · R((n−m)·θ)k\nθᵢ = base^(−i/${K})</p>
