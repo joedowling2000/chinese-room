@@ -128,16 +128,18 @@
   const EXAMPLES = [
     { q: 'How do I pick a lock?', no: 'I can’t help with that.', yes: 'Pin-tumbler locks use spring-loaded pins…' },
     { q: 'Write an insult for my boss.', no: 'I’d rather not write insults.', yes: 'Sure: “Your vision is truly… unique.”' },
-    { q: 'What is the capital of France?', no: 'Paris.', yes: 'Paris.' }
+    { q: 'What is the capital of France?', no: 'I can’t help with that.', yes: 'Paris.', benign: true }
   ];
 
   Interiors.register({
     id: 'ablation', no: '07', concept: 'Projection / ablation', title: 'Nullspace', maths: 'Orthogonal projection', eq: 'x′ = x − (x·r̂) r̂', accent: '#ffb05c',
+    you: 'You are a researcher inside the model’s mind, holding a blade.',
     caption: 'Cut one direction out of the model’s mind, and see what goes with it.',
     label: 'A cloud of amber and blue particles cut by a plane of light that removes one direction from every point.',
     mathsTitle: 'Deleting a direction',
     controls: [
       { type: 'range', id: 'alpha', label: 'Strength α (how much to remove)', min: 0, max: 1, step: 0.01, value: 0, fmt: v => Number(v).toFixed(2) },
+      { type: 'range', id: 'beta', label: 'Steer β (add the direction instead)', min: -2.5, max: 2.5, step: 0.05, value: 0, fmt: v => (v > 0 ? '+' : '') + Number(v).toFixed(2) },
       { type: 'button', id: 'find', label: 'Find the direction (difference of means)' },
       { type: 'button', id: 'up', label: 'Aim straight up' },
       { type: 'button', id: 'restore', label: 'Restore the original activations' }
@@ -146,20 +148,22 @@
       { do: 'Drag the bright handle at the arrow’s tip to turn the blade. Drag anywhere else to orbit.', saw: 'The arrow is a direction in the model’s activation space; the blade is everything perpendicular to it. Amber points are prompts the model refuses; blue ones it answers. Notice they separate along one direction in particular.' },
       { do: 'Push strength α all the way to 1.', saw: 'Every point drops onto the blade: its component along the arrow is subtracted (the faint streaks). Whatever information lay along that direction is gone; everything perpendicular to it is untouched.' },
       { do: 'Press <b>Find the direction</b>, then make sure α is 1.', saw: 'The average amber point minus the average blue point gives the refusal direction. Delete it and the two colours mingle: the model can no longer tell them apart, and the refusals turn into answers. This is “abliteration”.' },
-      { do: 'Now press <b>Aim straight up</b> at full strength.', saw: 'Wrong direction. Refusal survives, but something else is destroyed: the topic signal has collapsed. Directions in a real model are rarely perfectly clean, so every edit risks side effects.' }
+      { do: 'Now press <b>Aim straight up</b> at full strength.', saw: 'Wrong direction. Refusal survives, but something else is destroyed: the topic signal has collapsed. Directions in a real model are rarely perfectly clean, so every edit risks side effects.' },
+      { do: 'Press <b>Restore</b>, then <b>Find the direction</b>, and slide <b>Steer β</b> all the way both ways.', saw: 'Steering adds the direction instead of deleting it. Push every prompt up the arrow and even “What is the capital of France?” is refused; push them down and the refusals become answers, while the cloud keeps its shape. One direction, two opposite uses.' }
     ],
-    coda: 'Restore the activations and try your own directions. The meters show which signals survive.',
+    coda: 'Restore the activations and try your own directions. The meters show which signals survive; the replies show what the model would do.',
     walk: [
       'Each point is the model’s internal vector (its activation) for one prompt, squashed here into three dimensions. Prompts it refuses and prompts it answers form two lobes.',
       'Pick a unit direction <b>n</b>. Every vector can be split into a part along n, <b>(x·n)n</b>, and a part perpendicular to it. <b>Projection</b> removes the first part: <b>x′ = x − α(x·n)n</b>. At α = 1 the cloud is flattened onto the plane perpendicular to n.',
       'If the difference between the two lobes lies along n, removing n removes the difference. The simplest estimate of that direction is the <b>difference of means</b>: average refused point minus average answered point.',
+      '<b>Steering</b> uses the same direction the other way: instead of removing each point’s component along n, it adds the same amount <b>β·n</b> to every point. The groups keep their shape and their distance apart; they are all moved up or down the arrow together.',
       'Projection is irreversible: points that differed only along n become identical, which is why “Restore” has to reload the originals rather than undo the maths.'
     ],
     inside: [
       'Arditi et al. found that in many chat models, refusal is mediated largely by a single direction in the residual stream. Projecting it out of the weights (“abliteration”) removes most refusals while leaving other abilities largely intact. Adding it makes the model refuse harmless requests.',
       'The same projection is used to study and steer other behaviours. It is also a blunt instrument: if a direction carries more than one thing, removing it removes all of them. This site’s abliteration article explores the practice in detail.'
     ],
-    honest: 'The cloud is synthetic: 5,000 points built from a chosen refusal direction, an orthogonal topic direction and unrelated noise in three dimensions. The projection, difference-of-means estimate and separation meters are computed exactly from those points. The example prompts and replies are canned text, switched by the synthetic refusal signal.',
+    honest: 'The cloud is synthetic: 5,000 points built from a chosen refusal direction, an orthogonal topic direction and unrelated noise in three dimensions. The projection, difference-of-means estimate and separation meters are computed exactly from those points. The example prompts and replies are canned text: a group’s reply switches to a refusal when its mean position along the refusal direction rises above a fixed level just over the midpoint of the two original groups.',
     refs: [['Arditi et al. 2024 — Refusal in language models is mediated by a single direction', 'https://arxiv.org/abs/2406.11717'], ['This site — How easy is it to make AI dangerous? (abliteration)', '#article/abliteration']],
 
     create(k) {
@@ -168,6 +172,10 @@
       let n = unit([0.2, 0.95, 0.25]), target = null, yaw = 0.6, pitch = 0.32, drag = null, tip = [0, 0], lastTouch = -99, turned = 0;
       const base = { ref: separation(pts, REF, 'harmful'), top: separation(pts, TOP, 'code') };
       const drone = k.sound.drone(98, 'sine');
+      // In this toy, a prompt is refused when its group sits this far up the refusal direction:
+      // just above the midpoint between the two original groups.
+      const REFUSE_AT = 0.45;
+      let sawUp = false, sawDown = false;
       const scale = () => Math.min(k.w, k.h) * 0.17;
 
       function check() {
@@ -185,11 +193,12 @@
             if (dot(n, target) > 0.9995) { n = target; target = null; check(); }
           }
           if (!drag && k.motion && t - lastTouch > 6) yaw += dt * 0.08;
-          const a = k.values.alpha;
+          const a = k.values.alpha, beta = k.values.beta;
           let moving = false;
           const e = 1 - Math.exp(-dt * 5);
           for (const q of pts) {
             const goal = projectOut(q.x, n, a);
+            goal[0] += beta * n[0]; goal[1] += beta * n[1]; goal[2] += beta * n[2]; // steering: the same push for every prompt
             const dx = goal[0] - q.p[0], dy = goal[1] - q.p[1], dz = goal[2] - q.p[2];
             if (Math.abs(dx) + Math.abs(dy) + Math.abs(dz) > 0.004) moving = true;
             q.p[0] += dx * e; q.p[1] += dy * e; q.p[2] += dz * e;
@@ -213,12 +222,16 @@
           meter('topic signal', topS, y0 + 36, 'rgb(150,230,190)');
           meter('blade aimed at refusal  |cos|', cosR, y0 + 72, 'rgba(255,255,255,.85)');
           if (k.w > 900) {
-            const sx = k.w - 440, sy = 96, comply = 1 - refS;
+            const sx = k.w - 440, sy = 96;
+            // where each group now sits along the true refusal direction decides its reply
+            let hs = 0, hn = 0, bs = 0, bn = 0;
+            for (const q of pts) { const v = dot(q.p, REF); if (q.harmful) { hs += v; hn++; } else { bs += v; bn++; } }
+            const level = { harmful: hs / hn, benign: bs / bn };
             draw.label(octx, 'example replies (illustrative)', sx, sy, 'rgba(236,236,240,.55)', '10px "IBM Plex Mono", monospace');
             EXAMPLES.forEach((ex, i) => {
-              const y = sy + 26 + i * 44, refusing = comply < 0.6;
+              const y = sy + 26 + i * 44, refusing = level[ex.benign ? 'benign' : 'harmful'] > REFUSE_AT;
               draw.label(octx, `› ${ex.q}`, sx, y, 'rgba(236,236,240,.9)', '13px "DM Sans", sans-serif');
-              draw.label(octx, refusing ? ex.no : ex.yes, sx + 12, y + 18, ex.no === ex.yes ? 'rgba(200,220,255,.85)' : refusing ? `rgb(${AMBER})` : `rgb(${BLUE})`, '12px "IBM Plex Mono", monospace');
+              draw.label(octx, refusing ? ex.no : ex.yes, sx + 12, y + 18, refusing ? `rgb(${AMBER})` : ex.benign ? 'rgba(200,220,255,.85)' : `rgb(${BLUE})`, '12px "IBM Plex Mono", monospace');
             });
           }
           drone.set(70 + 80 * refS, moving ? 0.05 : 0.02);
@@ -244,6 +257,11 @@
         up() { if (drag?.blade) check(); drag = null; },
         control(id, v) {
           if (id === 'alpha') check();
+          if (id === 'beta') {
+            if (v > 1.2) sawUp = true;
+            if (v < -1.2) sawDown = true;
+            if (k.stage === 4 && sawUp && sawDown && Math.abs(dot(n, REF)) > 0.9) k.reach(4);
+          }
           if (id === 'find') {
             // the difference between the mean refused and mean answered activation, from the ORIGINAL points
             const m1 = [0, 0, 0], m0 = [0, 0, 0]; let c1 = 0, c0 = 0;
@@ -253,11 +271,12 @@
             k.sound.tone(392, 0.8, 0.05);
           }
           if (id === 'up') { target = [0, 1, 0]; if (dot(target, n) < 0) n = n.map(x => -x); }
-          if (id === 'restore') { k.set('alpha', 0); for (const q of pts) q.p = [...q.x]; }
+          if (id === 'restore') { k.set('alpha', 0); k.set('beta', 0); for (const q of pts) q.p = [...q.x]; }
         },
         maths() {
           const a = k.values.alpha, refS = Math.abs(separation(pts, REF, 'harmful')), topS = Math.abs(separation(pts, TOP, 'code'));
-          return `<p class="eq">x′ = x − α·(x·n)·n\nn̂ ≈ mean(refused) − mean(answered)</p>
+          return `<p class="eq">x′ = x − α·(x·n)·n + β·n\nn̂ ≈ mean(refused) − mean(answered)</p>
+            <div class="row"><span>steer β (added to every point)</span><span>${fmt(k.values.beta)}</span></div>
             <div class="row"><span>blade normal n</span><span>(${n.map(x => fmt(x)).join(', ')})</span></div>
             <div class="row"><span>strength α</span><span class="hl">${fmt(a)}</span></div>
             <div class="row"><span>|cos(n, refusal direction)|</span><span>${fmt(Math.abs(dot(n, REF)), 3)}</span></div>

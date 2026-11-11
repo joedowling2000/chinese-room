@@ -34,13 +34,13 @@ The site includes browser-only interactive experiments and decorative mathematic
 
 | Route | Artwork | Maths | Interaction |
 | --- | --- | --- | --- |
-| `#maths/play/linear-maps` | Lattice | Matrix multiplication | Drag the basis arrows î, ĵ; the whole embedding space bends |
-| `#maths/play/folding` | Kaleidoscope | ReLU activation | Each ReLU neuron is a folding mirror; paint once and the stroke repeats in every linear region; add layers, switch ReLU off (WebGL2) |
-| `#maths/play/gradient-descent` | Descent | Gradient descent | Drop seeds on a ridgeline loss landscape; tune η and momentum |
+| `#maths/play/linear-maps` | Lattice | Matrix multiplication | Drag the basis arrows î, ĵ; the whole embedding space bends; point at a word to run its analogy |
+| `#maths/play/folding` | Origami | ReLU activation | Each ReLU neuron is a crease you drag across the Lattice's words; keep one kind of word and push the rest away; add neurons, switch the activation off or to GELU |
+| `#maths/play/gradient-descent` | Descent | Gradient descent | Drop seeds on a ridgeline loss landscape; tune η and momentum; switch to the true loss of a 2-weight model and watch its curve fit |
 | `#maths/play/attention` | Loom | Softmax attention | Tap a word; threads are softmax weights from four toy heads |
 | `#maths/play/rotary` | Orrery | Rotary position embedding | Drag the sentence; position is rotation, score depends only on distance |
 | `#maths/play/dimensions` | Crowded Sky | Superposition | Add concepts, light stars, watch interference; random angles in 1,000-D |
-| `#maths/play/ablation` | Nullspace | Orthogonal projection | Turn a blade through a cloud of activations and delete a direction |
+| `#maths/play/ablation` | Nullspace | Orthogonal projection | Turn a blade through a cloud of activations; delete a direction, or steer along it |
 
 - Each piece walks the viewer through 4–5 discoveries with a guiding prompt line; **The maths** (`M`) opens a live drawer with the equation, the viewer's current numbers, a plain-English walkthrough, an "inside the model" note, an honesty note about what is synthetic, and primary references. `S` toggles optional generative sound, `Space` pauses ambient motion, `Esc` exits.
 - Everything runs locally in the browser; no model or API is called. Data are small and synthetic, and each piece says so.

@@ -127,12 +127,14 @@
 
   Interiors.register({
     id: 'dimensions', no: '06', concept: 'High dimensions', title: 'Crowded Sky', maths: 'Superposition', eq: 'z = Σ aᵢvᵢ  ·  âⱼ = vⱼ·z', accent: '#c4b2ff',
+    you: 'You are one concept among too many, sharing too few dimensions.',
     caption: 'More concepts than dimensions. They share the space, and pay for it in interference.',
     label: 'Feature directions as stars on a rotating sphere, joined by glowing filaments where they interfere.',
     mathsTitle: 'Superposition',
     controls: [
       { type: 'choice', id: 'space', label: 'Space', value: 3, options: [[2, '2D circle'], [3, '3D sphere'], [1000, 'Many dimensions']] },
       { type: 'range', id: 'n', label: 'Concepts (features)', min: 2, max: 16, step: 1, value: 6, fmt: v => String(v) },
+      { type: 'button', id: 'near', label: 'Light three neighbouring concepts' },
       { type: 'toggle', id: 'stream', label: 'Stream random sentences', value: false },
       { type: 'range', id: 'p', label: 'How often each concept appears', min: 0.03, max: 0.6, step: 0.01, value: 0.08, fmt: v => Math.round(v * 100) + '%' },
       { type: 'range', id: 'hd', label: 'Dimensions (many-dimensions view)', min: 0.3, max: 3.4, step: 0.02, value: 0.48, fmt: v => String(Math.round(10 ** v)) }
@@ -140,7 +142,7 @@
     prompts: [
       { do: 'Watch the stars settle, then raise <b>Concepts</b> above 6.', saw: 'More concepts than dimensions: they cannot all be at right angles, so they spread as evenly as they can. The glowing filaments are interference, pairs of concepts whose directions overlap.' },
       { do: 'Tap one star to switch that concept on.', saw: 'The white comet is the model’s vector: the sum of the concepts that are on. To read a concept back out, project the comet onto its direction. The one you lit reads clearly.' },
-      { do: 'Light three or four neighbouring stars at once.', saw: 'Ghosts. With several concepts on together, their overlaps add up, and concepts that are absent appear to be present (pink). Superposition only works while few concepts are active at the same time.' },
+      { do: 'Light three or four neighbouring stars at once (or press <b>Light three neighbouring concepts</b>).', saw: 'Ghosts. With several concepts on together, their overlaps add up, and concepts that are absent appear to be present (pink). Superposition only works while few concepts are active at the same time.' },
       { do: 'Turn on <b>Stream</b>, then slide <b>How often each concept appears</b> from low to high.', saw: 'Rare concepts can share space and still be read back almost every time. Common ones collide. Most concepts are absent from any given sentence, which is why a model can pack in so many.' },
       { do: 'Switch <b>Space</b> to <b>Many dimensions</b> and raise the dimensions.', saw: 'Each ray is the angle between two random directions. In 3 dimensions they fan out everywhere; in 1,000 they crowd around 90°. High-dimensional space has room for vastly more nearly-perpendicular directions than it has dimensions.' }
     ],
@@ -276,6 +278,15 @@
             const acc = stream.log.length ? stream.log.filter(Boolean).length / stream.log.length : 0;
             draw.label(octx, `stream: ${Math.round(acc * 100)}% of the last ${stream.log.length} sentences read back perfectly`, vw.cx, vw.cy + vw.R + 34, acc > 0.8 ? 'rgba(236,232,255,.9)' : `rgb(${GHOST})`, '12px "IBM Plex Mono", monospace', 'center');
           }
+          // the same readout, in words: what went in, and what the model believes came out
+          if (active.size) {
+            const names = f => V.map((_, i) => f(state[i]) ? NAMES[i] : null).filter(Boolean);
+            const ghosts = names(s => s.ghost), missed = names(s => s.miss), y = vw.cy + vw.R + (k.values.stream ? 54 : 34);
+            draw.label(octx, `this sentence contains: ${names(s => s.on).join(', ')}`, vw.cx, y, 'rgba(236,232,255,.9)', '12px "IBM Plex Mono", monospace', 'center');
+            draw.label(octx, ghosts.length || missed.length
+              ? `${ghosts.length ? `the model also reads: ${ghosts.join(', ')}` : ''}${ghosts.length && missed.length ? '  ·  ' : ''}${missed.length ? `and loses: ${missed.join(', ')}` : ''}`
+              : 'and the model reads back exactly that', vw.cx, y + 18, ghosts.length || missed.length ? `rgb(${GHOST})` : `rgba(${LAV},.85)`, '12px "IBM Plex Mono", monospace', 'center');
+          }
           const meanAbs = (() => { let s = 0, c = 0; for (let i = 0; i < V.length; i++) for (let j = i + 1; j < V.length; j++) { s += Math.abs(dot(V[i], V[j])); c++; } return c ? s / c : 0; })();
           drone.set(150 + meanAbs * 200, 0.02);
           if (k.stage === 2 && state.some(s => s.ghost) && active.size >= 3) k.reach(2);
@@ -305,6 +316,14 @@
           if (id === 'n') { setN(v); if (k.stage === 0 && v > 6) k.reach(0); }
           if (id === 'space') { setD(v); active.clear(); if (k.stage === 4 && v === 1000) setTimeout(() => k.reach(4), 2500); }
           if (id === 'stream' && !v) active.clear();
+          // light one concept and the two whose directions overlap it most: the surest way to raise a ghost
+          if (id === 'near' && V.length >= 3 && k.values.space !== 1000) {
+            if (k.values.stream) k.set('stream', false);
+            const base = Math.floor(Math.random() * V.length);
+            const near = V.map((v, i) => [i === base ? -9 : dot(v, V[base]), i]).sort((a, b) => b[0] - a[0]).slice(0, 2).map(q => q[1]);
+            active.clear(); [base, ...near].forEach(i => active.add(i));
+            k.sound.tone(392, 0.4, 0.04);
+          }
           if (id === 'p' || id === 'stream') {
             if (k.values.p < 0.1) sawLo = true;
             if (k.values.p > 0.35) sawHi = true;

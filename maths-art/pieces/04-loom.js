@@ -46,6 +46,17 @@
     return { scores: s.map(v => v * tau), w: e.map(v => v / z) };
   }
 
+  // The question each head's query encodes, in words: the same hand-written
+  // features the scores are computed from, read back for the viewer.
+  function question(head, tok) {
+    const q = tok[1] || {};
+    if (head === 'prev') return 'which word came just before me?';
+    if (head === 'copy') return 'what followed this word last time?';
+    if (head === 'sem' && q.sem) return `which noun is ${['a living thing', 'a place'].filter((_, n) => q.sem[n] > 0).join(' or ')}?`;
+    if (head === 'num' && q.num) return `which noun is ${q.num[2] ? 'plural' : 'singular'}?`;
+    return null;
+  }
+
   // value colours: each token carries a colour as its "content"
   function valueColor(word, idx) {
     let h = 0; for (const c of word) h = (h * 31 + c.charCodeAt(0)) % 360;
@@ -111,6 +122,7 @@
 
   Interiors.register({
     id: 'attention', no: '04', concept: 'Attention', title: 'Loom', maths: 'Softmax attention', eq: 'out = Σ softmax(q·kᵢ / τ) vᵢ', accent: '#ff9a7c',
+    you: 'You are a word, asking every earlier word a question.',
     caption: 'Every word asks every earlier word a question, and becomes a blend of the answers.',
     label: 'Words of a sentence around a ring, connected by coloured threads whose thickness is the attention weight.',
     mathsTitle: 'Query, key, value',
@@ -250,8 +262,26 @@
             if (future && i === query + 1) draw.label(octx, 'masked: not yet read →', lx, ly + 18, 'rgba(200,205,215,.35)', '10px "IBM Plex Mono", monospace', right ? 'left' : 'right');
           });
           draw.label(octx, `“${toks[query][0]}” becomes`, L.cx, L.cy + L.R * 0.2 + 22, 'rgba(236,240,244,.7)', '11px "IBM Plex Mono", monospace', 'center');
-          // legend of heads
-          if (k.w > 760) hs.forEach((H, i) => draw.label(octx, `— ${H.name}`, 28, 100 + i * 20, rgba(H.color, 0.95), '12px "IBM Plex Mono", monospace'));
+          // each head's question in words, and the word that answered it best:
+          // beside the legend on wide screens, under the orb on narrow ones
+          const wide = k.w > 760;
+          let line = 0;
+          hs.forEach((H, hi) => {
+            const ask = query > 0 ? question(H.id, toks[query]) : null;
+            let text = '';
+            if (ask) {
+              let top = -1; target[hi].forEach((wt, j) => { if (j > 0 && j < query && (top < 0 || wt > target[hi][top])) top = j; });
+              const heard = top > 0 && target[hi][top] > 0.15;
+              text = `${ask}  →  ${heard ? `${toks[top][0]} ${Math.round(target[hi][top] * 100)}%` : 'no clear answer'}`;
+            }
+            if (wide) {
+              draw.label(octx, `— ${H.name}`, 28, 100 + hi * 22, rgba(H.color, 0.95), '12px "IBM Plex Mono", monospace');
+              if (text) draw.label(octx, text, k.w - 30, 84 + line++ * 17, rgba(H.color, 0.85), '11px "IBM Plex Mono", monospace', 'right');
+            } else if (text && line < 2) {
+              draw.label(octx, text, L.cx, L.cy + L.R * 0.2 + 42 + line * 16, rgba(H.color, 0.9), '10px "IBM Plex Mono", monospace', 'center');
+              line++;
+            }
+          });
 
           // entropy of attention drives a soft drone
           const ent = -w0.reduce((s, v) => s + (v > 0 ? v * Math.log(v) : 0), 0);

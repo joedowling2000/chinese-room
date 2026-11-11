@@ -185,6 +185,7 @@
 
   Interiors.register({
     id: 'linear-maps', no: '01', concept: 'Linear maps', title: 'Lattice', maths: 'Matrix multiplication', eq: 'x′ = W x', accent: '#9ee6d4',
+    you: 'You are a word, standing in the space where meanings are kept.',
     caption: 'Two arrows decide where every word in the space goes.',
     label: 'A luminous grid of word-points that bends as two basis arrows are dragged.',
     mathsTitle: 'A matrix is two arrows',
@@ -198,9 +199,10 @@
       { do: 'Point at (or tap) a word to see where it came from.', saw: 'A word at (x, y) lands at x·î + y·ĵ: it keeps its old coordinates but spends them on the new arrows. That is all matrix multiplication is.' },
       { do: 'Drag the rose arrow <b>ĵ</b> until it lies along î.', saw: 'Determinant zero. The plane has collapsed onto a line and different words now sit in the same place. No later layer can separate them again: that information is gone.' },
       { do: 'Swing ĵ round to the other side of î.', saw: 'Negative determinant: space has been flipped into its mirror image. The unit square is inside out.' },
-      { do: 'Press <b>Add a layer</b>.', saw: 'Two matrices in a row are a single matrix, their product. Without a non-linearity between them, a hundred layers would be no more expressive than one. (That is the next room.)' }
+      { do: 'Press <b>Add a layer</b>.', saw: 'Two matrices in a row are a single matrix, their product. Without a non-linearity between them, a hundred layers would be no more expressive than one. (That is the next room.)' },
+      { do: 'With the space bent, point at <b>queen</b> (or any word joined by dashed lines).', saw: 'The gold arrows do the sum: start at <b>king</b>, take away <b>man</b>, add <b>woman</b>, and you land on <b>queen</b> — however the matrix has bent the space. A matrix moves every word but carries the differences between words along intact. That is why one direction can mean the same thing everywhere.' }
     ],
-    coda: 'Parallelograms stay parallelograms under any matrix, so king − man + woman still lands on queen. Open the maths for the live equation.',
+    coda: 'Point at any word on a dashed parallelogram to run its analogy in the space you have made. Open the maths for the live equation.',
     walk: [
       'A 2×2 matrix is just two arrows written side by side. Its first column says where the arrow <b>î = (1, 0)</b> goes; its second column says where <b>ĵ = (0, 1)</b> goes.',
       'Every other point is a combination of those two, so it has no choice: <b>(x, y)</b> must land at <b>x·î + y·ĵ</b>. Move two arrows and you have moved everything.',
@@ -241,6 +243,20 @@
         let best = -1, bd = 24;
         WORDS.forEach(([, x, y], i) => { const [tx, ty] = apply(M, x, y), d = Math.hypot(cx + tx * u - p.x, cy - ty * u - p.y); if (d < bd) { bd = d; best = i; } });
         return best;
+      }
+      // For a word on a parallelogram [p0 p1 p2 p3]: t = a − c + b, with a and b its neighbours and c opposite.
+      function analogy(wi) {
+        if (wi < 0) return null;
+        for (const q of PARALLELOGRAMS) {
+          const i = q.indexOf(wi);
+          if (i >= 0) return { t: wi, a: q[(i + 1) % 4], b: q[(i + 3) % 4], c: q[(i + 2) % 4] };
+        }
+        return null;
+      }
+      function sawAnalogy() {
+        if (k.stage !== 5 || !analogy(hover)) return;
+        const D = det(target), bent = target.some((v, i) => Math.abs(v - [1, 0, 0, 1][i]) > 0.2);
+        if (bent && Math.abs(D) > 0.06) k.reach(5);
       }
       function check() {
         const D = det(target);
@@ -286,13 +302,31 @@
             draw.label(octx, `${word} = ${fmt(x, 1)}·î + ${fmt(y, 1)}·ĵ = (${fmt(B[0])}, ${fmt(B[1])})`, PB[0] + 14, PB[1] + 22, '#fff', '500 13px "IBM Plex Mono", monospace');
           }
 
+          // The analogy through the hovered word, computed in the bent space:
+          // M·a − M·c + M·b = M·(a − c + b), because the map is linear.
+          const an = analogy(hover);
+          if (an) {
+            const GOLD = '255,214,128', P = i => { const [x, y] = apply(M, WORDS[i][1], WORDS[i][2]); return [cx + x * u, cy - y * u]; };
+            const [pa, pb, pc, pt] = [an.a, an.b, an.c, an.t].map(P);
+            octx.setLineDash([6, 5]); octx.lineWidth = 2;
+            octx.strokeStyle = octx.fillStyle = `rgba(${GOLD},.95)`;
+            draw.arrow(octx, pc[0], pc[1], pa[0], pa[1], 9);   // the difference: a − c
+            draw.arrow(octx, pb[0], pb[1], pt[0], pt[1], 9);   // the same difference, added to b
+            octx.setLineDash([]);
+            const A = apply(M, WORDS[an.a][1], WORDS[an.a][2]), B = apply(M, WORDS[an.b][1], WORDS[an.b][2]), C = apply(M, WORDS[an.c][1], WORDS[an.c][2]);
+            const sum = [A[0] - C[0] + B[0], A[1] - C[1] + B[1]];
+            const ly = Math.min(k.h - 190, Math.max(pa[1], pb[1], pc[1], pt[1]) + 46), lx = clamp(pt[0], 190, k.w - 190);
+            draw.label(octx, `${WORDS[an.a][0]} − ${WORDS[an.c][0]} + ${WORDS[an.b][0]} = (${fmt(sum[0])}, ${fmt(sum[1])})`, lx, ly, `rgb(${GOLD})`, '500 13px "IBM Plex Mono", monospace', 'center');
+            draw.label(octx, `exactly where ${WORDS[an.t][0]} stands`, lx, ly + 18, `rgba(${GOLD},.8)`, '11px "IBM Plex Mono", monospace', 'center');
+          }
+
           const collapse = Math.abs(D) < 0.06 ? 1 : 0;
           drone.set(55 + 30 * Math.min(4, Math.abs(D)), collapse ? 0.12 : 0.03);
           k.over.style.cursor = drag ? 'grabbing' : hoverHandle ? 'grab' : 'crosshair';
         },
         down(p) {
           drag = nearestHandle(p);
-          if (!drag) { const wi = nearestWord(p); if (wi >= 0) { hover = wi; if (k.stage === 1) k.reach(1); } }
+          if (!drag) { const wi = nearestWord(p); if (wi >= 0) { hover = wi; if (k.stage === 1) k.reach(1); sawAnalogy(); } }
           if (drag && k.values.breathe) { k.set('breathe', false); }
         },
         move(p) {
@@ -306,6 +340,7 @@
             hoverHandle = nearestHandle(p);
             hover = hoverHandle ? -1 : nearestWord(p);
             if (hover >= 0 && k.stage === 1) k.reach(1);
+            sawAnalogy();
           }
         },
         up() { if (drag) k.sound.tone(330 + 110 * Math.abs(det(target)), 0.3, 0.04); drag = null; },
@@ -342,7 +377,12 @@
             <div class="row"><span>î (column 1)</span><span style="color:rgb(${MINT})">(${fmt(M[0])}, ${fmt(M[2])})</span></div>
             <div class="row"><span>ĵ (column 2)</span><span style="color:rgb(${ROSE})">(${fmt(M[1])}, ${fmt(M[3])})</span></div>
             <div class="row"><span>det M = ad − bc</span><span class="hl">${fmt(D)}</span></div>
-            ${word || '<div class="row"><span>point at a word</span><span>to expand it</span></div>'}`;
+            ${word || '<div class="row"><span>point at a word</span><span>to expand it</span></div>'}${(() => {
+              const an = analogy(hover); if (!an) return '';
+              const g = i => apply(M, WORDS[i][1], WORDS[i][2]), A = g(an.a), B = g(an.b), C = g(an.c), T = g(an.t);
+              return `<div class="row"><span>M·${WORDS[an.a][0]} − M·${WORDS[an.c][0]} + M·${WORDS[an.b][0]}</span><span class="hl">(${fmt(A[0] - C[0] + B[0])}, ${fmt(A[1] - C[1] + B[1])})</span></div>
+                <div class="row"><span>M·${WORDS[an.t][0]}</span><span class="hl">(${fmt(T[0])}, ${fmt(T[1])})</span></div>`;
+            })()}`;
         }
       };
     },

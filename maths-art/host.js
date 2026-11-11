@@ -157,6 +157,7 @@ const Interiors = (() => {
           <span class="ir-dots" aria-hidden="true"></span>
         </div>
       </div>
+      ${p.you ? `<p class="ir-arrive" aria-hidden="true"><span>${p.no} / ${esc(p.title)}</span>${esc(p.you)}</p>` : ''}
       ${(p.controls || []).length ? `<div class="ir-dock ir-chrome"><button type="button" class="ir-dock-toggle" data-host="dock" aria-expanded="true">Controls</button><div class="ir-dock-body">${p.controls.map(control).join('')}</div></div>` : ''}
       <aside class="ir-drawer" hidden aria-label="The maths">
         <button type="button" class="ir-drawer-close" data-host="maths" aria-label="Close the maths">✕</button>
@@ -235,11 +236,20 @@ const Interiors = (() => {
 
     /* guided discovery: the piece calls k.reach(i) when the viewer has done prompt i */
     const prompts = p.prompts || [];
+    const nextRoom = pieces[(pieces.indexOf(p) + 1) % pieces.length];
     let stage = 0;
+    // Arrival: one line that says who you are in this room. It never blocks; it
+    // fades by itself, or at the first touch.
+    const arriveEl = $('.ir-arrive');
+    const arrived = () => arriveEl?.classList.add('ir-gone');
+    const arriveTimer = setTimeout(arrived, 5200);
     const dots = $('.ir-dots'), promptEl = $('.ir-prompt'), insightEl = $('.ir-insight');
     function showGuide() {
       dots.innerHTML = prompts.map((_, i) => `<i class="${i < stage ? 'on' : i === stage ? 'now' : ''}"></i>`).join('');
-      promptEl.innerHTML = stage < prompts.length ? `<span>›</span> ${prompts[stage].do}` : `<span>✓</span> ${p.coda || 'Keep exploring. Open the maths for the equation behind what you see.'}`;
+      // After the last discovery the coda hands the viewer on to the next room.
+      promptEl.innerHTML = stage < prompts.length ? `<span>›</span> ${prompts[stage].do}` : `<span>✓</span> ${p.coda || 'Keep exploring. Open the maths for the equation behind what you see.'}${nextRoom !== p ? ` <a class="ir-next" href="#maths/play/${nextRoom.id}">Next room: ${esc(nextRoom.maths)} →</a>` : ''}`;
+      // Once the viewer has begun, the title steps back and leaves the room to the artwork.
+      root.classList.toggle('ir-begun', stage > 0);
     }
     let insightTimer = 0;
     function reach(i) {
@@ -288,7 +298,7 @@ const Interiors = (() => {
     };
     let inst;
     try { inst = p.create(k); } catch (e) { console.error(e); inst = { frame() {} }; }
-    root._piece = inst; // handy for inspection in devtools
+    root._piece = inst; root._k = k; // handy for inspection in devtools
 
     function resize() {
       const r = root.getBoundingClientRect();
@@ -325,7 +335,7 @@ const Interiors = (() => {
     let pointer = null;
     const pos = e => { const r = over.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
     over.addEventListener('pointerdown', e => {
-      wake();
+      wake(); arrived();
       over.setPointerCapture?.(e.pointerId);
       const q = pos(e);
       pointer = { id: e.pointerId, x0: q.x, y0: q.y, t0: performance.now(), moved: false, x: q.x, y: q.y };
@@ -424,7 +434,7 @@ const Interiors = (() => {
       dispose() {
         alive = false;
         cancelAnimationFrame(raf);
-        clearTimeout(idleTimer); clearTimeout(insightTimer);
+        clearTimeout(idleTimer); clearTimeout(insightTimer); clearTimeout(arriveTimer);
         abort.abort(); ro.disconnect();
         try { inst.destroy?.(); } catch {}
         sound.dispose();

@@ -139,3 +139,18 @@ body.ir-playing main{min-height:100dvh}
   .ir-drawer{width:100vw}
 }
 @media (prefers-reduced-motion:reduce){.ir-poster,.ir-insight.ir-flash{transition:none;animation:none}}
+
+/* Arrival: who you are in this room. Fades by itself or at the first touch; never blocks. */
+.ir-arrive{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);z-index:3;margin:0;width:min(760px,calc(100vw - 48px));text-align:center;pointer-events:none;font:400 clamp(26px,3.4vw,46px)/1.12 var(--sans);letter-spacing:-.035em;color:#f6f2ea;text-shadow:0 2px 40px #000,0 0 12px rgba(0,0,0,.8);animation:ir-arrive 1.4s ease backwards;transition:opacity 1.1s ease}
+.ir-arrive span{display:block;margin-bottom:14px;font:500 11px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--ir-accent)}
+.ir-arrive.ir-gone{opacity:0}
+@keyframes ir-arrive{from{opacity:0;transform:translate(-50%,-44%)}to{opacity:1;transform:translate(-50%,-50%)}}
+/* While the arrival line is up, the caption waits its turn. */
+.ir-piece:has(.ir-arrive:not(.ir-gone)) .ir-caption{opacity:.25;transition:opacity .8s ease}
+.ir-caption{transition:opacity .8s ease}
+/* After the first discovery the title steps back so the artwork has the room. */
+.ir-piece.ir-begun .ir-caption h1,.ir-piece.ir-begun .ir-caption:has(.ir-insight:not([hidden])) h1{font-size:clamp(22px,2.2vw,30px);letter-spacing:-.03em;margin-bottom:6px}
+.ir-next{display:inline-block;margin-left:6px;color:var(--ir-accent);text-decoration:none;border-bottom:1px solid currentColor;white-space:nowrap}
+.ir-next:hover{color:#fff}
+@media (max-width:760px){.ir-arrive{top:34%;font-size:24px}.ir-piece.ir-begun .ir-caption h1{font-size:20px}}
+@media (prefers-reduced-motion:reduce){.ir-arrive{animation:none;transition:none}.ir-caption{transition:none}}

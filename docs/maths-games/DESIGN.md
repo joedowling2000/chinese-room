@@ -27,7 +27,7 @@ The site is called Chinese Room — Searle's thought experiment about a person i
 | # | Concept (route id) | Artwork | Medium / aesthetic | The viewer is… |
 |---|---|---|---|---|
 | 01 | Linear maps (`linear-maps`) | **Lattice** | Infinite architectural grid of luminous word-stars, moiré of before/after grids | standing in embedding space as a weight matrix bends it |
-| 02 | Non-linearity (`folding`) | **Kaleidoscope** | A turning kaleidoscope whose mirrors are ReLU neurons; each mirrored copy is one linear region | inside a feed-forward block, painting on a plane its neurons fold |
+| 02 | Non-linearity (`folding`) | **Origami** | The Lattice's word-space as a dark sheet of folded paper; each crease is a ReLU neuron | inside a feed-forward layer, deciding which words to leave alone |
 | 03 | Gradient descent (`gradient-descent`) | **Descent** | Ridgeline topography (Joy Division *Unknown Pleasures*) with long-exposure light trails | the training process, dropping seeds onto the loss landscape |
 | 04 | Attention (`attention`) | **Loom** | String art: words around a circle woven by weighted threads, one colour per head | a word asking every earlier word a question |
 | 05 | Rotary position (`rotary`) | **Orrery** | Brass-and-silver astrolabe of many-handed clocks, spirograph traces | a token whose position is written as rotation |
@@ -79,19 +79,19 @@ The **index** (`#maths/play`) is a dark gallery: seven large live thumbnails (ea
 
 **Truth.** Words' positions are illustrative 2D placements, labelled “illustrative positions — real embeddings have thousands of dimensions”.
 
-### 02 · Kaleidoscope — the ReLU activation
+### 02 · Origami — the ReLU activation
 
-*Replaced Stained Glass on 27 Oct 2026 at the user's request; Stained Glass is in git history up to `49d5978`.*
+*Replaced Kaleidoscope on 11 Nov 2026 at the user's request (it felt weak and out of style with the other rooms); Kaleidoscope is in git history up to `fe2e1c5`, Stained Glass up to `49d5978`.*
 
-**Image.** A turning kaleidoscope of marbled ink and glass beads. Every mirror is one **ReLU neuron**: it measures which side of a line a point is on, z = n·x − b, and applies the hinge to −z, x′ = x + 2·ReLU(−z)·n. On the positive side the neuron is off and the point passes through; on the negative side it switches on and reflects it. Stacked one neuron per layer, the folds cut the plane into **linear regions**, and every region shows the same patch of the folded plane, so the picture is mirrored region by region. Fine light lines are the creases (each neuron's z = 0); deeper creases bend where they cross earlier ones.
+**Image.** The word-space of the Lattice, one room on, drawn as a dark sheet of folded paper lit from the upper left. Each hidden neuron is a bright crease in its own colour, with ticks on the side it pushes. The sheet is the layer's output, y = max(0, 1 − Σ max(0, zᵢ)): a glowing plateau where every neuron is silent, facets sloping away where one or more fire, fine contour lines every ½, and a bright contour at y = ½, the decision. Words on the plateau stay lit; the rest go dim. A small graph of the activation sits top right.
 
-**Interaction.** Drag on empty glass to **paint**: the stroke is written into the folded plane, so it appears once in every region that covers that spot. Drag a bright crease to slide that neuron's mirror; hovering one labels it ("neuron 3: z = 0 · max(0, z) bends here") with a hinge glyph. Dock: **Activation: ReLU ↔ none**, **Layers** 1–8 (default 5), **Turn the kaleidoscope**, **Show the creases**, **Clear the paint**, **New mirrors**.
+**Interaction.** Drag a crease's dot to move it and its arrow to turn it. Point at a word for its worked example (each neuron's z → h, then y) and its dots on the hinge graph. Dock: **Keep only the** Places / People / Animals, **Neurons** 1–6, **Activation** ReLU / GELU / None, **Contour lines**, **Show one answer**.
 
-**Discoveries.** (1) paint → one stroke, many copies, all with the same network output; (2) add a layer → one more fold can double the regions; (3) drag a crease → a crease is the hinge of max(0, z), and every copy moves together; (4) ReLU off → every neuron reflects the whole plane, reflections compose into one rigid motion: one region, one copy; (5) ReLU on, 8 layers → the live region count against the at-most-37 that eight neurons side by side in one layer could make (depth multiplies, width adds).
+**Discoveries.** (1) one crease keeps the places: a neuron is silent on one side and a ramp on the other; (2) read the hinge graph for words on both sides; (3) the people stand in the middle, and one crease cannot keep only them (provably: other words lie inside their convex hull's line of sight on three sides); (4) three or more creases close a shape with corners; (5) activation off: the sum of linear pieces is one flat sheet and a single straight cut; (6) GELU: the same shape with rounded corners.
 
-**Maths drawer.** `z = n·x − b`, `x′ = x + 2·ReLU(−z)·n`, `ReLU(u) = max(0, u)`; live: activation, layers, regions in view, the 2ᵏ depth bound, the 1 + k + k(k−1)/2 one-layer bound, and which neurons are on at the pointer (● ○). Inside the model: the feed-forward block; GELU/SwiGLU are smooth cousins of the hinge.
+**Maths drawer.** zᵢ = nᵢ·x − bᵢ, hᵢ = max(0, zᵢ), y = max(0, 1 − Σ hᵢ); live table of every neuron's n and b and the pointed word's z → h; the at-most 1 + k + k(k−1)/2 facets of one layer.
 
-**Rendering.** WebGL2 fragment shader applies up to eight folds per pixel (fold parameters as a `vec3` uniform array), draws creases from |z|/fwidth(z), shades marbled fbm ink in the folded coordinates and samples a 1536² paint texture (updated by dirty rectangle with `texSubImage2D`). Mirrors are chosen greedily so each new one leaves the most regions big enough to see. Canvas 2D fallback at quarter resolution. Poster: offscreen WebGL2 canvas.
+**Truth.** A real two-layer ReLU network evaluated per pixel (Canvas 2D, a third-resolution buffer scaled up). Lines are placed by hand, not learned; word positions are the Lattice's illustrative ones.
 
 ### 03 · Descent — gradient descent
 
@@ -148,7 +148,7 @@ The **index** (`#maths/play`) is a dark gallery: seven large live thumbnails (ea
 ## 5. Visual system
 
 - Background `#05060a` with subtle film grain/vignette; additive (`lighter`) compositing for light.
-- Each piece owns an accent pair: Lattice mint/rose · Kaleidoscope marbled jewel inks with a pink accent · Descent amber/ice · Loom multi-head (cyan, coral, gold, violet) · Orrery brass/silver · Crowded Sky lavender/white · Nullspace amber/blue.
+- Each piece owns an accent pair: Lattice mint/rose · Origami folded dark paper in pink and violet · Descent amber/ice · Loom multi-head (cyan, coral, gold, violet) · Orrery brass/silver · Crowded Sky lavender/white · Nullspace amber/blue.
 - Type: DM Sans for titles/captions, IBM Plex Mono for numbers and labels, matching Field.
 - Labels have dark halos; colour always paired with shape or label.
 

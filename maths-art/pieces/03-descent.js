@@ -35,17 +35,46 @@
       const v = L(-EXTENT + 6 * i / 120, -EXTENT + 6 * j / 120);
       lo = Math.min(lo, v); hi = Math.max(hi, v);
     }
-    return { L, grad, lo, hi };
+    return { L, grad, lo, hi, Z: L, zlo: lo, zhi: hi };
+  }
+
+  // A real model with two weights: ŷ = w₂·tanh(w₁·x), fitted to nine points.
+  // The landscape is its mean squared error at every (w₁, w₂). Heights are drawn
+  // on a log scale so the valleys can be seen beside the steep corners; seeds
+  // always step on the true loss.
+  const MODEL = (() => {
+    const xs = [-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2], r = rng(41);
+    const ys = xs.map(x => 1.2 * Math.tanh(1.6 * x) + (r() - 0.5) * 0.16);
+    return { xs, ys, f: (w1, w2, x) => w2 * Math.tanh(w1 * x) };
+  })();
+  function makeModelSurface() {
+    const { xs, ys } = MODEL, n = xs.length;
+    const L = (w1, w2) => { let s = 0; for (let i = 0; i < n; i++) s += (w2 * Math.tanh(w1 * xs[i]) - ys[i]) ** 2; return s / n; };
+    const grad = (w1, w2) => {
+      let g1 = 0, g2 = 0;
+      for (let i = 0; i < n; i++) {
+        const th = Math.tanh(w1 * xs[i]), e = w2 * th - ys[i];
+        g1 += 2 * e * w2 * xs[i] * (1 - th * th); g2 += 2 * e * th;
+      }
+      return [g1 / n, g2 / n];
+    };
+    const Z = (w1, w2) => Math.log(1 + 3 * L(w1, w2));
+    let lo = Infinity, hi = -Infinity, zlo = Infinity, zhi = -Infinity;
+    for (let i = 0; i <= 120; i++) for (let j = 0; j <= 120; j++) {
+      const v = L(-EXTENT + 6 * i / 120, -EXTENT + 6 * j / 120), z = Math.log(1 + 3 * v);
+      lo = Math.min(lo, v); hi = Math.max(hi, v); zlo = Math.min(zlo, z); zhi = Math.max(zhi, z);
+    }
+    return { L, grad, lo, hi, Z, zlo, zhi, model: true };
   }
 
   // Projection: rows run from the far edge (y = +3, top of screen) to the near edge.
   function camera(w, h, surf) {
     const narrow = w < 760;
     const top = h * (narrow ? 0.34 : 0.27), depthPx = h * (narrow ? 0.46 : 0.56), half = w * (narrow ? 0.62 : 0.4), cx = w * 0.5;
-    const amp = h * (narrow ? 0.24 : 0.34) / (surf.hi - surf.lo);
+    const amp = h * (narrow ? 0.24 : 0.34) / (surf.zhi - surf.zlo);
     const proj = (x, y, z) => {
       const d = (EXTENT - y) / (2 * EXTENT), p = 0.5 + 0.5 * d;
-      return [cx + (x / EXTENT) * half * p, top + depthPx * d ** 1.1 - (z - surf.lo) * amp * p, d];
+      return [cx + (x / EXTENT) * half * p, top + depthPx * d ** 1.1 - (z - surf.zlo) * amp * p, d];
     };
     return { proj, top, depthPx };
   }
@@ -64,7 +93,7 @@
       let first = null, last = null;
       for (let c = 0; c <= cols; c++) {
         const x = -EXTENT * 1.15 + 2.3 * EXTENT * c / cols;
-        const [sx, sy] = cam.proj(x, y, surf.L(x, y));
+        const [sx, sy] = cam.proj(x, y, surf.Z(x, y));
         if (!c) { ctx.moveTo(sx, sy); first = [sx, sy]; } else ctx.lineTo(sx, sy);
         last = [sx, sy];
       }
@@ -77,7 +106,7 @@
       ctx.beginPath();
       for (let c = 0; c <= cols; c++) {
         const x = -EXTENT * 1.15 + 2.3 * EXTENT * c / cols;
-        const [sx, sy] = cam.proj(x, y, surf.L(x, y));
+        const [sx, sy] = cam.proj(x, y, surf.Z(x, y));
         c ? ctx.lineTo(sx, sy) : ctx.moveTo(sx, sy);
       }
       ctx.stroke();
@@ -92,10 +121,12 @@
 
   Interiors.register({
     id: 'gradient-descent', no: '03', concept: 'Gradient descent', title: 'Descent', maths: 'Gradient descent', eq: 'θ ← θ − η ∇L(θ)', accent: '#ffb46a',
+    you: 'You are the training process, feeling for the way down.',
     caption: 'Learning is a blind walk downhill across a landscape of error.',
     label: 'Stacked ridgelines of a loss landscape with glowing seeds rolling into its valleys.',
     mathsTitle: 'Feeling for the bottom',
     controls: [
+      { type: 'choice', id: 'world', label: 'Landscape', value: 'sculpted', options: [['sculpted', 'Sculpted'], ['model', 'A real 2-weight model']] },
       { type: 'range', id: 'eta', label: 'Learning rate η', min: 0.001, max: 0.4, step: 0.001, value: 0.012, fmt: v => Number(v).toFixed(3) },
       { type: 'range', id: 'mu', label: 'Momentum μ', min: 0, max: 0.97, step: 0.01, value: 0, fmt: v => Number(v).toFixed(2) },
       { type: 'button', id: 'rain', label: 'Rain: drop 120 seeds' },
@@ -106,7 +137,9 @@
       { do: 'Push the learning rate η above 0.2, then drop seeds.', saw: 'Steps too large: seeds overshoot the valley floor, ricochet from wall to wall, and some fly off the map. Training has diverged.' },
       { do: 'Set η low and momentum to zero. Drop seeds on the slopes until one stops short.', saw: 'Stuck in a hollow. The slope there is zero, so plain gradient descent stops — even though deeper valleys exist elsewhere. This is a local minimum.' },
       { do: 'Raise momentum μ above 0.8 and drop more seeds.', saw: 'Momentum carries velocity from step to step, like a heavy ball. Seeds coast through small hollows and along flat ravines — and sometimes overshoot.' },
-      { do: 'Press <b>Rain</b>.', saw: 'A hundred and twenty starting points, one rule. The landscape divides into basins: where a seed starts decides where it ends. Real training starts from random weights too.' }
+      { do: 'Press <b>Rain</b>.', saw: 'A hundred and twenty starting points, one rule. The landscape divides into basins: where a seed starts decides where it ends. Real training starts from random weights too.' },
+      { do: 'Switch <b>Landscape</b> to <b>A real 2-weight model</b>, set η near 0.05 and drop a seed.', saw: 'This landscape was not sculpted. It is the actual error of the small model in the corner, <b>ŷ = w₂·tanh(w₁·x)</b>, for every pair of weights. As the seed rolls down, the curve bends onto the nine points and the red error bars shrink: that is all “learning” is.' },
+      { do: 'Now drop a seed on the far side, so it settles in the other valley.', saw: 'Two valleys, far apart, and the model draws <b>exactly the same curve</b> in both: flipping the sign of both weights changes nothing. Different weights, same function. Real networks have astronomically many such twins, which is why no two training runs end with the same weights.' }
     ],
     coda: 'Try Reshape for a new landscape. In a real model this landscape has billions of dimensions, one per weight.',
     walk: [
@@ -119,7 +152,7 @@
       'Training a language model is this walk, in a space with one dimension per weight — billions of them. The loss is how badly the model predicts the next token on a batch of text, and backpropagation computes the gradient for every weight at once.',
       'Real training uses refinements of this rule (Adam keeps a separate step size per weight) and noisy gradients from small batches, which helps it rattle out of poor hollows. High-dimensional landscapes are thought to have far more saddle points than true traps.'
     ],
-    honest: 'The landscape is a synthetic two-parameter function (a bowl, six Gaussian valleys and a ripple) with an exact analytic gradient. Every seed step is the true momentum update on that function.',
+    honest: 'The sculpted landscape is a synthetic two-parameter function (a bowl, six Gaussian valleys and a ripple) with an exact analytic gradient. The real-model landscape is the mean squared error of ŷ = w₂·tanh(w₁·x) on nine fixed points; its height is drawn on a log scale, log(1 + 3L), so the valleys are visible, but seeds step on the true loss. Every seed step is the true momentum update.',
     refs: [['Goh 2017 — Why momentum really works (Distill)', 'https://distill.pub/2017/momentum/'], ['Li et al. 2018 — Visualizing the loss landscape of neural nets', 'https://arxiv.org/abs/1712.09913']],
 
     create(k) {
@@ -127,6 +160,8 @@
       let seedNo = 1, surf = makeSurface(seedNo), cam = null, terrain = null;
       const seeds = [];
       let acc = 0, last = null, dragTrail = null;
+      let shift = 0; // the canvases slide left when the maths drawer opens; the inset follows
+      const valleys = new Set(); // which of the real model's two valleys seeds have settled in
       const drone = k.sound.drone(80, 'sine');
 
       function bake() {
@@ -140,7 +175,7 @@
       function unproject(p) {
         let best = null, bd = 18;
         for (let i = 0; i <= 70; i++) for (let j = 0; j <= 70; j++) {
-          const x = -EXTENT + 6 * i / 70, y = -EXTENT + 6 * j / 70, [sx, sy, d] = cam.proj(x, y, surf.L(x, y));
+          const x = -EXTENT + 6 * i / 70, y = -EXTENT + 6 * j / 70, [sx, sy, d] = cam.proj(x, y, surf.Z(x, y));
           const dist = Math.hypot(sx - p.x, sy - p.y) - d * 6; // prefer nearer rows
           if (dist < bd) { bd = dist; best = [x, y]; }
         }
@@ -177,9 +212,45 @@
             const depth = (surf.L(s.x, s.y) - surf.lo) / (surf.hi - surf.lo);
             k.sound.tone(220 * 2 ** ((1 - depth) * 1.5), 0.9, 0.025);
             if (k.stage === 2 && mu < 0.3 && eta < 0.04 && depth > 0.12) k.reach(2);
+            if (surf.model && surf.L(s.x, s.y) < 0.05) {
+              valleys.add(Math.sign(s.x));
+              if (k.stage === 5) k.reach(5);
+              if (k.stage === 6 && valleys.size > 1) k.reach(6);
+            }
           }
           if (k.stage === 1 && eta > 0.2 && s.hops > 6) k.reach(1);
         }
+      }
+
+      // The real model, drawn: nine data points, the curve the latest seed's weights
+      // produce, and the errors whose mean square is the height it stands at.
+      function inset(t) {
+        const narrow = k.w < 760, pw = narrow ? Math.min(190, k.w * 0.5) : 250, ph = narrow ? 110 : 150;
+        const px = (narrow ? 14 : 30) + shift, py = narrow ? 64 : 84;
+        const X = x => px + (x + 2.4) / 4.8 * pw, Y = y => py + ph / 2 - y / 3.4 * ph;
+        octx.fillStyle = 'rgba(5,6,10,.72)'; octx.fillRect(px - 10, py - 26, pw + 20, ph + 62);
+        octx.strokeStyle = 'rgba(255,180,106,.28)'; octx.lineWidth = 1; octx.strokeRect(px - 10, py - 26, pw + 20, ph + 62);
+        draw.label(octx, 'the model: ŷ = w₂·tanh(w₁·x)', px, py - 12, 'rgba(255,220,180,.9)', '11px "IBM Plex Mono", monospace');
+        octx.strokeStyle = 'rgba(255,255,255,.14)';
+        octx.beginPath(); octx.moveTo(px, Y(0)); octx.lineTo(px + pw, Y(0)); octx.moveTo(X(0), py); octx.lineTo(X(0), py + ph); octx.stroke();
+        const w = last && last.state !== 'gone' ? [last.x, last.y] : null;
+        if (w) {
+          // errors: one bar per data point; the loss is their mean square
+          octx.strokeStyle = 'rgba(255,110,96,.85)'; octx.lineWidth = 1.5; octx.beginPath();
+          MODEL.xs.forEach((x, i) => { octx.moveTo(X(x), Y(MODEL.ys[i])); octx.lineTo(X(x), Y(clamp(MODEL.f(w[0], w[1], x), -1.7, 1.7))); });
+          octx.stroke();
+          octx.strokeStyle = 'rgba(255,196,128,.98)'; octx.lineWidth = 2; octx.beginPath();
+          for (let i = 0; i <= 60; i++) { const x = -2.4 + 4.8 * i / 60, y = clamp(MODEL.f(w[0], w[1], x), -1.7, 1.7); i ? octx.lineTo(X(x), Y(y)) : octx.moveTo(X(x), Y(y)); }
+          octx.stroke();
+        }
+        octx.fillStyle = '#fff';
+        MODEL.xs.forEach((x, i) => { octx.beginPath(); octx.arc(X(x), Y(MODEL.ys[i]), 2.6, 0, 7); octx.fill(); });
+        draw.label(octx, w ? `w₁ ${fmt(w[0])}   w₂ ${fmt(w[1])}   L ${fmt(surf.L(w[0], w[1]), 3)}` : 'drop a seed to choose its weights', px, py + ph + 14, w ? '#fff' : 'rgba(236,230,215,.6)', '11px "IBM Plex Mono", monospace');
+        if (w) draw.label(octx, 'red bars: its errors on the nine points', px, py + ph + 29, 'rgba(255,150,136,.85)', '10px "IBM Plex Mono", monospace');
+        // name the two axes of the landscape: they are the model's two weights
+        const a = cam.proj(EXTENT * 0.98, -EXTENT, surf.Z(EXTENT * 0.98, -EXTENT)), b = cam.proj(-EXTENT, EXTENT * 0.9, surf.Z(-EXTENT, EXTENT * 0.9));
+        draw.label(octx, 'w₁ →', a[0] - 6, a[1] + 16, 'rgba(255,220,180,.7)', '11px "IBM Plex Mono", monospace', 'right');
+        draw.label(octx, 'w₂ ↗', b[0] - 8, b[1] - 8, 'rgba(255,220,180,.7)', '11px "IBM Plex Mono", monospace', 'right');
       }
 
       return {
@@ -197,9 +268,9 @@
           for (const s of seeds) {
             const tr = s.trail, fade = s.state === 'gone' ? Math.max(0, 1 - (t - s.goneAt) / 3) : 1;
             if (fade <= 0) continue;
-            let prev = cam.proj(tr[0][0], tr[0][1], surf.L(tr[0][0], tr[0][1]));
+            let prev = cam.proj(tr[0][0], tr[0][1], surf.Z(tr[0][0], tr[0][1]));
             for (let i = 1; i < tr.length; i++) {
-              const [x, y] = tr[i], cur = cam.proj(x, y, surf.L(x, y));
+              const [x, y] = tr[i], cur = cam.proj(x, y, surf.Z(x, y));
               const sp = Math.hypot(x - tr[i - 1][0], y - tr[i - 1][1]);
               const age = (tr.length - i) / tr.length;
               ctx.strokeStyle = speedColor(sp, (0.15 + 0.6 * (1 - age)) * fade);
@@ -221,13 +292,14 @@
           octx.clearRect(0, 0, k.w, k.h);
           if (last && last.state === 'run') {
             const [gx, gy] = surf.grad(last.x, last.y), g = Math.hypot(gx, gy) || 1;
-            const a = cam.proj(last.x, last.y, surf.L(last.x, last.y));
-            const bx = last.x - gx / g * 0.5, by = last.y - gy / g * 0.5, b = cam.proj(bx, by, surf.L(bx, by));
+            const a = cam.proj(last.x, last.y, surf.Z(last.x, last.y));
+            const bx = last.x - gx / g * 0.5, by = last.y - gy / g * 0.5, b = cam.proj(bx, by, surf.Z(bx, by));
             octx.strokeStyle = octx.fillStyle = 'rgba(255,255,255,.85)'; octx.lineWidth = 1.5;
             draw.arrow(octx, a[0], a[1], b[0], b[1], 8);
             draw.label(octx, '−∇L', b[0] + 8, b[1] - 8, '#fff', '12px "IBM Plex Mono", monospace');
             draw.label(octx, `L = ${fmt(surf.L(last.x, last.y))}`, a[0] + 12, a[1] + 16, 'rgba(255,220,180,.9)', '11px "IBM Plex Mono", monospace');
           }
+          if (surf.model) inset(t);
           const running = seeds.filter(s => s.state === 'run');
           const meanL = running.length ? running.reduce((a, s) => a + surf.L(s.x, s.y), 0) / running.length : surf.lo;
           drone.set(70 + 60 * (meanL - surf.lo) / (surf.hi - surf.lo), running.length ? 0.04 : 0);
@@ -238,14 +310,20 @@
           if (Math.hypot(p.x - dragTrail[0], p.y - dragTrail[1]) > 22) { const q = unproject(p); if (q) drop(q[0], q[1], true); dragTrail = [p.x, p.y]; }
         },
         up() { dragTrail = null; },
-        control(id) {
+        drawer(open) { shift = open && k.w > 760 ? Math.min(420, innerWidth * 0.92) / 2 : 0; },
+        control(id, v) {
           if (id === 'rain') {
             const r = rng(Math.floor(k.t * 1000) + 1);
             for (let i = 0; i < 120; i++) drop((r() - 0.5) * 2 * EXTENT * 0.95, (r() - 0.5) * 2 * EXTENT * 0.95, true);
             k.sound.tone(523, 1, 0.04);
             if (k.stage === 4) k.reach(4);
           }
-          if (id === 'reshape') { seedNo++; surf = makeSurface(seedNo); seeds.length = 0; last = null; bake(); }
+          if (id === 'reshape') { seedNo++; k.set('world', 'sculpted'); surf = makeSurface(seedNo); seeds.length = 0; last = null; bake(); }
+          if (id === 'world') {
+            surf = v === 'model' ? makeModelSurface() : makeSurface(seedNo);
+            seeds.length = 0; last = null; valleys.clear(); bake();
+            k.sound.tone(v === 'model' ? 330 : 262, 0.6, 0.04);
+          }
         },
         maths() {
           const run = seeds.filter(s => s.state === 'run').length, set = seeds.filter(s => s.state === 'settled').length, gone = seeds.filter(s => s.state === 'gone').length;
@@ -258,7 +336,9 @@
               <div class="row"><span>velocity v</span><span>(${fmt(last.vx, 3)}, ${fmt(last.vy, 3)})</span></div>
               <div class="row"><span>state</span><span>${last.state === 'run' ? 'descending' : last.state === 'settled' ? 'settled (∇L ≈ 0)' : 'diverged'}</span></div>`;
           }
-          return `<p class="eq">v ← μ·v − η·∇L(θ)\nθ ← θ + v</p>
+          const model = surf.model ? `<div class="row"><span>the model</span><span class="hl">ŷ = w₂·tanh(w₁·x)</span></div>
+            <div class="row"><span>L = mean (ŷ − y)² over 9 points</span><span>θ = (w₁, w₂)</span></div>` : '';
+          return `<p class="eq">v ← μ·v − η·∇L(θ)\nθ ← θ + v</p>${model}
             <div class="row"><span>η, μ</span><span>${fmt(k.values.eta, 3)}, ${fmt(k.values.mu)}</span></div>${s}
             <div class="row"><span>seeds: moving · settled · lost</span><span>${run} · ${set} · ${gone}</span></div>
             <div class="row"><span>deepest point on this map</span><span>L ≈ ${fmt(surf.lo, 3)}</span></div>`;
@@ -284,7 +364,7 @@
         const [gx, gy] = st.surf.grad(s.x, s.y);
         s.vx = 0.85 * s.vx - 0.012 * gx; s.vy = 0.85 * s.vy - 0.012 * gy;
         s.x += s.vx; s.y += s.vy; s.n++;
-        s.tr.push(st.cam.proj(s.x, s.y, st.surf.L(s.x, s.y))); if (s.tr.length > 90) s.tr.shift();
+        s.tr.push(st.cam.proj(s.x, s.y, st.surf.Z(s.x, s.y))); if (s.tr.length > 90) s.tr.shift();
         ctx.strokeStyle = 'rgba(255,190,110,.55)'; ctx.lineWidth = 1.4;
         ctx.beginPath(); s.tr.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.stroke();
         const p = s.tr[s.tr.length - 1]; draw.glowDot(ctx, p[0], p[1], 8, 'rgba(255,210,150,.9)');

@@ -16,7 +16,7 @@ const Maths = (() => {
     id:'folding',no:'02',tag:'Non-linearity',short:'Folding space',
     title:'Bend, then fold.',
     body:['Two matrices in a row multiply into one, so a stack of linear maps is still a single linear map. Networks escape this with a non-linear function between layers. ReLU passes positive values through and sets negative ones to zero, which makes each neuron a hinge that creases where its input crosses zero.',
-          'Between creases the network is exactly linear. Each layer bends the space the previous one produced, so creases multiply with depth, and the network can carve its input into the shapes a task needs. In Kaleidoscope each layer is one ReLU fold: every extra layer can double the number of regions, and switching the activation off leaves just one.',
+          'Between creases the network is exactly linear. Each layer bends the space the previous one produced, so creases multiply with depth, and the network can carve its input into the shapes a task needs. In Origami each neuron is one crease across the space the words stand in, silent on one side and pushing on the other. One crease can keep the places and push the rest away; keeping the people, who stand in the middle, takes several whose silent sides overlap. Switching the activation off flattens the sheet into a single straight cut.',
           'In a transformer this is the feed-forward block that follows attention in every layer: a matrix that widens the vector, the activation, and a matrix that narrows it again. Most modern models use GELU, which scales inputs smoothly, or SwiGLU, which applies an input-dependent gate. Feed-forward layers often hold a large share of a model’s parameters.'],
     formula:'h = ReLU(W·x + b) = max(0, W·x + b)'
   },
@@ -88,7 +88,7 @@ const Maths = (() => {
   <div class="maths-hero-copy">
     <p class="eyebrow">The maths of AI</p>
     <h1>Step inside the maths.</h1>
-    <p>Seven ideas, seven rooms inside a language model. Bend the space words live in, fold it like a kaleidoscope, weave attention, roll down a loss landscape. Each is an interactive artwork drawn by the mathematics it depicts.</p>
+    <p>Seven ideas, seven rooms inside a language model. Bend the space words live in, crease it like paper, weave attention, roll down a loss landscape. Each is an interactive artwork drawn by the mathematics it depicts.</p>
     <p class="maths-hero-note">Seven interactive artworks · no installation · keyboard &amp; touch</p>
   </div>
 </section>
