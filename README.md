@@ -39,7 +39,7 @@ The site includes browser-only interactive experiments and decorative mathematic
 | `#maths/play/gradient-descent` | Descent | Gradient descent | Drop seeds on a ridgeline loss landscape; tune η and momentum; switch to the true loss of a 2-weight model and watch its curve fit |
 | `#maths/play/attention` | Loom | Softmax attention | Tap a word; threads are softmax weights from four toy heads |
 | `#maths/play/rotary` | Orrery | Rotary position embedding | Drag the sentence; position is rotation, score depends only on distance |
-| `#maths/play/dimensions` | Crowded Sky | Superposition | Add concepts, light stars, watch interference; random angles in 1,000-D |
+| `#maths/play/dimensions` | Crowded Sky | Superposition | Add concepts, light stars, watch the reading ring take in ghosts; polysemantic neurons; 2,000 concepts in up to 1,000 dimensions |
 | `#maths/play/ablation` | Nullspace | Orthogonal projection | Turn a blade through a cloud of activations; delete a direction, or steer along it |
 
 - Each piece walks the viewer through 4–5 discoveries with a guiding prompt line; **The maths** (`M`) opens a live drawer with the equation, the viewer's current numbers, a plain-English walkthrough, an "inside the model" note, an honesty note about what is synthetic, and primary references. `S` toggles optional generative sound, `Space` pauses ambient motion, `Esc` exits.

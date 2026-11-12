@@ -74,6 +74,7 @@ body.ir-playing main{min-height:100dvh}
 .ir-dock{position:absolute;z-index:2;right:22px;bottom:22px;display:flex;flex-direction:column;align-items:stretch;gap:10px;width:min(272px,calc(100vw - 44px));padding:14px;border-radius:14px;background:rgba(8,10,14,.5);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .ir-dock-body{display:flex;flex-direction:column;align-items:stretch;gap:10px}
 .ir-dock-body>button{width:100%}
+.ir-dock-body>[hidden]{display:none}
 .ir-piece .ir-dock-toggle{align-self:flex-end;min-height:30px;padding:4px 12px;font:10px var(--mono);letter-spacing:.12em;text-transform:uppercase;border-color:transparent;background:none}
 .ir-piece .ir-dock-toggle::after{content:' ▾'}
 .ir-dock.ir-dock-closed{width:auto;padding:6px}

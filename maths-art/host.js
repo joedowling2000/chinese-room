@@ -159,11 +159,11 @@ const Interiors = (() => {
   }
 
   function control(c) {
-    if (c.type === 'range') return `<label class="ir-range"><span><span>${esc(c.label)}</span><output data-out="${c.id}"></output></span>
+    if (c.type === 'range') return `<label class="ir-range" data-row="${c.id}"><span><span>${esc(c.label)}</span><output data-out="${c.id}"></output></span>
       <input type="range" data-ctl="${c.id}" min="${c.min}" max="${c.max}" step="${c.step}" value="${c.value}" aria-label="${esc(c.label)}"></label>`;
-    if (c.type === 'toggle') return `<button type="button" class="ir-toggle" data-ctl="${c.id}" aria-pressed="${!!c.value}">${esc(c.label)}</button>`;
-    if (c.type === 'button') return `<button type="button" data-ctl="${c.id}">${esc(c.label)}</button>`;
-    if (c.type === 'choice') return `<div class="ir-choice" role="group" aria-label="${esc(c.label)}"><span class="ir-choice-label">${esc(c.label)}</span><div>${c.options.map(([v, t]) =>
+    if (c.type === 'toggle') return `<button type="button" class="ir-toggle" data-row="${c.id}" data-ctl="${c.id}" aria-pressed="${!!c.value}">${esc(c.label)}</button>`;
+    if (c.type === 'button') return `<button type="button" data-row="${c.id}" data-ctl="${c.id}">${esc(c.label)}</button>`;
+    if (c.type === 'choice') return `<div class="ir-choice" data-row="${c.id}" role="group" aria-label="${esc(c.label)}"><span class="ir-choice-label">${esc(c.label)}</span><div>${c.options.map(([v, t]) =>
       `<button type="button" data-ctl="${c.id}" data-value="${esc(v)}" aria-pressed="${String(v) === String(c.value)}">${esc(t)}</button>`).join('')}</div></div>`;
     return '';
   }
@@ -317,7 +317,12 @@ const Interiors = (() => {
         if (c.type === 'choice') el.setAttribute('aria-pressed', String(el.dataset.value === String(values[id])));
       });
     }
+    // a control with show(values) is only in the dock while that returns true
+    function syncShown() {
+      (p.controls || []).forEach(c => { if (!c.show) return; const el = root.querySelector(`[data-row="${c.id}"]`); if (el) el.hidden = !c.show(values); });
+    }
     Object.keys(values).forEach(syncControl);
+    syncShown();
 
     const motionOn = () => !paused && !reducedMotion();
     let paused = false;
@@ -328,7 +333,7 @@ const Interiors = (() => {
       get motion() { return motionOn(); },
       get t() { return t; },
       values,
-      set(id, v) { values[id] = v; syncControl(id); },
+      set(id, v) { values[id] = v; syncControl(id); syncShown(); },
       reach,
       get stage() { return stage; },
       wake,
@@ -421,7 +426,7 @@ const Interiors = (() => {
       const id = el.dataset.ctl, c = p.controls.find(c => c.id === id);
       if (c.type === 'toggle') values[id] = !values[id];
       else if (c.type === 'choice') values[id] = typeof c.value === 'number' ? Number(el.dataset.value) : el.dataset.value;
-      syncControl(id);
+      syncControl(id); syncShown();
       inst.control?.(id, c.type === 'button' ? true : values[id]);
       wake();
     }, { signal });

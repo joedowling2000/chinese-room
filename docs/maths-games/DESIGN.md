@@ -131,7 +131,9 @@ The **index** (`#maths/play`) is a dark gallery: seven large live thumbnails (ea
 
 **Interaction.** Dock: features N (2–20), dimensions d (2 or 3 shown; plus a "high-d" histogram mode up to 1000), **sparsity** (how often features co-occur). Tap stars to activate them: the representation (sum of active arrows) appears as a white comet; every feature's readout bar shows `vⱼ·z`; false readouts above threshold flicker as ghosts.
 
-**Discoveries.** (1) add features beyond d: they can't be orthogonal, they spread evenly; (2) activate one: clean readout; activate several neighbours: ghosts appear — interference; (3) sparsity: superposition works because few features are on at once; (4) high-d mode: random directions in 1000 dimensions are almost all ≈ 90° apart — space for far more features than dimensions.
+**Discoveries.** (1) add features beyond d: they can't be orthogonal, they spread evenly; (2) activate one: clean readout, and the **reading ring** round z (every direction within acos(0.5 ÷ |z|) of z reads as present); (3) activate a second: the same neurons (the axes n1…n3) answer both — polysemanticity; (4) several neighbours: the ring widens and takes in ghosts; (5) sparsity: superposition works because few features are on at once, compared live with one concept per dimension; (6) many dimensions: a sky of 2,000 random concept directions read in 2–1,000 dimensions, ghosts clearing as dimensions rise, with the protractor of pairwise angles showing why; (7) more concepts per sentence brings the ghosts back: interference ≈ √(k/d).
+
+**Sentences.** **Read a sentence** lights a hand-tagged example (“Les chats de Paris.” → cat, Paris, French, plural) so that a set of active concepts is something a visitor recognises. The names stay labels only.
 
 **Maths drawer.** `z = Σ aᵢvᵢ`, `readoutⱼ = vⱼ·z = aⱼ + Σ aᵢ(vⱼ·vᵢ)`, mean |cos|, and the concentration of measure note. Reference: Elhage et al. 2022.
 
