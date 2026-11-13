@@ -2,8 +2,8 @@
    The same study as assets/field-stream-dark.svg (strands threading through
    34 layer planes: a residual stream), drawn on a canvas so that it can move:
    the strands sway and slowly twist, a few pale pulses travel along them from
-   the first layer to the last, and each plane brightens a little as a pulse
-   crosses it. Decorative procedural geometry only — not measured data.
+   the first layer to the last, each plane brightens a little as a pulse
+   crosses it, and the strands part gently around the pointer. Decorative procedural geometry only — not measured data.
    The static SVG stays underneath as the fallback and the reduced-motion view. */
 const FieldStream = (() => {
   const L = 34, LO = -2.35, HI = 2.35, STRANDS = 56, HALF = 0.6, SUB = 6;
@@ -44,10 +44,12 @@ const FieldStream = (() => {
     if (!ctx) { canvas.remove(); return; }
 
     const strands = build(), r = rng(29);
-    const energy = new Float32Array(L), planeHue = new Array(L).fill(HUES[0]);
+    const energy = new Float32Array(L);
     const pulses = Array.from({ length: 6 }, (_, i) => ({ s: Math.floor(r() * STRANDS), u: r() * 1.1 - 0.1, v: 0.028 + r() * 0.024, hue: HUES[i % HUES.length], layer: -1 }));
     let w = 0, h = 0, dpr = 1, sc = 1, ox = 0, oy = 0, raf = 0, alive = true, visible = true, t = 0, last = 0, born = 0;
     let mx = 0, my = 0, px = 0, py = 0, wash = null;
+    // the pointer in the canvas's own pixels, eased, and how strongly it is felt (0 when it has left)
+    let tx = 0, ty = 0, cxp = 0, cyp = 0, near = 0, feel = 0;
 
     function resize() {
       const b = host.getBoundingClientRect();
@@ -66,7 +68,9 @@ const FieldStream = (() => {
     function draw(time, dt) {
       // the camera drifts a little, and leans towards the pointer
       px += (mx - px) * Math.min(1, dt * 2.5); py += (my - py) * Math.min(1, dt * 2.5);
-      const a = -0.55 + 0.03 * Math.sin(time * 0.11) + px * 0.025, b = 0.65 + 0.018 * Math.sin(time * 0.073 + 1) + py * 0.015;
+      cxp += (tx - cxp) * Math.min(1, dt * 5); cyp += (ty - cyp) * Math.min(1, dt * 5); feel += (near - feel) * Math.min(1, dt * 2);
+      const reach = 150 * sc, push = 13 * sc * feel;
+      const a = -0.55 + 0.03 * Math.sin(time * 0.11) + px * 0.04, b = 0.65 + 0.018 * Math.sin(time * 0.073 + 1) + py * 0.022;
       const ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(b), sb = Math.sin(b);
       const P = (x, y, z) => { const Xr = x * ca - z * sa, Zr = x * sa + z * ca; return [ox + (500 + Xr * 200) * sc, oy + (350 + (y * cb - Zr * sb) * 200) * sc]; };
       const grow = reduced ? 1 : Math.min(1, (time - born) / 2.6); // the stream draws itself in from the first layer
@@ -84,13 +88,13 @@ const FieldStream = (() => {
       }
       ctx.globalCompositeOperation = 'source-over';
 
-      // the layer planes; one that a pulse has just crossed glows in that pulse's colour
+      // the layer planes
       ctx.lineWidth = 0.6 * sc;
       for (let l = 0; l < L; l++) {
         if (l / (L - 1) > grow) break;
         const x = X(l), e = energy[l], c = [[-HALF, -HALF], [HALF, -HALF], [HALF, HALF], [-HALF, HALF]].map(([y, z]) => P(x, y, z));
         ctx.beginPath(); c.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath();
-        ctx.strokeStyle = e > 0.02 ? `rgba(${planeHue[l]},${Math.min(0.55, 0.26 + e * 0.3)})` : `rgba(${INK},${l % 8 === 0 ? 0.5 : 0.26})`;
+        ctx.strokeStyle = `rgba(${INK},${Math.min(0.62, (l % 8 === 0 ? 0.5 : 0.26) + e * 0.26)})`; // a plane a pulse has just crossed brightens, in the ink colour
         ctx.lineWidth = (0.6 + Math.min(1, e) * 0.3) * sc;
         ctx.stroke();
       }
@@ -111,7 +115,13 @@ const FieldStream = (() => {
           for (let q = 0; q < SUB; q++) {
             const u = q / SUB, u2 = u * u, u3 = u2 * u;
             const f = k => 0.5 * (2 * p1[k] + (p2[k] - p0[k]) * u + (2 * p0[k] - 5 * p1[k] + 4 * p2[k] - p3[k]) * u2 + (3 * p1[k] - p0[k] - 3 * p2[k] + p3[k]) * u3);
-            const s2 = P(f(0), f(1), f(2)); S.line[o++] = s2[0]; S.line[o++] = s2[1];
+            const s2 = P(f(0), f(1), f(2));
+            // strands part gently around the pointer, like reeds round a hand
+            if (push > 0.05) {
+              const dx = s2[0] - cxp, dy = s2[1] - cyp, dd = Math.hypot(dx, dy);
+              if (dd < reach && dd > 0.01) { const k2 = (1 - dd / reach) ** 2 * push / dd; s2[0] += dx * k2; s2[1] += dy * k2; }
+            }
+            S.line[o++] = s2[0]; S.line[o++] = s2[1];
           }
         }
         const end = P(...pts[L - 1]); S.line[o++] = end[0]; S.line[o++] = end[1];
@@ -151,7 +161,7 @@ const FieldStream = (() => {
       for (const p of pulses) {
         p.u += p.v * dt;
         const layer = Math.floor(p.u * (L - 1));
-        if (p.u >= 0 && layer !== p.layer && layer >= 0 && layer < L) { p.layer = layer; energy[layer] = Math.min(1, energy[layer] + 0.6); planeHue[layer] = p.hue; }
+        if (p.u >= 0 && layer !== p.layer && layer >= 0 && layer < L) { p.layer = layer; energy[layer] = Math.min(1, energy[layer] + 0.6); }
         if (p.u > 1) { p.u = -r() * 0.5; p.s = Math.floor(r() * STRANDS); p.v = 0.028 + r() * 0.024; p.layer = -1; }
       }
     }
@@ -169,8 +179,10 @@ const FieldStream = (() => {
     hero.addEventListener('pointermove', e => {
       if (e.pointerType !== 'mouse') return;
       const b = hero.getBoundingClientRect(); mx = (e.clientX - b.left) / b.width * 2 - 1; my = (e.clientY - b.top) / b.height * 2 - 1;
+      const c = canvas.getBoundingClientRect(); tx = e.clientX - c.left; ty = e.clientY - c.top;
+      if (!near) { cxp = tx; cyp = ty; } near = 1;
     }, { signal, passive: true });
-    hero.addEventListener('pointerleave', () => { mx = 0; my = 0; }, { signal });
+    hero.addEventListener('pointerleave', () => { mx = 0; my = 0; near = 0; }, { signal });
     resize();
     host.classList.add('is-live');
     if (!reduced) raf = requestAnimationFrame(now => { last = now; loop(now); });
