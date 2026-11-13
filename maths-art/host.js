@@ -179,6 +179,8 @@ const Interiors = (() => {
         <span class="ir-top-actions">
           <button type="button" data-host="maths" aria-pressed="false"><span class="ir-wide">The </span>maths <kbd>M</kbd></button>
           <button type="button" data-host="sound" aria-pressed="false" title="${esc(p.hear || 'Sound')}">Sound <kbd>S</kbd></button>
+          <button type="button" class="ir-icon" data-host="shot" aria-label="Save this view as an image" title="Save this view as an image (P)">⤓</button>
+          <button type="button" class="ir-icon ir-full" data-host="full" aria-pressed="false" aria-label="Full screen" title="Full screen (F)" hidden>⛶</button>
           <a href="#maths/play/${prev.id}" class="ir-step" aria-label="Previous room: ${esc(prev.title)}">‹</a>
           <a href="#maths/play/${next.id}" class="ir-step" aria-label="Next room: ${esc(next.title)}">›</a>
           <a href="#maths" class="ir-close" aria-label="Exit to the maths page">✕</a>
@@ -191,10 +193,10 @@ const Interiors = (() => {
         <div class="ir-guide" aria-live="polite">
           <p class="ir-insight" hidden></p>
           <p class="ir-prompt"></p>
-          <span class="ir-dots" aria-hidden="true"></span>
+          <span class="ir-dots"></span>
         </div>
       </div>
-      ${p.you ? `<p class="ir-arrive" aria-hidden="true"><span>${p.no} / ${esc(p.title)}</span>${esc(p.you)}</p>` : ''}
+      ${p.you ? `<p class="ir-arrive" aria-hidden="true"><span>${p.no} / ${esc(p.title)}</span>${esc(p.you)}${p.hear ? '<small class="ir-arrive-sound">This room can be heard. Turn on <b>Sound</b>.</small>' : ''}</p>` : ''}
       ${(p.controls || []).length ? `<div class="ir-dock ir-chrome"><button type="button" class="ir-dock-toggle" data-host="dock" aria-expanded="true">Controls</button><div class="ir-dock-body">${p.controls.map(control).join('')}</div></div>` : ''}
       <aside class="ir-drawer" hidden aria-label="The maths">
         <button type="button" class="ir-drawer-close" data-host="maths" aria-label="Close the maths">✕</button>
@@ -283,24 +285,38 @@ const Interiors = (() => {
     const arriveTimer = setTimeout(arrived, 5200);
     const dots = $('.ir-dots'), promptEl = $('.ir-prompt'), insightEl = $('.ir-insight');
     function showGuide() {
-      dots.innerHTML = prompts.map((_, i) => `<i class="${i < stage ? 'on' : i === stage ? 'now' : ''}"></i>`).join('');
+      dots.innerHTML = prompts.map((_, i) => i < stage
+        ? `<button type="button" class="on" data-dot="${i}" aria-label="Read discovery ${i + 1} again"></button>`
+        : `<i class="${i === stage ? 'now' : ''}"></i>`).join('');
       // After the last discovery the coda hands the viewer on to the next room.
       promptEl.innerHTML = stage < prompts.length ? `<span>›</span> ${prompts[stage].do}` : `<span>✓</span> ${p.coda || 'Keep exploring. Open the maths for the equation behind what you see.'}${nextRoom !== p ? ` <a class="ir-next" href="#maths/play/${nextRoom.id}">Next room: ${esc(nextRoom.maths)} →</a>` : ''}`;
       // Once the viewer has begun, the title steps back and leaves the room to the artwork.
       root.classList.toggle('ir-begun', stage > 0);
     }
-    let insightTimer = 0;
+    let insightTimer = 0, lastXY = null;
+    function showInsight(saw) {
+      insightEl.innerHTML = saw; insightEl.hidden = false;
+      insightEl.classList.remove('ir-flash'); void insightEl.offsetWidth; insightEl.classList.add('ir-flash');
+      clearTimeout(insightTimer);
+      insightTimer = setTimeout(() => { insightEl.hidden = true; }, 9000);
+    }
+    // A discovery is marked where it happened: a ring of the room's colour opens from the last touch.
+    function pulse() {
+      if (reducedMotion()) return;
+      const el = document.createElement('i');
+      el.className = 'ir-pulse';
+      el.style.left = (lastXY ? lastXY.x : w / 2) + 'px'; el.style.top = (lastXY ? lastXY.y : h / 2) + 'px';
+      el.addEventListener('animationend', () => el.remove());
+      root.appendChild(el);
+    }
     function reach(i) {
       if (i !== stage || stage >= prompts.length) return;
       const saw = prompts[stage].saw;
       stage++;
       showGuide();
-      if (saw) {
-        insightEl.innerHTML = saw; insightEl.hidden = false;
-        insightEl.classList.remove('ir-flash'); void insightEl.offsetWidth; insightEl.classList.add('ir-flash');
-        clearTimeout(insightTimer);
-        insightTimer = setTimeout(() => { insightEl.hidden = true; }, 9000);
-      }
+      if (saw) showInsight(saw);
+      pulse();
+      try { navigator.vibrate?.(12); } catch {}
       sound.tone(440 * 2 ** (stage / 6), 0.8, 0.05);
       wake();
     }
@@ -360,11 +376,37 @@ const Interiors = (() => {
       if (!document.hidden) {
         t += dt;
         try { inst.frame(t, dt); } catch (e) { console.error(e); alive = false; return; }
+        if (wantShot) { wantShot = false; snapshot(); }
         if (!drawer.hidden && (now - lastLive > 120)) { lastLive = now; renderLive(); }
       }
       raf = requestAnimationFrame(loop);
     }
-    let lastLive = 0;
+    let lastLive = 0, wantShot = false;
+    // The two canvases as one picture, signed with the room's name.
+    function snapshot() {
+      const c = document.createElement('canvas'); c.width = base.width; c.height = base.height;
+      const x = c.getContext('2d');
+      x.fillStyle = '#05060a'; x.fillRect(0, 0, c.width, c.height);
+      x.drawImage(base, 0, 0); x.drawImage(over, 0, 0);
+      x.scale(dpr, dpr);
+      x.font = '500 11px "IBM Plex Mono", monospace'; x.textBaseline = 'bottom'; x.shadowColor = '#000'; x.shadowBlur = 8;
+      x.fillStyle = p.accent; x.fillText(`${p.no} / ${p.title}`.toUpperCase(), 20, h - 34);
+      x.fillStyle = 'rgba(238,241,244,.85)'; x.fillText(`${p.maths} · chineseroom.io`, 20, h - 18);
+      c.toBlob(b => {
+        if (!b) return;
+        const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `chinese-room-${p.id}.png`;
+        a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+      }, 'image/png');
+      root.classList.remove('ir-shot'); void root.offsetWidth; root.classList.add('ir-shot');
+    }
+    const fullBtn = $('[data-host="full"]');
+    const canFull = !!(document.fullscreenEnabled && root.requestFullscreen);
+    if (fullBtn) fullBtn.hidden = !canFull;
+    function toggleFull() {
+      if (!canFull) return;
+      (document.fullscreenElement ? document.exitFullscreen() : root.requestFullscreen()).catch(() => {});
+    }
+    document.addEventListener('fullscreenchange', () => fullBtn?.setAttribute('aria-pressed', String(document.fullscreenElement === root)), { signal });
     function renderLive() { if (inst.maths) live.innerHTML = inst.maths(); }
 
     /* chrome fades when idle so the artwork can breathe */
@@ -378,9 +420,9 @@ const Interiors = (() => {
     let pointer = null;
     const pos = e => { const r = over.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
     over.addEventListener('pointerdown', e => {
-      wake(); arrived();
+      wake(); arrived(); root.classList.add('ir-touched');
       over.setPointerCapture?.(e.pointerId);
-      const q = pos(e);
+      const q = pos(e); lastXY = q;
       pointer = { id: e.pointerId, x0: q.x, y0: q.y, t0: performance.now(), moved: false, x: q.x, y: q.y };
       inst.down?.({ ...q, button: e.button });
       e.preventDefault();
@@ -400,7 +442,7 @@ const Interiors = (() => {
     const end = e => {
       if (!pointer || pointer.id !== e.pointerId) return;
       const q = pos(e), tap = !pointer.moved && performance.now() - pointer.t0 < 450;
-      pointer = null;
+      pointer = null; lastXY = q;
       inst.up?.(q);
       if (tap) inst.tap?.(q);
     };
@@ -420,10 +462,15 @@ const Interiors = (() => {
         if (host.dataset.host === 'maths') toggleDrawer();
         if (host.dataset.host === 'sound') toggleSound();
         if (host.dataset.host === 'dock') toggleDock();
+        if (host.dataset.host === 'shot') wantShot = true;
+        if (host.dataset.host === 'full') toggleFull();
         return;
       }
+      const dot = e.target.closest('[data-dot]');
+      if (dot) { const saw = prompts[Number(dot.dataset.dot)]?.saw; if (saw) showInsight(saw); wake(); return; }
       const el = e.target.closest('[data-ctl]'); if (!el || el.type === 'range') return;
       const id = el.dataset.ctl, c = p.controls.find(c => c.id === id);
+      root.classList.add('ir-touched'); lastXY = null;
       if (c.type === 'toggle') values[id] = !values[id];
       else if (c.type === 'choice') values[id] = typeof c.value === 'number' ? Number(el.dataset.value) : el.dataset.value;
       syncControl(id); syncShown();
@@ -460,6 +507,8 @@ const Interiors = (() => {
       const key = e.key.toLowerCase();
       if (key === 'm') { toggleDrawer(); e.preventDefault(); }
       else if (key === 's') { toggleSound(); e.preventDefault(); }
+      else if (key === 'f') { toggleFull(); e.preventDefault(); }
+      else if (key === 'p') { wantShot = true; e.preventDefault(); }
       else if (key === 'escape') { if (!drawer.hidden) toggleDrawer(false); else location.hash = 'interiors'; e.preventDefault(); }
       else if (key === ' ' && (document.activeElement === over || document.activeElement === document.body)) { paused = !paused; e.preventDefault(); }
       else inst.key?.(e);
@@ -480,6 +529,7 @@ const Interiors = (() => {
         clearTimeout(idleTimer); clearTimeout(insightTimer); clearTimeout(arriveTimer);
         abort.abort(); ro.disconnect();
         try { inst.destroy?.(); } catch {}
+        if (document.fullscreenElement === root) document.exitFullscreen().catch(() => {});
         sound.dispose();
         document.body.classList.remove('ir-playing');
       }
