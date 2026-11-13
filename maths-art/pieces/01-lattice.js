@@ -3,7 +3,7 @@
    in it goes: y = M x = x·î + y·ĵ. Drag them and the whole lattice bends. */
 (() => {
   const { draw, rng, gauss, fmt, clamp } = Interiors;
-  const MINT = '158,230,212', ROSE = '255,150,182', IVORY = '236,232,220', RED = '255,90,80';
+  const AZURE = '110,196,255', AMBER = '255,196,92', IVORY = '236,232,220', RED = '255,90,80';
 
   // Illustrative 2D placements: analogies are parallelograms (king − man + woman ≈ queen).
   const WORDS = [
@@ -71,7 +71,7 @@
     const lines = Math.min(60, Math.ceil(span / minLen) + 2);
     for (const pass of ['fine', 'halo', 'crisp']) {
       const fine = pass === 'fine', step = fine ? 0.5 : 1;
-      for (const [dir, col] of [[1, ROSE], [0, MINT]]) {
+      for (const [dir, col] of [[1, AMBER], [0, AZURE]]) {
         ctx.strokeStyle = `rgba(${col},${(fine ? 0.08 : pass === 'halo' ? 0.07 : 0.34) * glow})`;
         ctx.lineWidth = fine ? 0.8 : pass === 'halo' ? 6 : 1.2;
         ctx.beginPath();
@@ -87,7 +87,7 @@
       }
     }
     // transformed axes, brighter
-    for (const [dir, col] of [[1, ROSE], [0, MINT]]) {
+    for (const [dir, col] of [[1, AMBER], [0, AZURE]]) {
       const a = dir ? apply(M, 0, -L) : apply(M, -L, 0), b = dir ? apply(M, 0, L) : apply(M, L, 0);
       ctx.strokeStyle = `rgba(${col},0.55)`; ctx.lineWidth = 1.4;
       ctx.beginPath(); ctx.moveTo(...S(a[0], a[1])); ctx.lineTo(...S(b[0], b[1])); ctx.stroke();
@@ -126,10 +126,10 @@
     // unit square → parallelogram, coloured by orientation; area = det
     const sq = [[0, 0], [1, 0], [1, 1], [0, 1]].map(([x, y]) => S(...apply(M, x, y)));
     ctx.beginPath(); sq.forEach((p, i) => i ? ctx.lineTo(...p) : ctx.moveTo(...p)); ctx.closePath();
-    ctx.fillStyle = D >= 0 ? `rgba(${MINT},0.13)` : `rgba(${ROSE},0.16)`; ctx.fill();
+    ctx.fillStyle = D >= 0 ? `rgba(${AZURE},0.13)` : `rgba(${AMBER},0.16)`; ctx.fill();
     if (D < 0) {
       ctx.save(); ctx.clip();
-      ctx.strokeStyle = `rgba(${ROSE},0.35)`; ctx.lineWidth = 1;
+      ctx.strokeStyle = `rgba(${AMBER},0.35)`; ctx.lineWidth = 1;
       ctx.beginPath();
       for (let k = -40; k < 40; k++) { ctx.moveTo(cx + k * 8, cy - 400); ctx.lineTo(cx + k * 8 + 400, cy + 400); }
       ctx.stroke(); ctx.restore();
@@ -166,10 +166,10 @@
     if (handles) {
       const O = S(0, 0);
       ctx.setLineDash([4, 6]); ctx.lineWidth = 1;
-      ctx.strokeStyle = `rgba(${MINT},.35)`; ctx.beginPath(); ctx.moveTo(...O); ctx.lineTo(...S(1, 0)); ctx.stroke();
-      ctx.strokeStyle = `rgba(${ROSE},.35)`; ctx.beginPath(); ctx.moveTo(...O); ctx.lineTo(...S(0, 1)); ctx.stroke();
+      ctx.strokeStyle = `rgba(${AZURE},.35)`; ctx.beginPath(); ctx.moveTo(...O); ctx.lineTo(...S(1, 0)); ctx.stroke();
+      ctx.strokeStyle = `rgba(${AMBER},.35)`; ctx.beginPath(); ctx.moveTo(...O); ctx.lineTo(...S(0, 1)); ctx.stroke();
       ctx.setLineDash([]);
-      for (const [v, col, name] of [[[M[0], M[2]], MINT, 'î'], [[M[1], M[3]], ROSE, 'ĵ']]) {
+      for (const [v, col, name] of [[[M[0], M[2]], AZURE, 'î'], [[M[1], M[3]], AMBER, 'ĵ']]) {
         const P = S(v[0], v[1]);
         ctx.globalCompositeOperation = 'lighter';
         draw.glowDot(ctx, P[0], P[1], 34 * glow, `rgba(${col},0.45)`);
@@ -184,7 +184,7 @@
   }
 
   Interiors.register({
-    id: 'linear-maps', no: '01', concept: 'Linear maps', title: 'Lattice', maths: 'Matrix multiplication', eq: 'x′ = W x', accent: '#9ee6d4',
+    id: 'linear-maps', no: '01', concept: 'Linear maps', title: 'Lattice', maths: 'Matrix multiplication', eq: 'x′ = W x', accent: '#6ec4ff',
     you: 'You are a word, standing in the space where meanings are kept.',
     hear: 'The low hum is the determinant: it rises as the space stretches and drops, with a rush of noise, when the plane collapses. Each arrow you let go of plays its own length as a note.',
     caption: 'Two arrows decide where every word in the space goes.',
@@ -196,12 +196,12 @@
       { type: 'button', id: 'layer', label: 'Add a layer (multiply by another matrix)' }
     ],
     prompts: [
-      { do: 'Drag the glowing tip of the mint arrow <b>î</b>.', saw: 'Every star moved, not just the arrow. Straight lines stayed straight, parallel lines stayed parallel. A matrix is one rule applied to the whole space.' },
+      { do: 'Drag the glowing tip of the blue arrow <b>î</b>.', saw: 'Every star moved, not just the arrow. Straight lines stayed straight, parallel lines stayed parallel. A matrix is one rule applied to the whole space.' },
       { do: 'Point at (or tap) a word to see where it came from.', saw: 'A word at (x, y) lands at x·î + y·ĵ: it keeps its old coordinates but spends them on the new arrows. That is all matrix multiplication is.' },
-      { do: 'Drag the rose arrow <b>ĵ</b> until it lies along î.', saw: 'Determinant zero. The plane has collapsed onto a line and different words now sit in the same place. No later layer can separate them again: that information is gone.' },
+      { do: 'Drag the amber arrow <b>ĵ</b> until it lies along î.', saw: 'Determinant zero. The plane has collapsed onto a line and different words now sit in the same place. No later layer can separate them again: that information is gone.' },
       { do: 'Swing ĵ round to the other side of î.', saw: 'Negative determinant: space has been flipped into its mirror image. The unit square is inside out.' },
       { do: 'Press <b>Add a layer</b>.', saw: 'Two matrices in a row are a single matrix, their product. Without a non-linearity between them, a hundred layers would be no more expressive than one. (That is the next room.)' },
-      { do: 'With the space bent, point at <b>queen</b> (or any word joined by dashed lines).', saw: 'The gold arrows do the sum: start at <b>king</b>, take away <b>man</b>, add <b>woman</b>, and you land on <b>queen</b> — however the matrix has bent the space. A matrix moves every word but carries the differences between words along intact. That is why one direction can mean the same thing everywhere.' }
+      { do: 'With the space bent, point at <b>queen</b> (or any word joined by dashed lines).', saw: 'The violet arrows do the sum: start at <b>king</b>, take away <b>man</b>, add <b>woman</b>, and you land on <b>queen</b> — however the matrix has bent the space. A matrix moves every word but carries the differences between words along intact. That is why one direction can mean the same thing everywhere.' }
     ],
     coda: 'Point at any word on a dashed parallelogram to run its analogy in the space you have made. Open the maths for the live equation.',
     walk: [
@@ -286,11 +286,11 @@
           octx.strokeStyle = 'rgba(230,236,240,.7)'; octx.lineWidth = 1.5;
           octx.beginPath(); octx.moveTo(mx - 128, my - 6); octx.lineTo(mx - 134, my - 6); octx.lineTo(mx - 134, my + 42); octx.lineTo(mx - 128, my + 42); octx.stroke();
           octx.beginPath(); octx.moveTo(mx - 8, my - 6); octx.lineTo(mx - 2, my - 6); octx.lineTo(mx - 2, my + 42); octx.lineTo(mx - 8, my + 42); octx.stroke();
-          draw.label(octx, fmt(M[0]), mx - 76, my + 6, `rgb(${MINT})`, '500 17px "IBM Plex Mono", monospace', 'right');
-          draw.label(octx, fmt(M[2]), mx - 76, my + 30, `rgb(${MINT})`, '500 17px "IBM Plex Mono", monospace', 'right');
-          draw.label(octx, fmt(M[1]), mx - 14, my + 6, `rgb(${ROSE})`, '500 17px "IBM Plex Mono", monospace', 'right');
-          draw.label(octx, fmt(M[3]), mx - 14, my + 30, `rgb(${ROSE})`, '500 17px "IBM Plex Mono", monospace', 'right');
-          const dcol = Math.abs(D) < 0.06 ? `rgb(${RED})` : D < 0 ? `rgb(${ROSE})` : 'rgba(230,236,240,.75)';
+          draw.label(octx, fmt(M[0]), mx - 76, my + 6, `rgb(${AZURE})`, '500 17px "IBM Plex Mono", monospace', 'right');
+          draw.label(octx, fmt(M[2]), mx - 76, my + 30, `rgb(${AZURE})`, '500 17px "IBM Plex Mono", monospace', 'right');
+          draw.label(octx, fmt(M[1]), mx - 14, my + 6, `rgb(${AMBER})`, '500 17px "IBM Plex Mono", monospace', 'right');
+          draw.label(octx, fmt(M[3]), mx - 14, my + 30, `rgb(${AMBER})`, '500 17px "IBM Plex Mono", monospace', 'right');
+          const dcol = Math.abs(D) < 0.06 ? `rgb(${RED})` : D < 0 ? `rgb(${AMBER})` : 'rgba(230,236,240,.75)';
           draw.label(octx, `det = ${fmt(D)}${Math.abs(D) < 0.06 ? '  · collapsed' : D < 0 ? '  · flipped' : ''}`, mx - 2, my + 66, dcol, '13px "IBM Plex Mono", monospace', 'right');
 
           if (hover >= 0) {
@@ -298,8 +298,8 @@
             const O = [cx, cy], A = apply(M, x, 0), B = apply(M, x, y);
             const PA = [cx + A[0] * u, cy - A[1] * u], PB = [cx + B[0] * u, cy - B[1] * u];
             octx.lineWidth = 2.5;
-            octx.strokeStyle = octx.fillStyle = `rgba(${MINT},.95)`; draw.arrow(octx, O[0], O[1], PA[0], PA[1], 10);
-            octx.strokeStyle = octx.fillStyle = `rgba(${ROSE},.95)`; draw.arrow(octx, PA[0], PA[1], PB[0], PB[1], 10);
+            octx.strokeStyle = octx.fillStyle = `rgba(${AZURE},.95)`; draw.arrow(octx, O[0], O[1], PA[0], PA[1], 10);
+            octx.strokeStyle = octx.fillStyle = `rgba(${AMBER},.95)`; draw.arrow(octx, PA[0], PA[1], PB[0], PB[1], 10);
             draw.label(octx, `${word} = ${fmt(x, 1)}·î + ${fmt(y, 1)}·ĵ = (${fmt(B[0])}, ${fmt(B[1])})`, PB[0] + 14, PB[1] + 22, '#fff', '500 13px "IBM Plex Mono", monospace');
           }
 
@@ -307,18 +307,18 @@
           // M·a − M·c + M·b = M·(a − c + b), because the map is linear.
           const an = analogy(hover);
           if (an) {
-            const GOLD = '255,214,128', P = i => { const [x, y] = apply(M, WORDS[i][1], WORDS[i][2]); return [cx + x * u, cy - y * u]; };
+            const VIOLET = '204,176,255', P = i => { const [x, y] = apply(M, WORDS[i][1], WORDS[i][2]); return [cx + x * u, cy - y * u]; };
             const [pa, pb, pc, pt] = [an.a, an.b, an.c, an.t].map(P);
             octx.setLineDash([6, 5]); octx.lineWidth = 2;
-            octx.strokeStyle = octx.fillStyle = `rgba(${GOLD},.95)`;
+            octx.strokeStyle = octx.fillStyle = `rgba(${VIOLET},.95)`;
             draw.arrow(octx, pc[0], pc[1], pa[0], pa[1], 9);   // the difference: a − c
             draw.arrow(octx, pb[0], pb[1], pt[0], pt[1], 9);   // the same difference, added to b
             octx.setLineDash([]);
             const A = apply(M, WORDS[an.a][1], WORDS[an.a][2]), B = apply(M, WORDS[an.b][1], WORDS[an.b][2]), C = apply(M, WORDS[an.c][1], WORDS[an.c][2]);
             const sum = [A[0] - C[0] + B[0], A[1] - C[1] + B[1]];
             const ly = Math.min(k.h - 190, Math.max(pa[1], pb[1], pc[1], pt[1]) + 46), lx = clamp(pt[0], 190, k.w - 190);
-            draw.label(octx, `${WORDS[an.a][0]} − ${WORDS[an.c][0]} + ${WORDS[an.b][0]} = (${fmt(sum[0])}, ${fmt(sum[1])})`, lx, ly, `rgb(${GOLD})`, '500 13px "IBM Plex Mono", monospace', 'center');
-            draw.label(octx, `exactly where ${WORDS[an.t][0]} stands`, lx, ly + 18, `rgba(${GOLD},.8)`, '11px "IBM Plex Mono", monospace', 'center');
+            draw.label(octx, `${WORDS[an.a][0]} − ${WORDS[an.c][0]} + ${WORDS[an.b][0]} = (${fmt(sum[0])}, ${fmt(sum[1])})`, lx, ly, `rgb(${VIOLET})`, '500 13px "IBM Plex Mono", monospace', 'center');
+            draw.label(octx, `exactly where ${WORDS[an.t][0]} stands`, lx, ly + 18, `rgba(${VIOLET},.8)`, '11px "IBM Plex Mono", monospace', 'center');
           }
 
           const collapse = Math.abs(D) < 0.06 ? 1 : 0;
@@ -398,8 +398,8 @@
               <div class="row"><span>${fmt(x, 1)}·î + ${fmt(y, 1)}·ĵ</span><span class="hl">(${fmt(X)}, ${fmt(Y)})</span></div>`;
           }
           return `<p class="eq">M = [ î  ĵ ]    y = M·x = x·î + y·ĵ</p>
-            <div class="row"><span>î (column 1)</span><span style="color:rgb(${MINT})">(${fmt(M[0])}, ${fmt(M[2])})</span></div>
-            <div class="row"><span>ĵ (column 2)</span><span style="color:rgb(${ROSE})">(${fmt(M[1])}, ${fmt(M[3])})</span></div>
+            <div class="row"><span>î (column 1)</span><span style="color:rgb(${AZURE})">(${fmt(M[0])}, ${fmt(M[2])})</span></div>
+            <div class="row"><span>ĵ (column 2)</span><span style="color:rgb(${AMBER})">(${fmt(M[1])}, ${fmt(M[3])})</span></div>
             <div class="row"><span>det M = ad − bc</span><span class="hl">${fmt(D)}</span></div>
             ${word || '<div class="row"><span>point at a word</span><span>to expand it</span></div>'}${(() => {
               const an = analogy(hover); if (!an) return '';

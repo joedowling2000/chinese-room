@@ -26,56 +26,103 @@ const Interiors = (() => {
   // stands for a quantity on screen. Notes come from a pentatonic scale so any
   // combination is consonant; a soft echo gives the room some air.
   const PENT = [0, 2, 4, 7, 9];
-  function makeSound() {
-    let ac = null, master = null, send = null, on = prefs.sound === true;
-    const drones = [];
+  // The room each piece sounds in: the note its ambient bed is built on, chosen to sit under the piece's own voices.
+  const KEYS = { 'linear-maps': 110, folding: 146.83, 'gradient-descent': 110, attention: 98, rotary: 110, dimensions: 98, ablation: 146.83 };
+  function makeSound(key = 110) {
+    let ac = null, master = null, send = null, wet = null, on = prefs.sound === true;
+    const drones = [], LEVEL = 0.85;
     function ensure() {
       if (ac) return ac;
       try {
         ac = new (window.AudioContext || window.webkitAudioContext)();
         master = ac.createGain();
-        master.gain.value = on ? 0.5 : 0;
+        master.gain.value = on ? LEVEL : 0;
         const comp = ac.createDynamicsCompressor();
-        master.connect(comp); comp.connect(ac.destination);
+        comp.threshold.value = -20; comp.ratio.value = 4; comp.attack.value = 0.01; comp.release.value = 0.3;
+        // measured at about −24 dB RMS without it: the make-up gain brings the room up to a comfortable level
+        const makeup = ac.createGain(); makeup.gain.value = 2.2;
+        master.connect(comp); comp.connect(makeup); makeup.connect(ac.destination);
+        // a hall: a few seconds of decaying noise as the impulse of a convolution reverb
+        wet = ac.createGain(); wet.gain.value = 0.42;
+        const len = Math.floor(ac.sampleRate * 3.2), imp = ac.createBuffer(2, len, ac.sampleRate);
+        for (let c = 0; c < 2; c++) { const d = imp.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len) ** 2.6; }
+        const hall = ac.createConvolver(); hall.buffer = imp;
+        const dark = ac.createBiquadFilter(); dark.type = 'lowpass'; dark.frequency.value = 3600;
+        wet.connect(hall); hall.connect(dark); dark.connect(master);
         // echo: a filtered feedback delay that everything can send a little of itself to
-        send = ac.createGain(); send.gain.value = 0.32;
+        send = ac.createGain(); send.gain.value = 0.24;
         const delay = ac.createDelay(1), fb = ac.createGain(), lp = ac.createBiquadFilter();
-        delay.delayTime.value = 0.31; fb.gain.value = 0.42; lp.type = 'lowpass'; lp.frequency.value = 1700;
-        send.connect(delay); delay.connect(lp); lp.connect(fb); fb.connect(delay); lp.connect(master);
+        delay.delayTime.value = 0.31; fb.gain.value = 0.4; lp.type = 'lowpass'; lp.frequency.value = 1700;
+        send.connect(delay); delay.connect(lp); lp.connect(fb); fb.connect(delay); lp.connect(master); lp.connect(wet);
+        bed();
       } catch { ac = null; }
       return ac;
     }
-    const out = g => { g.connect(master); g.connect(send); };
+    // every voice goes out dry, to the echo and to the hall, from its own place between the speakers
+    const out = (g, pan = 0) => {
+      let n = g;
+      if (pan && ac.createStereoPanner) { n = ac.createStereoPanner(); n.pan.value = pan; g.connect(n); }
+      n.connect(master); n.connect(send); n.connect(wet);
+    };
+    // The bed: a slow, dark chord on the room's key that is always there while sound is on.
+    // It is atmosphere only. Everything else you hear is one of the piece's numbers.
+    function bed() {
+      const t = ac.currentTime, lp = ac.createBiquadFilter(), g = ac.createGain();
+      lp.type = 'lowpass'; lp.frequency.value = 520; lp.Q.value = 0.6;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(1, t + 5);
+      [[1, 'sawtooth', 0.05, 0], [1.4983, 'sawtooth', 0.028, 5], [2, 'sawtooth', 0.03, -6], [3, 'sine', 0.014, 3], [0.5, 'sine', 0.05, 0]].forEach(([m, type, a, cents]) => {
+        const o = ac.createOscillator(), og = ac.createGain();
+        o.type = type; o.frequency.value = key * m; o.detune.value = cents; og.gain.value = a;
+        o.connect(og); og.connect(lp); o.start(t);
+      });
+      // the filter opens and closes over about fifteen seconds, and the level breathes a little slower
+      const sweep = ac.createOscillator(), depth = ac.createGain(); sweep.frequency.value = 0.065; depth.gain.value = 260;
+      sweep.connect(depth); depth.connect(lp.frequency); sweep.start(t);
+      const breath = ac.createOscillator(), amt = ac.createGain(); breath.frequency.value = 0.045; amt.gain.value = 0.22;
+      breath.connect(amt); amt.connect(g.gain); breath.start(t);
+      lp.connect(g); g.connect(master); g.connect(wet);
+    }
     return {
       get on() { return on; },
       set on(v) {
         on = v; prefs.sound = v; savePrefs();
         if (v) ensure()?.resume();
-        if (master) master.gain.setTargetAtTime(v ? 0.5 : 0, ac.currentTime, 0.1);
+        if (master) master.gain.setTargetAtTime(v ? LEVEL : 0, ac.currentTime, 0.1);
       },
+      // browsers hold audio until a gesture: called on every touch and key so a remembered "on" really sounds
+      wake() { if (on && ensure() && ac.state === 'suspended') ac.resume(); },
       // degree n of a pentatonic scale: 0 is the root, 5 an octave up
       note(n, root = 196) { const d = Math.round(n), o = Math.floor(d / 5); return root * 2 ** ((o * 12 + PENT[d - o * 5]) / 12); },
+      // a soft bell: the note, its octave and a twelfth, each dying a little sooner
       tone(freq, dur = 0.4, gain = 0.06, type = 'sine') {
         if (!on || !ensure()) return;
-        const t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain();
-        o.type = type; o.frequency.value = freq;
-        g.gain.setValueAtTime(0, t);
-        g.gain.linearRampToValueAtTime(gain, t + 0.01);
-        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-        o.connect(g); out(g); o.start(t); o.stop(t + dur + 0.05);
+        const t = ac.currentTime, pan = Math.random() * 0.5 - 0.25;
+        [[1, 1, 1], [2, 0.28, 0.7], [3, 0.1, 0.45]].forEach(([m, a, life]) => {
+          const o = ac.createOscillator(), g = ac.createGain();
+          o.type = m === 1 ? type : 'sine'; o.frequency.value = freq * m;
+          g.gain.setValueAtTime(0, t);
+          g.gain.linearRampToValueAtTime(gain * a * 1.3, t + 0.012);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + (dur + 0.25) * life);
+          o.connect(g); out(g, pan); o.start(t); o.stop(t + (dur + 0.25) * life + 0.05);
+        });
       },
-      // a struck string: a fundamental with two quieter overtones that die away faster
+      // a struck string: the click of the strike, then a fundamental with overtones that die away faster
       pluck(freq, gain = 0.07, dur = 1.4) {
         if (!on || !ensure() || !(freq > 20)) return;
-        const t = ac.currentTime;
-        [[1, 1, 1], [2, 0.32, 0.55], [3, 0.14, 0.3]].forEach(([m, a, life]) => {
+        const t = ac.currentTime, pan = Math.random() * 0.7 - 0.35;
+        [[1, 1, 1, 'triangle'], [2.003, 0.42, 0.6, 'sine'], [3.01, 0.2, 0.36, 'sine'], [4.2, 0.07, 0.18, 'sine']].forEach(([m, a, life, type]) => {
           const o = ac.createOscillator(), g = ac.createGain();
-          o.type = m === 1 ? 'triangle' : 'sine'; o.frequency.value = freq * m;
+          o.type = type; o.frequency.value = freq * m;
           g.gain.setValueAtTime(0, t);
-          g.gain.linearRampToValueAtTime(gain * a, t + 0.006);
-          g.gain.exponentialRampToValueAtTime(0.0001, t + dur * life);
-          o.connect(g); out(g); o.start(t); o.stop(t + dur * life + 0.05);
+          g.gain.linearRampToValueAtTime(gain * a * 1.5, t + 0.004);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + dur * 1.3 * life);
+          o.connect(g); out(g, pan); o.start(t); o.stop(t + dur * 1.3 * life + 0.05);
         });
+        const n = Math.floor(ac.sampleRate * 0.02), buf = ac.createBuffer(1, n, ac.sampleRate), d = buf.getChannelData(0);
+        for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+        const src = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
+        src.buffer = buf; f.type = 'bandpass'; f.frequency.value = Math.min(6000, freq * 6); f.Q.value = 1.2; g.gain.value = gain * 0.9;
+        src.connect(f); f.connect(g); out(g, pan); src.start(t);
       },
       // a breath of filtered noise, for things that break
       noise(dur = 0.5, gain = 0.05, freq = 900) {
@@ -83,31 +130,37 @@ const Interiors = (() => {
         const t = ac.currentTime, n = Math.floor(ac.sampleRate * dur), buf = ac.createBuffer(1, n, ac.sampleRate), d = buf.getChannelData(0);
         for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n) ** 2;
         const src = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
-        src.buffer = buf; f.type = 'bandpass'; f.frequency.value = freq; f.Q.value = 0.8; g.gain.value = gain;
+        src.buffer = buf; f.type = 'bandpass'; f.frequency.value = freq; f.Q.value = 0.8; g.gain.value = gain * 1.6;
+        f.frequency.setValueAtTime(freq * 1.6, t); f.frequency.exponentialRampToValueAtTime(freq * 0.6, t + dur);
         src.connect(f); f.connect(g); out(g); src.start(t);
       },
-      // a held voice a piece retunes every frame: two oscillators a few cents apart, so it shimmers
+      // a held voice a piece retunes every frame: two oscillators a few cents apart with a quiet octave above,
+      // so it shimmers; each voice a piece makes sits a little further across the stereo field
       drone(freq = 110, type = 'sine') {
-        const d = { freq, gain: 0, o: null, o2: null, g: null };
+        const d = { freq, gain: 0, o: null, o2: null, o3: null, g: null }, slot = drones.length;
+        const pan = slot ? (slot % 2 ? 1 : -1) * Math.min(0.7, 0.18 * Math.ceil(slot / 2)) : 0;
         d.set = (f, gain) => {
           d.freq = f; d.gain = gain;
           if (!on || !ensure()) return;
           if (!d.o) {
             if (gain <= 0) return;
-            d.o = ac.createOscillator(); d.o2 = ac.createOscillator(); d.g = ac.createGain();
-            d.o.type = d.o2.type = type; d.g.gain.value = 0;
-            const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1400;
-            d.o.connect(lp); d.o2.connect(lp); lp.connect(d.g); out(d.g); d.o.start(); d.o2.start();
+            d.o = ac.createOscillator(); d.o2 = ac.createOscillator(); d.o3 = ac.createOscillator(); d.g = ac.createGain();
+            d.o.type = d.o2.type = type; d.o3.type = 'sine'; d.g.gain.value = 0;
+            const lp = ac.createBiquadFilter(), up = ac.createGain(); lp.type = 'lowpass'; lp.frequency.value = 2200; up.gain.value = 0.22;
+            d.o.frequency.value = f; d.o2.frequency.value = f * 1.004; d.o3.frequency.value = f * 2;
+            d.o.connect(lp); d.o2.connect(lp); d.o3.connect(up); up.connect(lp); lp.connect(d.g); out(d.g, pan);
+            d.o.start(); d.o2.start(); d.o3.start();
           }
           d.o.frequency.setTargetAtTime(f, ac.currentTime, 0.08);
           d.o2.frequency.setTargetAtTime(f * 1.004, ac.currentTime, 0.08);
-          d.g.gain.setTargetAtTime(gain * 0.6, ac.currentTime, 0.15);
+          d.o3.frequency.setTargetAtTime(f * 2, ac.currentTime, 0.08);
+          d.g.gain.setTargetAtTime(gain * 1.1, ac.currentTime, 0.15);
         };
         drones.push(d);
         return d;
       },
       dispose() {
-        drones.forEach(d => { try { d.o?.stop(); d.o2?.stop(); } catch {} });
+        drones.forEach(d => { try { d.o?.stop(); d.o2?.stop(); d.o3?.stop(); } catch {} });
         drones.length = 0;
         try { ac?.close(); } catch {}
         ac = null;
@@ -209,7 +262,7 @@ const Interiors = (() => {
         <h3>Inside the model</h3>
         <div class="ir-inside">${(p.inside || []).map(t => `<p>${t}</p>`).join('')}</div>
         ${p.honest ? `<p class="ir-honest">${p.honest}</p>` : ''}
-        ${p.hear ? `<p class="ir-honest ir-hear"><b>What you hear (sound on).</b> ${p.hear}</p>` : ''}
+        ${p.hear ? `<p class="ir-honest ir-hear"><b>What you hear (sound on).</b> ${p.hear} The slow chord underneath is only atmosphere; every other sound is one of this room’s numbers.</p>` : ''}
         <p class="ir-refs">${(p.refs || []).map(([t, u]) => u.startsWith('#') ? `<a href="${u}">${esc(t)} →</a>` : `<a href="${u}" target="_blank" rel="noopener">${esc(t)} ↗</a>`).join('')}</p>
       </aside>
     </section>`;
@@ -266,7 +319,7 @@ const Interiors = (() => {
     const $ = s => root.querySelector(s);
     const base = $('.ir-base'), over = $('.ir-over');
     const drawer = $('.ir-drawer'), live = $('.ir-live');
-    const sound = makeSound();
+    const sound = makeSound(KEYS[p.id]);
     let w = 0, h = 0, dpr = 1, raf = 0, alive = true, idleTimer = 0, last = performance.now(), t = 0;
     let gl = null, ctx = null;
     if (p.webgl) {
@@ -520,7 +573,7 @@ const Interiors = (() => {
     let pointer = null;
     const pos = e => { const r = over.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
     over.addEventListener('pointerdown', e => {
-      wake(); arrived(); stopDemo(); root.classList.add('ir-touched');
+      wake(); arrived(); stopDemo(); sound.wake(); root.classList.add('ir-touched');
       over.setPointerCapture?.(e.pointerId);
       const q = pos(e); lastXY = q;
       pointer = { id: e.pointerId, x0: q.x, y0: q.y, t0: performance.now(), moved: false, x: q.x, y: q.y };
@@ -572,7 +625,7 @@ const Interiors = (() => {
       if (dot) { const saw = prompts[Number(dot.dataset.dot)]?.saw; if (saw) showInsight(saw); wake(); return; }
       const el = e.target.closest('[data-ctl]'); if (!el || el.type === 'range') return;
       const id = el.dataset.ctl, c = p.controls.find(c => c.id === id);
-      stopDemo(); root.classList.add('ir-touched'); lastXY = null;
+      stopDemo(); sound.wake(); root.classList.add('ir-touched'); lastXY = null;
       if (c.type === 'toggle') values[id] = !values[id];
       else if (c.type === 'choice') values[id] = typeof c.value === 'number' ? Number(el.dataset.value) : el.dataset.value;
       syncControl(id); syncShown();
@@ -607,6 +660,7 @@ const Interiors = (() => {
     document.addEventListener('keydown', e => {
       if (e.target.closest?.('input,textarea,select') || e.metaKey || e.ctrlKey || e.altKey) return;
       const key = e.key.toLowerCase();
+      sound.wake();
       if (key === 'm') { toggleDrawer(); e.preventDefault(); }
       else if (key === 's') { toggleSound(); e.preventDefault(); }
       else if (key === 'f') { toggleFull(); e.preventDefault(); }

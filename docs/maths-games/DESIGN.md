@@ -69,7 +69,7 @@ The **index** (`#maths/play`) is a dark gallery: seven large live thumbnails (ea
 
 ### 01 · Lattice — linear maps
 
-**Image.** A deep-perspective-free, infinite 2D lattice in mint and ivory, drawn twice: the faint original grid and the bright transformed grid, producing moiré where they cross. Thousands of tiny star-points (embedding vectors) are scattered through it, a few dozen labelled with words (*king, queen, man, woman, Paris, France, cat, dog…*) placed so analogies are parallelograms. Two large glowing arrows, **î** (mint) and **ĵ** (rose), grow out of the origin. A unit square shaded with its signed area.
+**Image.** A deep-perspective-free, infinite 2D lattice in blue and ivory, drawn twice: the faint original grid and the bright transformed grid, producing moiré where they cross. Thousands of tiny star-points (embedding vectors) are scattered through it, a few dozen labelled with words (*king, queen, man, woman, Paris, France, cat, dog…*) placed so analogies are parallelograms. Two large glowing arrows, **î** (mint) and **ĵ** (rose), grow out of the origin. A unit square shaded with its signed area.
 
 **Interaction.** Drag the tips of î and ĵ. The whole space — grid, stars, words — moves with them in real time. This is the identifying moment: *two arrows determine where everything goes*. Dock: presets (identity, rotate, shear, stretch, reflect, collapse), a "breathe" toggle that animates between identity and your matrix, and "add a layer" which composes another random matrix to show stacking.
 
@@ -152,7 +152,7 @@ The **index** (`#maths/play`) is a dark gallery: seven large live thumbnails (ea
 ## 5. Visual system
 
 - Background `#05060a` with subtle film grain/vignette; additive (`lighter`) compositing for light.
-- Each piece owns an accent pair: Lattice mint/rose · Origami folded dark paper in pink and violet · Descent amber/ice · Loom multi-head (cyan, coral, gold, violet) · Orrery brass/silver · Crowded Sky lavender/white · Nullspace amber/blue.
+- Each piece owns an accent pair: Lattice blue/amber (violet for the analogy arrows) · Origami folded dark paper in pink and violet · Descent amber/ice · Loom multi-head (cyan, coral, gold, violet) · Orrery brass/silver · Crowded Sky lavender/white · Nullspace amber/blue.
 - Type: DM Sans for titles/captions, IBM Plex Mono for numbers and labels, matching Field.
 - Labels have dark halos; colour always paired with shape or label.
 
