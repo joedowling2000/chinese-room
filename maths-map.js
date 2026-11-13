@@ -185,7 +185,7 @@ const MathsMap = (() => {
     const ideas = ['01', '02', '03', '04', '05', '06', '07'].map(idea);
     return `<section class="ml" id="maths-map" aria-labelledby="ml-title">
   <div class="ml-head">
-    <div class="ml-intro"><p class="eyebrow">One token’s journey</p><h2 id="ml-title">Where each idea lives.</h2><p>A transformer drawn as a transit map. The main line is the residual stream; attention and the feed-forward block branch off it and add back in. Each coloured station is one of the seven ideas. Follow the token, or choose a station to see where an idea sits.</p></div>
+    <div class="ml-intro"><p class="eyebrow">One token’s journey</p><h2 id="ml-title">Where each idea lives</h2><p>A transformer drawn as a transit map. The main line is the residual stream; attention and the feed-forward block branch off it and add back in. Each coloured station is one of the seven ideas. Follow the token, or choose a station to see where an idea sits.</p></div>
     <div class="ml-controls">
       <div class="ml-modes" role="group" aria-label="What the map shows"><button type="button" data-mode="forward" aria-pressed="true">Forward pass</button><button type="button" data-mode="train" aria-pressed="false">Training step</button></div>
       <button type="button" class="ml-pause" aria-pressed="false">Pause</button>

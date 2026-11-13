@@ -208,7 +208,7 @@ const Interiors = (() => {
   }
 
   function gallery() {
-    return `<section class="ir-gallery"><p class="eyebrow">The maths of AI / Interiors</p><h1>Inside the <em>room.</em></h1>${showcase()}</section>`;
+    return `<section class="ir-gallery"><p class="eyebrow">The maths of AI / Interiors</p><h1>Seven <em>rooms</em></h1>${showcase()}</section>`;
   }
 
   function control(c) {

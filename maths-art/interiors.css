@@ -35,7 +35,7 @@ body.ir-playing main{min-height:100dvh}
 .ir-chrome{transition:opacity .9s ease}
 .ir-piece.ir-idle .ir-chrome{opacity:.12}
 .ir-piece.ir-idle .ir-dock{opacity:.35}
-.ir-piece button{font:12px var(--sans);min-height:40px;padding:9px 14px;border-radius:6px;border:1px solid rgba(255,255,255,.16);background:rgba(10,12,16,.55);color:#e6eaee;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.ir-piece button{font:12px var(--sans);min-height:40px;padding:9px 14px;border-radius:4px;border:1px solid rgba(255,255,255,.16);background:rgba(10,12,16,.55);color:#e6eaee;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .ir-piece button:hover{border-color:var(--ir-accent);color:#fff}
 .ir-piece button[aria-pressed=true]{border-color:var(--ir-accent);color:var(--ir-accent);background:rgba(20,22,30,.75)}
 .ir-piece kbd{font:10px var(--mono);opacity:.55;margin-left:4px}
@@ -67,11 +67,11 @@ body.ir-playing main{min-height:100dvh}
 .ir-insight.ir-flash{animation:ir-flash 1.2s ease}
 @keyframes ir-flash{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .ir-dots{display:flex;gap:6px;margin-top:10px}
-.ir-dots i{width:18px;height:3px;border-radius:2px;background:rgba(255,255,255,.18)}
+.ir-dots i{width:18px;height:3px;border-radius:4px;background:rgba(255,255,255,.18)}
 .ir-dots i.on{background:var(--ir-accent)}
 .ir-dots i.now{background:rgba(255,255,255,.55)}
 
-.ir-dock{position:absolute;z-index:2;right:22px;bottom:22px;display:flex;flex-direction:column;align-items:stretch;gap:10px;width:min(272px,calc(100vw - 44px));padding:14px;border-radius:14px;background:rgba(8,10,14,.5);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.ir-dock{position:absolute;z-index:2;right:22px;bottom:22px;display:flex;flex-direction:column;align-items:stretch;gap:10px;width:min(272px,calc(100vw - 44px));padding:14px;border-radius:12px;background:rgba(8,10,14,.5);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .ir-dock-body{display:flex;flex-direction:column;align-items:stretch;gap:10px}
 .ir-dock-body>button{width:100%}
 .ir-dock-body>[hidden]{display:none}
@@ -97,7 +97,7 @@ body.ir-playing main{min-height:100dvh}
 .ir-drawer h3{font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#9aa4ae;margin:28px 0 10px}
 .ir-drawer p{font:14px/1.7 var(--sans);color:#c8cfd6;margin:0 0 12px}
 .ir-drawer p b,.ir-drawer p strong{color:#fff;font-weight:500}
-.ir-live{border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:16px 18px;margin-bottom:22px;background:rgba(255,255,255,.025);font:13px/1.7 var(--mono);color:#e8ecef}
+.ir-live{border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:16px 18px;margin-bottom:22px;background:rgba(255,255,255,.025);font:13px/1.7 var(--mono);color:#e8ecef}
 .ir-live .eq{font:15px/1.6 var(--mono);color:#fff;margin:0 0 10px;white-space:pre-wrap}
 .ir-live .row{display:flex;justify-content:space-between;gap:12px;border-top:1px dashed rgba(255,255,255,.08);padding:4px 0}
 .ir-live .row span:first-child{color:#9aa4ae}
@@ -106,7 +106,7 @@ body.ir-playing main{min-height:100dvh}
 .ir-live td,.ir-live th{padding:3px 4px;text-align:right;border-top:1px dashed rgba(255,255,255,.08)}
 .ir-live th{color:#9aa4ae;font-weight:400}
 .ir-live td:first-child,.ir-live th:first-child{text-align:left}
-.ir-live .bar{display:inline-block;height:6px;border-radius:3px;background:var(--ir-accent);vertical-align:middle}
+.ir-live .bar{display:inline-block;height:6px;border-radius:4px;background:var(--ir-accent);vertical-align:middle}
 .ir-live .mat{display:inline-grid;grid-template-columns:auto auto;gap:0 16px;padding:2px 10px;border-left:1px solid #fff;border-right:1px solid #fff;vertical-align:middle;text-align:right}
 .ir-honest{font-size:12.5px!important;color:#9aa4ae!important;border-left:2px solid rgba(255,255,255,.15);padding-left:12px}
 .ir-refs{display:flex;flex-direction:column;gap:6px}
@@ -162,7 +162,7 @@ body.ir-playing main{min-height:100dvh}
 .ir-piece.ir-touched .ir-caption h1,.ir-piece.ir-touched .ir-caption:has(.ir-insight:not([hidden])) h1{font-size:clamp(22px,2.2vw,30px);letter-spacing:-.03em;margin-bottom:6px}
 .ir-piece.ir-touched .ir-sub,.ir-piece.ir-begun .ir-sub{opacity:0;max-height:0;margin:0}
 .ir-piece.ir-touched .ir-eq,.ir-piece.ir-begun .ir-eq{font-size:12px;margin-bottom:10px}
-.ir-piece .ir-dots button{min-height:0;width:18px;height:3px;padding:0;border:0;border-radius:2px;background:var(--ir-accent);backdrop-filter:none;-webkit-backdrop-filter:none;position:relative}
+.ir-piece .ir-dots button{min-height:0;width:18px;height:3px;padding:0;border:0;border-radius:4px;background:var(--ir-accent);backdrop-filter:none;-webkit-backdrop-filter:none;position:relative}
 .ir-piece .ir-dots button::after{content:'';position:absolute;inset:-12px -3px}
 .ir-piece .ir-dots button:hover,.ir-piece .ir-dots button:focus-visible{background:#fff}
 .ir-piece .ir-icon{min-width:40px;padding:0;border-radius:999px;font-size:15px}

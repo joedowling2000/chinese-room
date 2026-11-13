@@ -4,7 +4,7 @@
 const Maths = (() => {
   const topics = [
   {
-    id:'linear-maps',no:'01',tag:'Vectors & matrices',short:'Linear maps',
+    id:'linear-maps',no:'01',tag:'Vectors & matrices',short:'Matrix multiplication',
     title:'A matrix moves all of space at once.',
     body:['A 2×2 matrix records where the two basis arrows, î and ĵ, land. Every other point follows: (x, y) lands at x·î + y·ĵ, so grid lines stay straight, parallel and evenly spaced. In Lattice, dragging those two arrows moves every star.',
           'The determinant measures the change in area. Its size is the scale factor, a negative sign means the plane is mirrored, and at zero the plane collapses onto a line or a point: distinct inputs share an output, and the information that separated them is lost.',
@@ -13,7 +13,7 @@ const Maths = (() => {
     sources:[{label:'Hu et al., LoRA: Low-Rank Adaptation of Large Language Models (2021)',href:'https://arxiv.org/abs/2106.09685'}]
   },
   {
-    id:'folding',no:'02',tag:'Non-linearity',short:'Folding space',
+    id:'folding',no:'02',tag:'Non-linearity',short:'ReLU activation',
     title:'Bend, then fold.',
     body:['Two matrices in a row multiply into one, so a stack of linear maps is still a single linear map. Networks escape this with a non-linear function between layers. ReLU passes positive values through and sets negative ones to zero, which makes each neuron a hinge that creases where its input crosses zero.',
           'Between creases the network is exactly linear. Each layer bends the space the previous one produced, so creases multiply with depth, and the network can carve its input into the shapes a task needs. In Origami each neuron is one crease across the space the words stand in, silent on one side and pushing on the other. One crease can keep the places and push the rest away; keeping the people, who stand in the middle, takes several whose silent sides overlap. Switching the activation off flattens the sheet into a single straight cut.',
@@ -30,7 +30,7 @@ const Maths = (() => {
     sources:[{label:'Loshchilov and Hutter, Decoupled Weight Decay Regularization',href:'https://arxiv.org/abs/1711.05101'}]
   },
   {
-    id:'attention',no:'04',tag:'Attention',short:'Attention',
+    id:'attention',no:'04',tag:'Attention',short:'Softmax attention',
     title:'Every token asks a question.',
     body:['Attention lets each token gather information from earlier tokens. Learned matrices project each token’s vector into a query, a key and a value. The query is scored against every earlier key by a dot product, which depends on both direction and length. Softmax turns the scores into positive weights that sum to one, and the output is the weighted sum of the values.',
           'In Loom each thread is one weight, running back to an earlier word, and the central orb is the blend; a causal mask stops any word looking ahead. Loom’s four hand-built heads track the previous word, meaning, grammatical agreement and copying. Dividing the scores by a temperature sharpens or flattens the weights. Standard attention divides by √dₖ, the key width, which is unrelated to the sampling temperature used to pick output tokens.',
@@ -38,7 +38,7 @@ const Maths = (() => {
     formula:'wᵢ = softmax(q·kᵢ / τ)  ·  output = Σ wᵢ vᵢ'
   },
   {
-    id:'rotary',no:'05',tag:'Position',short:'Rotary positions',
+    id:'rotary',no:'05',tag:'Position',short:'Rotary position embedding',
     title:'Position as rotation.',
     body:['Attention compares queries and keys by content alone, so by itself it has no sense of token order. Rotary position embeddings (RoPE) add order by rotating pairs of coordinates in each query and key by an angle proportional to the token’s position, each pair at its own frequency.',
           'Because both vectors rotate, only the difference in angle matters: for fixed content, the positional part of the score depends on the distance n − m, not on absolute position. In Orrery each orbit is one coordinate pair, and dragging the whole sentence moves every planet without changing the score. Fast pairs wrap round within a few tokens and slow pairs change over long distances, so together they tell many distances apart.',
@@ -47,7 +47,7 @@ const Maths = (() => {
     sources:[{label:'Su et al., RoFormer: Enhanced Transformer with Rotary Position Embedding',href:'https://arxiv.org/abs/2104.09864'}]
   },
   {
-    id:'dimensions',no:'06',tag:'Geometry',short:'High dimensions',
+    id:'dimensions',no:'06',tag:'Geometry',short:'Superposition',
     title:'Room for more than you’d think.',
     body:['In two dimensions only two directions can be at right angles. In thousands of dimensions almost any two random directions are nearly perpendicular: their cosine similarity clusters tightly around zero, as Crowded Sky’s many-dimensions view shows with two thousand random directions.',
           'That suggests how a model could represent more features than it has dimensions, by giving each feature a direction and tolerating slight overlap. This is superposition. A feature is read back by projecting onto its direction, which works while few features are active; when several overlapping features are on together, interference can make absent ones appear. It also means no single neuron stands for one feature: each axis of the space answers to several. Crowded Sky’s stars settle into arrangements reported in toy models, but neither random nor toy geometry shows what a trained language model stores.',
@@ -56,7 +56,7 @@ const Maths = (() => {
     sources:[{label:'Elhage et al., Toy Models of Superposition',href:'https://transformer-circuits.pub/2022/toy_model/'}]
   },
   {
-    id:'ablation',no:'07',tag:'Interpretability',short:'Removing a direction',
+    id:'ablation',no:'07',tag:'Interpretability',short:'Orthogonal projection',
     title:'Delete one direction.',
     body:['Some behaviours seem tied to a single direction r̂ in a model’s activations, the internal vectors it produces for each token. Projecting r̂ out subtracts each activation’s component along it; at α = 1 the component is removed entirely. Components at right angles are unchanged, though the model’s downstream behaviour can still shift.',
           'Researchers often find such a direction in the residual stream as the difference between average activations on two sets of prompts, such as ones a model refuses and ones it answers, then remove it to test its effect. This is the core move in abliteration. Nullspace does it to a synthetic cloud: the difference of means recovers the refusal direction and removing it mixes the two groups, while removing the wrong direction destroys an unrelated signal instead.',
@@ -83,19 +83,20 @@ const Maths = (() => {
 
   function page(){
     return `<section class="maths-hero">
-  <div class="maths-hero-art" aria-hidden="true">${Field.art('manifold','dark',{eager:true})}</div>
+  <div class="maths-hero-art" aria-hidden="true">${Field.art('polytope','dark',{eager:true})}</div>
   <div class="maths-hero-shade" aria-hidden="true"></div>
   <div class="maths-hero-copy">
-    <p class="eyebrow">The maths of AI</p>
-    <h1>Step inside the maths.</h1>
+    <p class="eyebrow">The maths of AI / Seven ideas</p>
+    <h1>Step inside the maths</h1>
     <p>Seven ideas, seven rooms inside a language model. Bend the space words live in, crease it like paper, weave attention, roll down a loss landscape. Each is an interactive artwork drawn by the mathematics it depicts.</p>
     <p class="maths-hero-note">Seven interactive artworks · no installation · keyboard &amp; touch</p>
+    <a class="cta cta-lg" href="#interiors">Enter the seven rooms</a>
   </div>
 </section>
 ${MathsMap.markup()}
 <div class="maths-topics">${topics.map(topic).join('')}</div>
 <section class="section-dark maths-outro">
-  <div class="field-exp-intro"><p class="eyebrow">Keep going</p><h2>See the ideas at work.</h2><p>Every artwork here is a small synthetic example computed in your browser. No model is run.</p></div>
+  <div class="field-exp-intro"><p class="eyebrow">Keep going</p><h2>See the ideas at work</h2><p>Every artwork here is a small synthetic example computed in your browser. No model is run.</p></div>
   <div class="field-exp-links">
     <a class="experiment-link" href="#interiors"><span class="exp-no">→</span> <span class="exp-name">All seven Interiors</span> <span class="exp-arrow">↗</span></a>
     <a class="experiment-link" href="#research"><span class="exp-no">→</span> <span class="exp-name">The research</span> <span class="exp-arrow">↗</span></a>

@@ -44,8 +44,8 @@ const Field = (() => {
 <section class="field-experiments" id="field-experiments" aria-labelledby="lab-title">
   <div class="field-exp-intro"><p class="eyebrow"><span class="flow-no">03</span>The lab</p><h2 id="lab-title">Interactive examples</h2><p>Undo a cube scramble, or compare what happens when weights are stored with fewer bits.</p></div>
   <div class="field-exp-links">
-    <a class="experiment-link" href="#lab/mindcuber"><span class="exp-no">01</span> <span class="exp-name">Mindcuber</span> <span class="exp-arrow" aria-hidden="true"></span></a>
-    <a class="experiment-link" href="#lab/quantization"><span class="exp-no">02</span> <span class="exp-name">Quantisation</span> <span class="exp-arrow" aria-hidden="true"></span></a>
+    <a class="experiment-link" href="#lab/mindcuber"><span class="exp-no">01</span> <span class="exp-name">Mindcuber</span> <span class="exp-glyph cube-glyph" aria-hidden="true"></span><span class="exp-arrow" aria-hidden="true"></span></a>
+    <a class="experiment-link" href="#lab/quantization"><span class="exp-no">02</span> <span class="exp-name">Quantisation</span> <span class="exp-glyph quant-glyph" aria-hidden="true"></span><span class="exp-arrow" aria-hidden="true"></span></a>
   </div>
 </section>
 </div>`;
@@ -55,10 +55,10 @@ const Field = (() => {
     const tags=['ALL',...new Set(articles.map(a=>a.tag))];
     return `<section class="page research-page">
   <p class="eyebrow">Research / The notebook</p>
-  <h1 class="page-title">Project notes.</h1>
+  <h1 class="page-title">Project notes</h1>
   <p class="page-intro">Notes from projects on the DGX Spark, with the code, calculations and results described in each article.</p>
   <div class="filters" role="group" aria-label="Filter research">${tags.map((x,i)=>`<button class="filter${i===0?' active':''}" data-filter="${esc(x)}" aria-pressed="${i===0}">${esc(x)}${i===0?` · ${articles.length}`:''}</button>`).join('')}</div>
-  <div class="field-grid" id="article-list">${articles.map(card).join('')}</div>
+  <div class="field-grid" id="article-list">${articles.map(a => card(a)).join('')}</div>
   <p id="research-count" class="research-count" role="status">${articles.length} research notes</p>
 </section>`;
   }

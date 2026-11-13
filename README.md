@@ -63,6 +63,8 @@ See [PLAN.md](PLAN.md) for the implementation status, source requirements and fo
 ## Project layout
 
 - `index.html`, `styles.css`, `field.css`, `app.js`, `field.js`: site shell, layout base, Field theme, and client-side navigation/content
+- `field-stream.js`: the animated home hero (falls back to `assets/field-stream-dark.svg`)
+- Design rules: one dark surface on every page, articles included. Colour is reserved for what can be touched (the Interiors rooms and the lab charts, which share one palette); reading pages and their artwork stay monochrome. Corner radii come in three steps: 4px controls, 12px cards and panels, 16px large surfaces. Page labels read `Section / Descriptor`; headings carry no full stop.
 - `lab.js`: cube geometry, experiment pages and quantisation calculations
 - `experiences.js`, `experiences.css`: purpose labels for the maths topics and lab pages (see `enhancement_plan.md`)
 - `maths.js`: The Maths of AI page: the seven ideas' copy and a live poster of each artwork linking into Interiors

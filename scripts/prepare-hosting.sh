@@ -12,7 +12,7 @@ else
   rm -rf "$output"
 fi
 mkdir -p "$output/articles" "$output/assets"
-cp index.html app.js lab.js field.js maths.js maths-map.js experiences.js styles.css field.css experiences.css maths-map.css favicon.svg robots.txt sitemap.xml feed.xml "$output/"
+cp index.html app.js lab.js field.js field-stream.js maths.js maths-map.js experiences.js styles.css field.css experiences.css maths-map.css favicon.svg robots.txt sitemap.xml feed.xml "$output/"
 # Only the published article files; articles/source-materials/ is a private review archive.
 find articles -maxdepth 1 -type f -exec cp {} "$output/articles/" \;
 cp assets/* "$output/assets/"
