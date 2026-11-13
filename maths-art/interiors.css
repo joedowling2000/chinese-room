@@ -178,3 +178,14 @@ body.ir-playing main{min-height:100dvh}
 .ir-piece:fullscreen{width:100vw;height:100vh}
 @media (max-width:760px){.ir-top-actions .ir-icon{display:none}}
 @media (prefers-reduced-motion:reduce){.ir-canvas,.ir-pulse,.ir-piece.ir-shot::after,.ir-piece [data-host="sound"]{animation:none}.ir-eq,.ir-sub{transition:none}}
+/* "Show me": the offer, the ghost hand, and the control it is using */
+.ir-piece .ir-showme{margin-top:10px;min-height:32px;padding:5px 12px;font:11px var(--mono);letter-spacing:.06em;border-color:var(--ir-accent);color:var(--ir-accent);animation:ir-flash .8s ease}
+.ir-piece .ir-showme[hidden]{display:none}
+.ir-hand{position:absolute;left:0;top:0;z-index:4;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;border:1.5px solid #fff;background:rgba(255,255,255,.14);box-shadow:0 0 18px var(--ir-accent);pointer-events:none;opacity:0;transition:opacity .4s ease,width .15s ease,height .15s ease,margin .15s ease,background .15s ease}
+.ir-piece.ir-demo .ir-hand{opacity:1}
+.ir-hand.ir-down{width:20px;height:20px;margin:-10px 0 0 -10px;background:var(--ir-accent)}
+.ir-piece.ir-demo .ir-chrome{opacity:1}
+.ir-shown{animation:ir-shown 1.4s ease}
+@keyframes ir-shown{0%,60%{box-shadow:0 0 0 2px var(--ir-accent),0 0 22px var(--ir-accent)}100%{box-shadow:0 0 0 2px transparent}}
+@media (prefers-reduced-motion:reduce){.ir-shown,.ir-piece .ir-showme{animation:none}}
+

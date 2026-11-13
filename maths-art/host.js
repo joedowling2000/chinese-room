@@ -193,9 +193,11 @@ const Interiors = (() => {
         <div class="ir-guide" aria-live="polite">
           <p class="ir-insight" hidden></p>
           <p class="ir-prompt"></p>
+          <button type="button" class="ir-showme" data-host="showme" hidden>Show me</button>
           <span class="ir-dots"></span>
         </div>
       </div>
+      <i class="ir-hand" aria-hidden="true"></i>
       ${p.you ? `<p class="ir-arrive" aria-hidden="true"><span>${p.no} / ${esc(p.title)}</span>${esc(p.you)}${p.hear ? '<small class="ir-arrive-sound">This room can be heard. Turn on <b>Sound</b>.</small>' : ''}</p>` : ''}
       ${(p.controls || []).length ? `<div class="ir-dock ir-chrome"><button type="button" class="ir-dock-toggle" data-host="dock" aria-expanded="true">Controls</button><div class="ir-dock-body">${p.controls.map(control).join('')}</div></div>` : ''}
       <aside class="ir-drawer" hidden aria-label="The maths">
@@ -277,21 +279,28 @@ const Interiors = (() => {
     /* guided discovery: the piece calls k.reach(i) when the viewer has done prompt i */
     const prompts = p.prompts || [];
     const nextRoom = pieces[(pieces.indexOf(p) + 1) % pieces.length];
+    // Discoveries can be made in any order. `stage` is the first one not yet made: the prompt on screen.
+    const done = new Set();
     let stage = 0;
     // Arrival: one line that says who you are in this room. It never blocks; it
     // fades by itself, or at the first touch.
     const arriveEl = $('.ir-arrive');
     const arrived = () => arriveEl?.classList.add('ir-gone');
     const arriveTimer = setTimeout(arrived, 5200);
-    const dots = $('.ir-dots'), promptEl = $('.ir-prompt'), insightEl = $('.ir-insight');
+    const dots = $('.ir-dots'), promptEl = $('.ir-prompt'), insightEl = $('.ir-insight'), showBtn = $('.ir-showme'), handEl = $('.ir-hand');
+    let offerTimer = 0;
     function showGuide() {
-      dots.innerHTML = prompts.map((_, i) => i < stage
+      dots.innerHTML = prompts.map((_, i) => done.has(i)
         ? `<button type="button" class="on" data-dot="${i}" aria-label="Read discovery ${i + 1} again"></button>`
         : `<i class="${i === stage ? 'now' : ''}"></i>`).join('');
       // After the last discovery the coda hands the viewer on to the next room.
       promptEl.innerHTML = stage < prompts.length ? `<span>›</span> ${prompts[stage].do}` : `<span>✓</span> ${p.coda || 'Keep exploring. Open the maths for the equation behind what you see.'}${nextRoom !== p ? ` <a class="ir-next" href="#maths/play/${nextRoom.id}">Next room: ${esc(nextRoom.maths)} →</a>` : ''}`;
       // Once the viewer has begun, the title steps back and leaves the room to the artwork.
-      root.classList.toggle('ir-begun', stage > 0);
+      root.classList.toggle('ir-begun', done.size > 0);
+      // If the viewer stays on one prompt for a while, the room offers to perform it.
+      showBtn.hidden = true;
+      clearTimeout(offerTimer);
+      if (stage < prompts.length) offerTimer = setTimeout(() => { if (inst?.demo && !root.classList.contains('ir-demo')) showBtn.hidden = false; }, 20000);
     }
     let insightTimer = 0, lastXY = null;
     function showInsight(saw) {
@@ -310,14 +319,15 @@ const Interiors = (() => {
       root.appendChild(el);
     }
     function reach(i) {
-      if (i !== stage || stage >= prompts.length) return;
-      const saw = prompts[stage].saw;
-      stage++;
+      if (!(i >= 0 && i < prompts.length) || done.has(i)) return;
+      const saw = prompts[i].saw;
+      done.add(i);
+      stage = 0; while (done.has(stage)) stage++;
       showGuide();
       if (saw) showInsight(saw);
       pulse();
       try { navigator.vibrate?.(12); } catch {}
-      sound.tone(440 * 2 ** (stage / 6), 0.8, 0.05);
+      sound.tone(440 * 2 ** (done.size / 6), 0.8, 0.05);
       wake();
     }
     showGuide();
@@ -352,9 +362,99 @@ const Interiors = (() => {
       set(id, v) { values[id] = v; syncControl(id); syncShown(); },
       reach,
       get stage() { return stage; },
+      did: i => done.has(i),
+      get show() { return show; },
       wake,
       clamp, lerp, fmt, esc
     };
+    /* "Show me": the piece's demo(i) performs prompt i through the same handlers a hand would use */
+    const STOP = Symbol('stop');
+    let demoRun = 0, hand = null, handDown = false;
+    const setHand = (x, y) => { hand = { x, y }; handEl.style.transform = `translate(${x}px,${y}px)`; };
+    const tick = (ms, fn) => new Promise((res, rej) => {
+      const t0 = performance.now(), run = demoRun;
+      (function step(now) {
+        if (!alive || run !== demoRun) return rej(STOP);
+        const u = Math.min(1, (now - t0) / ms);
+        fn(u * u * (3 - 2 * u));
+        u < 1 ? requestAnimationFrame(step) : res();
+      })(t0);
+    });
+    const flashRow = id => {
+      toggleDock(true);
+      const el = root.querySelector(`[data-row="${id}"]`); if (!el) return;
+      el.classList.remove('ir-shown'); void el.offsetWidth; el.classList.add('ir-shown');
+    };
+    const show = {
+      wait: ms => tick(ms, () => {}),
+      async point(x, y, ms = 450) {
+        const a = hand || { x: w / 2, y: h / 2 };
+        await tick(ms, u => setHand(lerp(a.x, x, u), lerp(a.y, y, u)));
+        inst.move?.({ x, y, dx: 0, dy: 0, dragging: false });
+      },
+      async hover(x, y, ms = 1100) { await show.point(x, y); await show.wait(ms); },
+      async tap(x, y) {
+        await show.point(x, y);
+        handEl.classList.add('ir-down'); inst.down?.({ x, y, button: 0 }); handDown = true;
+        await show.wait(160);
+        handDown = false; inst.up?.({ x, y }); inst.tap?.({ x, y }); handEl.classList.remove('ir-down');
+        lastXY = { x, y };
+        await show.wait(380);
+      },
+      // drag through a list of [x, y] points
+      async drag(pts, ms = 1200) {
+        await show.point(pts[0][0], pts[0][1]);
+        handEl.classList.add('ir-down'); inst.down?.({ x: pts[0][0], y: pts[0][1], button: 0 }); handDown = true;
+        let px = pts[0][0], py = pts[0][1];
+        const legs = pts.length - 1;
+        await tick(ms, u => {
+          const f = Math.min(legs - 1e-6, u * legs), i = Math.floor(f), v = f - i;
+          const x = lerp(pts[i][0], pts[i + 1][0], u >= 1 ? 1 : v), y = lerp(pts[i][1], pts[i + 1][1], u >= 1 ? 1 : v);
+          inst.move?.({ x, y, dx: x - px, dy: y - py, dragging: true }); px = x; py = y; setHand(x, y);
+        });
+        handDown = false; inst.up?.({ x: px, y: py }); handEl.classList.remove('ir-down');
+        lastXY = { x: px, y: py };
+        await show.wait(320);
+      },
+      async slide(id, to, ms = 900) {
+        const c = (p.controls || []).find(c => c.id === id); if (!c) return;
+        flashRow(id); lastXY = null;
+        const from = values[id];
+        await tick(ms, u => {
+          const v = clamp(Number((Math.round((from + (to - from) * u) / c.step) * c.step).toFixed(6)), c.min, c.max);
+          if (v !== values[id]) { values[id] = v; syncControl(id); inst.control?.(id, v); }
+        });
+        await show.wait(250);
+      },
+      async press(id, v) {
+        const c = (p.controls || []).find(c => c.id === id); if (!c) return;
+        flashRow(id); lastXY = null;
+        await show.wait(350);
+        if (c.type === 'toggle') values[id] = v === undefined ? !values[id] : v;
+        else if (c.type !== 'button') values[id] = v;
+        syncControl(id); syncShown();
+        inst.control?.(id, c.type === 'button' ? true : values[id]);
+        await show.wait(450);
+      }
+    };
+    async function runDemo(i) {
+      if (!inst.demo || i >= prompts.length) return;
+      const run = ++demoRun;
+      showBtn.hidden = true; clearTimeout(offerTimer); arrived();
+      root.classList.add('ir-demo', 'ir-touched');
+      if (!hand) setHand(w / 2, h / 2);
+      try { await inst.demo(i); } catch (e) { if (e !== STOP) console.error(e); }
+      if (run === demoRun) root.classList.remove('ir-demo');
+    }
+    // any real touch takes the room back from the demonstration
+    function stopDemo() {
+      if (!root.classList.contains('ir-demo')) return;
+      demoRun++;
+      if (handDown) { handDown = false; try { inst.up?.(hand); } catch {} }
+      handEl.classList.remove('ir-down');
+      root.classList.remove('ir-demo');
+    }
+
     let inst;
     try { inst = p.create(k); } catch (e) { console.error(e); inst = { frame() {} }; }
     root._piece = inst; root._k = k; // handy for inspection in devtools
@@ -420,7 +520,7 @@ const Interiors = (() => {
     let pointer = null;
     const pos = e => { const r = over.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
     over.addEventListener('pointerdown', e => {
-      wake(); arrived(); root.classList.add('ir-touched');
+      wake(); arrived(); stopDemo(); root.classList.add('ir-touched');
       over.setPointerCapture?.(e.pointerId);
       const q = pos(e); lastXY = q;
       pointer = { id: e.pointerId, x0: q.x, y0: q.y, t0: performance.now(), moved: false, x: q.x, y: q.y };
@@ -454,6 +554,7 @@ const Interiors = (() => {
     /* dock + header */
     root.addEventListener('input', e => {
       const el = e.target.closest('[data-ctl]'); if (!el || el.type !== 'range') return;
+      stopDemo();
       const id = el.dataset.ctl; values[id] = Number(el.value); syncControl(id); inst.control?.(id, values[id]); wake();
     }, { signal });
     root.addEventListener('click', e => {
@@ -464,13 +565,14 @@ const Interiors = (() => {
         if (host.dataset.host === 'dock') toggleDock();
         if (host.dataset.host === 'shot') wantShot = true;
         if (host.dataset.host === 'full') toggleFull();
+        if (host.dataset.host === 'showme') runDemo(stage);
         return;
       }
       const dot = e.target.closest('[data-dot]');
       if (dot) { const saw = prompts[Number(dot.dataset.dot)]?.saw; if (saw) showInsight(saw); wake(); return; }
       const el = e.target.closest('[data-ctl]'); if (!el || el.type === 'range') return;
       const id = el.dataset.ctl, c = p.controls.find(c => c.id === id);
-      root.classList.add('ir-touched'); lastXY = null;
+      stopDemo(); root.classList.add('ir-touched'); lastXY = null;
       if (c.type === 'toggle') values[id] = !values[id];
       else if (c.type === 'choice') values[id] = typeof c.value === 'number' ? Number(el.dataset.value) : el.dataset.value;
       syncControl(id); syncShown();
@@ -526,7 +628,7 @@ const Interiors = (() => {
       dispose() {
         alive = false;
         cancelAnimationFrame(raf);
-        clearTimeout(idleTimer); clearTimeout(insightTimer); clearTimeout(arriveTimer);
+        clearTimeout(idleTimer); clearTimeout(insightTimer); clearTimeout(arriveTimer); clearTimeout(offerTimer);
         abort.abort(); ro.disconnect();
         try { inst.destroy?.(); } catch {}
         if (document.fullscreenElement === root) document.exitFullscreen().catch(() => {});

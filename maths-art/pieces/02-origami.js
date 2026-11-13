@@ -30,6 +30,9 @@
   // where a newly added neuron first appears: a loose ring that solves nothing
   const SPAWN = [[-0.3, 0.6, 0], [0.8, 2.6, 110], [0.6, -2.7, -100], [-2.2, -0.4, 200], [3.3, 0.2, 20], [-0.6, 2.2, 150]];
 
+  // where each fold of the earlier layer first lies: [anchor x, anchor y, normal angle in degrees]
+  const FOLD0 = [[-0.48, 1.98, 20], [2.19, -0.01, 95], [2.04, 2.14, -40]];
+
   const gelu = z => 0.5 * z * (1 + Math.tanh(0.7978845608 * (z + 0.044715 * z * z * z)));
   const ACT = { relu: z => (z > 0 ? z : 0), gelu, none: z => z };
   const SLOPE = { relu: z => (z > 0 ? 1 : 0), gelu: z => (gelu(z + 0.01) - gelu(z - 0.01)) / 0.02, none: () => 1 };
@@ -37,15 +40,48 @@
   const neuron = ([px, py, deg]) => ({ px, py, a: deg * Math.PI / 180 });
   const zOf = (N, x, y) => GAIN * ((x - N.px) * Math.cos(N.a) + (y - N.py) * Math.sin(N.a));
   // the layer: y = max(0, 1 − Σ act(zᵢ)); with no activation the output is left unclipped too
-  function layer(neurons, act, x, y) {
+  // An earlier layer that folds the sheet before the creases are made. Each fold is
+  // x′ = x + 2·max(0, −z)·n: the far side of its line is mirrored onto the near side.
+  // With no activation it is x′ = x − 2z·n everywhere: a plain mirror, which is one matrix.
+  function foldPoint(folds, linear, x, y) {
+    let mask = 0;
+    for (let q = 0; q < folds.length; q++) {
+      const F = folds[q], c = Math.cos(F.a), s = Math.sin(F.a), z = (x - F.px) * c + (y - F.py) * s;
+      if (linear || z < 0) { x -= 2 * z * c; y -= 2 * z * s; mask |= 1 << q; }
+    }
+    return [x, y, mask];
+  }
+  // Where a set of segments drawn on the folded sheet appears once the first `upto` folds are undone.
+  // A segment is [ax, ay, bx, by, nx, ny]; the normal is carried along so ticks can show the pushing side.
+  function unfold(segs, folds, upto, linear) {
+    for (let q = upto - 1; q >= 0; q--) {
+      const F = folds[q], c = Math.cos(F.a), s = Math.sin(F.a), out = [];
+      const mirror = (x, y) => { const z = (x - F.px) * c + (y - F.py) * s; return [x - 2 * z * c, y - 2 * z * s]; };
+      for (let [ax, ay, bx, by, nx, ny] of segs) {
+        const dn = nx * c + ny * s, mn = [nx - 2 * dn * c, ny - 2 * dn * s];
+        if (linear) { out.push([...mirror(ax, ay), ...mirror(bx, by), ...mn]); continue; }
+        const za = (ax - F.px) * c + (ay - F.py) * s, zb = (bx - F.px) * c + (by - F.py) * s;
+        if (za < 0 && zb < 0) continue; // drawn where no paper lands
+        if (za < 0 || zb < 0) {
+          const t = za / (za - zb), x = ax + (bx - ax) * t, y = ay + (by - ay) * t;
+          if (za < 0) { ax = x; ay = y; } else { bx = x; by = y; }
+        }
+        out.push([ax, ay, bx, by, nx, ny], [...mirror(ax, ay), ...mirror(bx, by), ...mn]);
+      }
+      segs = out;
+    }
+    return segs;
+  }
+  function layer(neurons, act, x, y, folds = []) {
+    if (folds.length) [x, y] = foldPoint(folds, act === 'none', x, y);
     let r = 0;
     for (const N of neurons) r += ACT[act](zOf(N, x, y));
     return { r, y: act === 'none' ? 1 - r : Math.max(0, 1 - r) };
   }
-  function score(neurons, act, task) {
+  function score(neurons, act, task, folds = []) {
     let kept = 0, wrong = 0, total = 0;
     const state = WORDS.map(([, x, y, kind]) => {
-      const on = layer(neurons, act, x, y).y > KEEP, want = kind === task;
+      const on = layer(neurons, act, x, y, folds).y > KEEP, want = kind === task;
       if (want) { total++; if (on) kept++; } else if (on) wrong++;
       return { on, want };
     });
@@ -54,19 +90,29 @@
 
   // The folded sheet seen from above, lit from one side: every facet is a region
   // where the same neurons are firing, so the layer is exactly linear there.
-  function sheet(buf, bw, bh, s, view, neurons, act, lines) {
+  function sheet(buf, bw, bh, s, view, neurons, act, lines, folds = []) {
     const img = buf.createImageData(bw, bh), d = img.data;
+    const fs = folds.map(F => [F.px, F.py, Math.cos(F.a), Math.sin(F.a)]), nf = fs.length, lin = act === 'none';
+    const seen = new Uint16Array(512); // how many pixels show each pattern of folds and firing neurons
     const cs = neurons.map(N => [N.px, N.py, Math.cos(N.a), Math.sin(N.a)]), f = ACT[act], df = SLOPE[act];
     const LX = -0.55, LY = 0.83, pxWorld = s / view.u;
     for (let j = 0, o = 0; j < bh; j++) {
       const wy = (view.cy - (j + 0.5) * s) / view.u;
       for (let i = 0; i < bw; i++, o += 4) {
-        const wx = ((i + 0.5) * s - view.cx) / view.u;
-        let r = 0, gx = 0, gy = 0;
-        for (const c of cs) {
-          const z = GAIN * ((wx - c[0]) * c[2] + (wy - c[1]) * c[3]), sl = df(z);
-          r += f(z); gx += sl * c[2]; gy += sl * c[3];
+        let wx = ((i + 0.5) * s - view.cx) / view.u, fy = wy, mask = 0;
+        for (let q = 0; q < nf; q++) {
+          const c = fs[q], z = (wx - c[0]) * c[2] + (fy - c[1]) * c[3];
+          if (lin || z < 0) { wx -= 2 * z * c[2]; fy -= 2 * z * c[3]; mask |= 1 << q; }
         }
+        let r = 0, gx = 0, gy = 0, pat = mask;
+        for (let n = 0; n < cs.length; n++) {
+          const c = cs[n], z = GAIN * ((wx - c[0]) * c[2] + (fy - c[1]) * c[3]), sl = df(z);
+          r += f(z); gx += sl * c[2]; gy += sl * c[3];
+          if (z > 0) pat |= 8 << n;
+        }
+        // the slope as seen on the unfolded sheet: mirrored back through each fold that applied
+        for (let q = nf - 1; q >= 0; q--) if (mask >> q & 1) { const c = fs[q], dp = gx * c[2] + gy * c[3]; gx -= 2 * dp * c[2]; gy -= 2 * dp * c[3]; }
+        if (seen[pat] < 65535) seen[pat]++;
         const g = Math.hypot(gx, gy) * GAIN, y = clamp(1 - r, 0, 1);
         // paper: facets on the slopes, brighter where they face the light, fading as they fall away
         const lit = g > 0.02 ? 0.5 + 0.5 * (gx * LX + gy * LY) / (g / GAIN) : 0;
@@ -87,10 +133,14 @@
       }
     }
     buf.putImageData(img, 0, 0);
+    // facets on screen: with no bend anywhere there is exactly one
+    let facets = 0;
+    for (let q = 0; q < 512; q++) if (seen[q] >= 4) facets++;
+    return lin ? 1 : facets;
   }
 
   function paint(ctx, w, h, view, buf, st, opts = {}) {
-    const { neurons, act, task, sc } = st, S = (x, y) => [view.cx + x * view.u, view.cy - y * view.u];
+    const { neurons, act, task, sc } = st, folds = st.folds || [], lin = act === 'none', S = (x, y) => [view.cx + x * view.u, view.cy - y * view.u];
     ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(buf.canvas, 0, 0, w, h);
 
@@ -105,18 +155,45 @@
 
     // the creases: one straight line per neuron, with ticks on the side it pushes
     const far = Math.hypot(w, h) / view.u;
+    const line = N => { const nx = Math.cos(N.a), ny = Math.sin(N.a); return [N.px + ny * far, N.py - nx * far, N.px - ny * far, N.py + nx * far, nx, ny]; };
+    // the earlier layer's folds: each one is drawn as it lies once the folds before it are undone
+    folds.forEach((F, q) => {
+      const fhot = opts.hotFold === q;
+      ctx.strokeStyle = `rgba(${IVORY},${fhot ? 0.95 : 0.7})`; ctx.lineWidth = 1.4; ctx.setLineDash([9, 6]); ctx.beginPath();
+      for (const g of unfold([line(F)], folds, q, lin)) { ctx.moveTo(...S(g[0], g[1])); ctx.lineTo(...S(g[2], g[3])); }
+      ctx.stroke(); ctx.setLineDash([]);
+      if (opts.handles) {
+        const nx = Math.cos(F.a), ny = Math.sin(F.a), P = S(F.px, F.py), T = S(F.px + nx * 0.6, F.py + ny * 0.6);
+        ctx.strokeStyle = ctx.fillStyle = `rgb(${IVORY})`; ctx.lineWidth = 2;
+        draw.arrow(ctx, P[0], P[1], T[0], T[1], 9);
+        ctx.beginPath(); ctx.arc(P[0], P[1], 6, 0, 7); ctx.fill();
+        ctx.fillStyle = '#05060a'; ctx.beginPath(); ctx.arc(P[0], P[1], 2.5, 0, 7); ctx.fill();
+        draw.label(ctx, `fold ${q + 1}`, P[0] - 10 * nx + (nx > 0.3 ? -8 : 8), P[1] + 10 * ny + 4, `rgba(${IVORY},.9)`, '500 11px "IBM Plex Mono", monospace', nx > 0.3 ? 'right' : 'left');
+      }
+    });
     neurons.forEach((N, i) => {
       const col = NCOL[i % NCOL.length], nx = Math.cos(N.a), ny = Math.sin(N.a), hot = opts.hot === i;
-      const a = S(N.px + ny * far, N.py - nx * far), b = S(N.px - ny * far, N.py + nx * far);
+      // one straight crease on the folded sheet; unfolded, it shows up once in every layer of paper it crossed
+      const segs = unfold([line(N)], folds, folds.length, lin);
+      if (folds.length) { // where the crease lies on the folded sheet itself
+        const g = line(N);
+        ctx.strokeStyle = `rgba(${col},.22)`; ctx.lineWidth = 1; ctx.setLineDash([2, 5]);
+        ctx.beginPath(); ctx.moveTo(...S(g[0], g[1])); ctx.lineTo(...S(g[2], g[3])); ctx.stroke(); ctx.setLineDash([]);
+      }
       ctx.globalCompositeOperation = 'lighter';
       for (const [lw, al] of [[12, 0.07], [4, 0.18], [1.5, 0.95]]) {
         ctx.strokeStyle = `rgba(${col},${al * (hot ? 1.35 : 1)})`; ctx.lineWidth = lw;
-        ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke();
+        ctx.beginPath();
+        for (const g of segs) { ctx.moveTo(...S(g[0], g[1])); ctx.lineTo(...S(g[2], g[3])); }
+        ctx.stroke();
       }
       ctx.strokeStyle = `rgba(${col},.5)`; ctx.lineWidth = 1; ctx.beginPath();
-      for (let q = -Math.ceil(far * 2.5); q <= far * 2.5; q++) {
-        const [x, y] = S(N.px + ny * q * 0.4, N.py - nx * q * 0.4);
-        ctx.moveTo(x, y); ctx.lineTo(x + nx * 7, y - ny * 7);
+      for (const g of segs) {
+        const len = Math.hypot(g[2] - g[0], g[3] - g[1]), steps = Math.floor(len / 0.4);
+        for (let q = 0; q <= steps; q++) {
+          const [x, y] = S(g[0] + (g[2] - g[0]) * q / (steps || 1), g[1] + (g[3] - g[1]) * q / (steps || 1));
+          ctx.moveTo(x, y); ctx.lineTo(x + g[4] * 7, y - g[5] * 7);
+        }
       }
       ctx.stroke();
       ctx.globalCompositeOperation = 'source-over';
@@ -160,11 +237,12 @@
     you: 'You are inside a feed-forward layer, deciding which words to leave alone.',
     hear: 'Each neuron is a string. Point at a word and you hear only the neurons that fire for it, louder the harder they push; a word every neuron is silent on makes no sound at all. That silence is the zero in max(0, z).',
     caption: 'A neuron is silent on one side of a line. Enough of them fold the space into shapes no matrix can draw.',
-    label: 'A dark sheet of word-points creased by bright lines; the region the neurons leave alone glows and keeps its words lit.',
+    label: 'A dark sheet of word-points creased by bright lines; the region the neurons leave alone glows and keeps its words lit. Dashed lines are the folds of an earlier layer, and each crease reappears mirrored across them.',
     mathsTitle: 'A bend at zero',
     controls: [
       { type: 'choice', id: 'task', label: 'Keep only the', value: 'places', options: [['places', 'Places'], ['people', 'People'], ['animals', 'Animals']] },
       { type: 'range', id: 'n', label: 'Neurons (creases)', min: 1, max: 6, step: 1, value: 1, fmt: v => String(v) },
+      { type: 'range', id: 'folds', label: 'Fold the sheet first (an earlier layer)', min: 0, max: 3, step: 1, value: 0, fmt: v => String(v) },
       { type: 'choice', id: 'act', label: 'Activation', value: 'relu', options: [['relu', 'ReLU'], ['gelu', 'GELU'], ['none', 'None (linear)']] },
       { type: 'toggle', id: 'lines', label: 'Contour lines', value: true },
       { type: 'button', id: 'solve', label: 'Show one answer' }
@@ -175,29 +253,37 @@
       { do: 'Switch <b>Keep only the</b> to <b>People</b>, and try to do it with one crease.', saw: 'It cannot be done. The people stand in the middle with other words on every side, and one neuron only ever draws one straight line. This is exactly as far as a matrix can go.' },
       { do: 'Raise <b>Neurons</b> and place the creases around the people.', saw: 'Each neuron is still only a straight line and a bend. But their silent sides overlap, and the overlap has <b>corners</b>: a shape no single line could draw. More neurons, finer shapes. This is what a feed-forward layer’s width buys.' },
       { do: 'Now set <b>Activation</b> to <b>None (linear)</b>.', saw: 'The shape is gone. Without the bend every neuron pushes on both sides of its line; the pushes add up to one tilted, flat sheet, and the whole layer is a single straight cut again. However many neurons you add, it is one matrix in disguise.' },
-      { do: 'Try <b>GELU</b>, the smooth bend most language models use.', saw: 'The corners round off and the sheet curves instead of creasing, but the shape is back. GELU is the same idea with a soft hinge, which gives training a slope to follow on both sides of zero.' }
+      { do: 'Try <b>GELU</b>, the smooth bend most language models use.', saw: 'The corners round off and the sheet curves instead of creasing, but the shape is back. GELU is the same idea with a soft hinge, which gives training a slope to follow on both sides of zero.' },
+      { do: 'Back on <b>ReLU</b>, raise <b>Fold the sheet first</b> to 1.', saw: 'An earlier layer has folded the paper along the dashed line before your neuron creases it. Unfolded, the one crease is there twice, mirrored. The neuron still asks one straight question; it is the space it is asked in that is no longer flat.' },
+      { do: 'Raise the folds to 2, then 3, and drag a crease across them.', saw: 'Every fold can double what each later crease draws: three folds and one neuron can cut the sheet in eight places, where three more neurons in the same layer would add only three lines. Width adds facets. <b>Depth multiplies them.</b>' }
     ],
-    coda: 'Stack layers and the creases themselves get folded: depth multiplies the number of facets where width only adds to it.',
+    coda: 'Drag the dashed folds too (dot to move, arrow to turn). Words on the far side of a fold land on top of words on the near side, and from then on no later layer can tell them apart.',
     walk: [
       'Each crease is one hidden neuron. It measures how far a word lies past its line, <b>zᵢ = nᵢ·x − bᵢ</b>, and passes that on only if it is positive: <b>hᵢ = max(0, zᵢ)</b>. That is ReLU. On the near side the neuron says nothing at all.',
       'One output neuron adds the pushes up and subtracts them from 1: <b>y = max(0, 1 − Σ hᵢ)</b>. A word is kept while y stays above ½, so the kept region is where no neuron pushes hard: the overlap of all the silent sides.',
       'The sheet is that function drawn as folded paper. Inside each facet the same neurons are firing, so the layer is exactly linear there; the creases are where a neuron switches on. The bright contour is y = ½, the layer’s decision.',
+      'Now put a layer before it. A <b>fold</b> is x′ = x + 2·max(0, −z)·n: one more ReLU, added back onto the word’s own position, which mirrors everything behind the fold’s line onto the side in front. The creases are then made on the folded sheet, so one straight crease is drawn through every layer of paper at once. With k folds a single neuron can bend the sheet in up to 2ᵏ places. This is why depth is worth more than width.',
       'Take the bend away and Σ zᵢ is a sum of linear functions, which is one linear function: a flat tilted sheet whose decision is one straight line. The activation is the only reason a second neuron, or a second layer, adds anything.'
     ],
     inside: [
       'Every transformer layer contains a feed-forward block: a matrix, a non-linearity, another matrix. It holds about two-thirds of the model’s parameters, and it is where the computation stops being linear.',
       'Its hidden neurons are thousands of creases through a space of thousands of dimensions. Interpretability work often finds neurons, or small groups of them, that stay silent for most text and fire for one kind of thing. Modern models use smooth cousins of ReLU (GELU, SwiGLU), so their creases are rounded, but the role is the same: without the activation, a hundred layers would collapse into one matrix.'
     ],
-    honest: 'A real two-layer network, computed exactly for every pixel: up to six hidden ReLU neurons whose lines you place by hand, and one output neuron with weights −1 and bias 1. The word positions are the illustrative placements from the Lattice, and the three tasks are chosen so that two need one crease and one needs several. A trained layer learns its lines; nobody drags them. Shading is a light from the upper left on the sheet’s slope; contour lines are every ½ of the summed push.',
+    honest: 'A real two-layer network, computed exactly for every pixel: up to six hidden ReLU neurons whose lines you place by hand, and one output neuron with weights −1 and bias 1. The word positions are the illustrative placements from the Lattice, and the three tasks are chosen so that two need one crease and one needs several. A trained layer learns its lines; nobody drags them. Shading is a light from the upper left on the sheet’s slope; contour lines are every ½ of the summed push. The folds of the earlier layer are exact reflections (a ReLU with a skip connection, which is how a transformer block is wired); they stay sharp when you choose GELU, and become a plain mirror with no activation. A trained network does not fold so neatly: its early layers bend the space in whatever way lowers the loss.',
     refs: [['Montúfar et al. 2014 — On the number of linear regions of deep neural networks', 'https://arxiv.org/abs/1402.1869'], ['Hendrycks & Gimpel 2016 — Gaussian error linear units (GELU)', 'https://arxiv.org/abs/1606.08415'], ['Vaswani et al. 2017 — the position-wise feed-forward network (§3.3)', 'https://arxiv.org/abs/1706.03762']],
 
     create(k) {
       const { ctx, octx } = k;
       const buf = makeBuffer();
-      let neurons = [neuron(SPAWN[0])], goals = null;
+      let neurons = [neuron(SPAWN[0])], goals = null, folds = [], facets = 1;
       let view = { u: 60, cx: 0, cy: 0 }, bw = 0, bh = 0, s = 3, dirty = true;
       let drag = null, hover = -1, hot = -1, sel = 0, dragged = 0, sawSilent = false, sawFiring = false, wasPerfect = false;
       let sc = score(neurons, 'relu', 'places');
+      const fpt = p => { const [wx, wy] = toWorld(p); return folds.length ? foldPoint(folds, k.values.act === 'none', wx, wy) : [wx, wy]; };
+      function setFolds(n) {
+        while (folds.length < n) folds.push(neuron(FOLD0[folds.length]));
+        folds.length = Math.min(folds.length, n); dirty = true;
+      }
       const drone = k.sound.drone(147, 'triangle');
 
       function layout() {
@@ -223,8 +309,14 @@
           if (dt < bd) { bd = dt; best = { i, mode: 'turn', handle: true }; }
           if (da < bd) { bd = da; best = { i, mode: 'move', handle: true }; }
         });
+        folds.forEach((F, i) => {
+          const [tx, ty] = toScreen(F.px + Math.cos(F.a) * 0.6, F.py + Math.sin(F.a) * 0.6), [ax, ay] = toScreen(F.px, F.py);
+          const dt = Math.hypot(tx - p.x, ty - p.y), da = Math.hypot(ax - p.x, ay - p.y);
+          if (dt < bd) { bd = dt; best = { i, mode: 'turn', handle: true, fold: true }; }
+          if (da < bd) { bd = da; best = { i, mode: 'move', handle: true, fold: true }; }
+        });
         if (best) return best;
-        const [wx, wy] = toWorld(p);
+        const [wx, wy] = fpt(p);
         bd = 9 / view.u * GAIN;
         neurons.forEach((N, i) => { const d = Math.abs(zOf(N, wx, wy)); if (d < bd) { bd = d; best = { i, mode: 'move' }; } });
         return best;
@@ -236,18 +328,21 @@
       }
       function check() {
         const act = k.values.act, task = k.values.task;
-        if (k.stage === 0 && task === 'places' && act === 'relu' && sc.perfect) k.reach(0);
-        if (k.stage === 1 && sawSilent && sawFiring) k.reach(1);
-        if (k.stage === 2 && task === 'people' && (dragged > 260 || neurons.length > 1)) k.reach(2);
-        if (k.stage === 3 && task === 'people' && act !== 'none' && sc.perfect) k.reach(3);
-        if (k.stage === 4 && act === 'none' && neurons.length > 1) k.reach(4);
-        if (k.stage === 5 && act === 'gelu') k.reach(5);
+        if (!k.did(0) && task === 'places' && act === 'relu' && sc.perfect) k.reach(0);
+        if (!k.did(1) && sawSilent && sawFiring) k.reach(1);
+        if (!k.did(2) && task === 'people' && (dragged > 260 || neurons.length > 1)) k.reach(2);
+        if (!k.did(3) && task === 'people' && act !== 'none' && sc.perfect) k.reach(3);
+        if (!k.did(4) && act === 'none' && neurons.length > 1) k.reach(4);
+        if (!k.did(5) && act === 'gelu') k.reach(5);
+        if (!k.did(6) && folds.length >= 1 && act !== 'none') k.reach(6);
+        if (!k.did(7) && folds.length >= 2 && act !== 'none' && facets >= 6) k.reach(7);
       }
       function touchWord(i) {
         const fresh = i !== hover;
         hover = i;
         if (i < 0) return;
-        const zs = neurons.map(N => zOf(N, WORDS[i][1], WORDS[i][2]));
+        const [fx, fy] = foldPoint(folds, k.values.act === 'none', WORDS[i][1], WORDS[i][2]);
+        const zs = neurons.map(N => zOf(N, fx, fy));
         // the firing neurons sound; the silent ones are silent
         if (fresh) zs.forEach((z, n) => { const h = ACT[k.values.act](z); if (h > 0.02) k.sound.pluck(k.sound.note(n * 2, 147), 0.03 + 0.05 * Math.min(1, h), 1.1); });
         if (zs.some(z => z > 0.05)) sawFiring = true; else sawSilent = true;
@@ -270,13 +365,13 @@
             dirty = true;
           }
           if (dirty) {
-            sheet(buf.ctx, bw, bh, s, view, neurons, act, k.values.lines);
-            sc = score(neurons, act, task);
+            facets = sheet(buf.ctx, bw, bh, s, view, neurons, act, k.values.lines, folds);
+            sc = score(neurons, act, task, folds);
             dirty = false;
             if (sc.perfect && !wasPerfect) [523, 659, 784].forEach((f, i) => setTimeout(() => k.sound.tone(f, 0.5, 0.04), i * 90));
             wasPerfect = sc.perfect;
           }
-          paint(ctx, k.w, k.h, view, buf, { neurons, act, task, sc }, { handles: true, hover, hot: drag ? drag.i : hot });
+          paint(ctx, k.w, k.h, view, buf, { neurons, act, task, sc, folds }, { handles: true, hover, hot: drag ? (drag.fold ? -1 : drag.i) : hot, hotFold: drag && drag.fold ? drag.i : -1 });
           draw.vignette(ctx, k.w, k.h, 0.5);
 
           octx.clearRect(0, 0, k.w, k.h);
@@ -284,6 +379,12 @@
           const others = sc.wrong ? `  ·  ${sc.wrong} other word${sc.wrong > 1 ? 's' : ''} kept by mistake` : '';
           draw.label(octx, sc.perfect ? `only the ${task} are left alone  ✓` : `${sc.kept} of ${sc.total} ${task} kept${others}`, k.w < 760 ? 16 : 28, k.w < 760 ? 92 : 84,
             sc.perfect ? `rgb(${PINK})` : sc.wrong ? `rgb(${RED})` : 'rgba(236,232,240,.85)', '12px "IBM Plex Mono", monospace');
+          if (folds.length) {
+            const n = neurons.length, flat = 1 + n + n * (n - 1) / 2;
+            draw.label(octx, act === 'none' ? `${folds.length} fold${folds.length > 1 ? 's' : ''}, but with no bend each is only a mirror: 1 facet`
+              : `${folds.length} fold${folds.length > 1 ? 's' : ''}, then ${n} crease${n > 1 ? 's' : ''}: ${facets} facets on the sheet  ·  ${n} crease${n > 1 ? 's' : ''} alone: at most ${flat}`,
+              k.w < 760 ? 16 : 28, k.w < 760 ? 110 : 102, `rgba(${IVORY},.85)`, '12px "IBM Plex Mono", monospace');
+          }
 
           // the hinge itself: this activation's graph, with the hovered word's z for every neuron
           const narrow = k.w < 760, gw = narrow ? 120 : 190, gh = narrow ? 70 : 104, gx = k.w - gw - (narrow ? 16 : 34), gy = narrow ? 118 : 108;
@@ -299,7 +400,8 @@
             draw.label(octx, 'z →', gx + gw, Y(0) + 10, 'rgba(236,232,240,.5)', '10px "IBM Plex Mono", monospace', 'right');
             if (hover >= 0) {
               neurons.forEach((N, i) => {
-                const z = clamp(zOf(N, WORDS[hover][1], WORDS[hover][2]), -2.2, 2.2), v = clamp(ACT[act](z), -0.3, 2.3);
+                const [hx, hy] = foldPoint(folds, act === 'none', WORDS[hover][1], WORDS[hover][2]);
+                const z = clamp(zOf(N, hx, hy), -2.2, 2.2), v = clamp(ACT[act](z), -0.3, 2.3);
                 octx.fillStyle = `rgb(${NCOL[i % NCOL.length]})`; octx.beginPath(); octx.arc(X(z), Y(v), 4.5, 0, 7); octx.fill();
                 octx.strokeStyle = '#05060a'; octx.lineWidth = 1.5; octx.stroke();
               });
@@ -307,9 +409,11 @@
           }
           // the worked example beside the hovered word
           if (hover >= 0) {
-            const [word, x, y] = WORDS[hover], [px, py] = toScreen(x, y), out = layer(neurons, act, x, y);
-            const rows = neurons.map((N, i) => { const z = zOf(N, x, y); return [`z${'₁₂₃₄₅₆'[i]} = ${fmt(z)}  →  ${fmt(ACT[act](z))}`, NCOL[i % NCOL.length]]; });
+            const [word, x, y] = WORDS[hover], [px, py] = toScreen(x, y), out = layer(neurons, act, x, y, folds);
+            const [fx, fy, fm] = foldPoint(folds, act === 'none', x, y);
+            const rows = neurons.map((N, i) => { const z = zOf(N, fx, fy); return [`z${'₁₂₃₄₅₆'[i]} = ${fmt(z)}  →  ${fmt(ACT[act](z))}`, NCOL[i % NCOL.length]]; });
             const left = px > k.w * 0.62, lx = px + (left ? -16 : 16), ly = clamp(py + 18, 120, k.h - 40 - rows.length * 16);
+            if (fm) rows.unshift([`folded to (${fmt(fx, 1)}, ${fmt(fy, 1)})`, IVORY]);
             rows.forEach(([text, col], i) => draw.label(octx, text, lx, ly + i * 16, `rgb(${col})`, '12px "IBM Plex Mono", monospace', left ? 'right' : 'left'));
             draw.label(octx, `${word}: y = ${act === 'none' ? '' : 'max(0, '}1 − ${fmt(out.r)}${act === 'none' ? '' : ')'} = ${fmt(out.y)}  ·  ${out.y > KEEP ? 'kept' : 'pushed away'}`, lx, ly + rows.length * 16 + 4, '#fff', '500 12px "IBM Plex Mono", monospace', left ? 'right' : 'left');
           }
@@ -320,17 +424,22 @@
         down(p) {
           // a word wins over the bare line of a crease, so words lying on a crease can still be read
           const hit = pick(p), word = nearestWord(p);
-          if (hit && (hit.handle || word < 0)) { drag = hit; sel = hit.i; goals = null; } else touchWord(word);
+          if (hit && (hit.handle || word < 0)) { drag = hit; if (!hit.fold) sel = hit.i; goals = null; } else touchWord(word);
         },
         move(p) {
           if (drag && p.dragging) {
-            const N = neurons[drag.i], [wx, wy] = toWorld(p);
+            const N = (drag.fold ? folds : neurons)[drag.i], [wx, wy] = toWorld(p);
             if (drag.mode === 'turn') N.a = Math.atan2(wy - N.py, wx - N.px);
-            else { N.px = clamp(N.px + p.dx / view.u, -4.5, 4.5); N.py = clamp(N.py - p.dy / view.u, -4, 4); }
+            else if (!drag.handle && folds.length) {
+              // a crease grabbed by one of its mirrored copies moves the way that copy is dragged
+              const f = fpt(p);
+              if (drag.f && drag.f[2] === f[2]) { N.px = clamp(N.px + f[0] - drag.f[0], -4.5, 4.5); N.py = clamp(N.py + f[1] - drag.f[1], -4, 4); }
+              drag.f = f;
+            } else { N.px = clamp(N.px + p.dx / view.u, -4.5, 4.5); N.py = clamp(N.py - p.dy / view.u, -4, 4); }
             dragged += Math.hypot(p.dx, p.dy); dirty = true;
           } else if (!p.dragging) {
             const hit = pick(p), word = nearestWord(p), grab = hit && (hit.handle || word < 0);
-            hot = grab ? hit.i : -1;
+            hot = grab && !hit.fold ? hit.i : -1;
             touchWord(grab ? -1 : word);
           }
         },
@@ -338,9 +447,11 @@
         leave() { hover = -1; hot = -1; },
         control(id, v) {
           if (id === 'n') { setCount(v); k.sound.tone(220 * 2 ** (v / 6), 0.3, 0.04); }
+          if (id === 'folds') { setFolds(v); k.sound.pluck(k.sound.note(v * 2 + 1, 98), 0.06, 1.6); }
+          if (id === 'task') dragged = 0;
           if (id === 'solve') {
             const A = ANSWERS[k.values.task];
-            k.set('n', A.length); setCount(A.length);
+            k.set('n', A.length); setCount(A.length); k.set('folds', 0); setFolds(0);
             if (k.values.act === 'none') k.set('act', 'relu');
             goals = A.map(neuron);
           }
@@ -356,20 +467,52 @@
           if (e.shiftKey) N.a += d * 0.1; else { N.px += Math.cos(N.a) * d * 0.1; N.py += Math.sin(N.a) * d * 0.1; }
           dragged += 20; dirty = true;
         },
+        async demo(i) {
+          const s = k.show, at = (x, y) => toScreen(x, y);
+          const relu = async () => { if (k.values.act !== 'relu') await s.press('act', 'relu'); };
+          if (i === 0 || i === 3) {
+            const task = i === 0 ? 'places' : 'people';
+            if (k.values.task !== task) await s.press('task', task);
+            if (i === 0) await relu();
+            await s.press('solve'); await s.wait(1400);
+          }
+          if (i === 1) {
+            const zmax = w => Math.max(...neurons.map(N => zOf(N, ...foldPoint(folds, k.values.act === 'none', w[1], w[2]))));
+            const quiet = WORDS.find(w => zmax(w) < -0.3), loud = WORDS.find(w => zmax(w) > 0.4);
+            if (quiet) await s.hover(...at(quiet[1], quiet[2]), 1700);
+            if (loud) await s.hover(...at(loud[1], loud[2]), 1700);
+          }
+          if (i === 2) {
+            if (k.values.task !== 'people') await s.press('task', 'people');
+            const N = neurons[0];
+            await s.drag([at(N.px, N.py), at(0.2, 1.6), at(1.9, 0.2), at(0.3, -1.6), at(-0.3, 0)], 3200);
+          }
+          if (i === 4) { if (neurons.length < 2) { await s.press('task', 'people'); await s.press('solve'); await s.wait(1200); } await s.press('act', 'none'); }
+          if (i === 5) await s.press('act', 'gelu');
+          if (i === 6) { await relu(); await s.slide('folds', 1, 300); }
+          if (i === 7) {
+            await relu();
+            await s.slide('folds', 2, 300); await s.wait(900); await s.slide('folds', 3, 300); await s.wait(600);
+            const N = neurons[0];
+            await s.drag([at(N.px, N.py), at(1.6, 1.2), at(2.2, -0.8), at(1.2, 0.4)], 3000);
+          }
+        },
         maths() {
           const act = k.values.act, name = act === 'relu' ? 'max(0, zᵢ)' : act === 'gelu' ? 'GELU(zᵢ)' : 'zᵢ';
           const rows = neurons.map((N, i) => {
             const nx = Math.cos(N.a), ny = Math.sin(N.a), b = GAIN * (N.px * nx + N.py * ny);
-            const z = hover >= 0 ? zOf(N, WORDS[hover][1], WORDS[hover][2]) : null;
+            const z = hover >= 0 ? zOf(N, ...foldPoint(folds, act === 'none', WORDS[hover][1], WORDS[hover][2])) : null;
             return `<tr><td style="color:rgb(${NCOL[i % NCOL.length]})">neuron ${i + 1}</td><td>(${fmt(GAIN * nx)}, ${fmt(GAIN * ny)})</td><td>${fmt(b)}</td><td>${z === null ? '–' : `${fmt(z)} → ${fmt(ACT[act](z))}`}</td></tr>`;
           }).join('');
-          const out = hover >= 0 ? layer(neurons, act, WORDS[hover][1], WORDS[hover][2]) : null;
+          const out = hover >= 0 ? layer(neurons, act, WORDS[hover][1], WORDS[hover][2], folds) : null;
           return `<p class="eq">zᵢ = nᵢ·x − bᵢ      hᵢ = ${name}\ny = ${act === 'none' ? '1 − Σ hᵢ' : 'max(0, 1 − Σ hᵢ)'}      kept while y &gt; ½</p>
             <div class="row"><span>task</span><span class="hl">keep only the ${TASKS[k.values.task]}</span></div>
             <div class="row"><span>kept · of · by mistake</span><span>${sc.kept} · ${sc.total} · ${sc.wrong}</span></div>
             <table><tr><th></th><th>nᵢ</th><th>bᵢ</th><th>${hover >= 0 ? Interiors.esc(WORDS[hover][0]) + ': z → h' : 'point at a word'}</th></tr>${rows}</table>
             ${out ? `<div class="row"><span>Σ hᵢ, then y</span><span class="hl">${fmt(out.r)}, ${fmt(out.y)}</span></div>` : ''}
-            <div class="row"><span>facets one layer of ${neurons.length} can make, at most</span><span>${1 + neurons.length + neurons.length * (neurons.length - 1) / 2}</span></div>`;
+            <div class="row"><span>facets one layer of ${neurons.length} can make, at most</span><span>${1 + neurons.length + neurons.length * (neurons.length - 1) / 2}</span></div>
+            <div class="row"><span>folds made first, by an earlier layer</span><span>${folds.length}</span></div>
+            <div class="row"><span>facets on the sheet now</span><span class="hl">${facets}</span></div>`;
         }
       };
     },

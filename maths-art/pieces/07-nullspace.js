@@ -181,9 +181,9 @@
 
       function check() {
         const a = k.values.alpha, c = Math.abs(dot(n, REF));
-        if (k.stage === 1 && a >= 0.95) k.reach(1);
-        if (k.stage === 2 && a >= 0.95 && c > 0.95) setTimeout(() => k.reach(2), 900);
-        if (k.stage === 3 && a >= 0.95 && c < 0.5 && Math.abs(separation(pts, TOP, 'code')) / base.top < 0.4) setTimeout(() => k.reach(3), 900);
+        if (!k.did(1) && a >= 0.95) k.reach(1);
+        if (!k.did(2) && a >= 0.95 && c > 0.95) setTimeout(() => k.reach(2), 900);
+        if (!k.did(3) && a >= 0.95 && c < 0.5 && Math.abs(separation(pts, TOP, 'code')) / base.top < 0.4) setTimeout(() => k.reach(3), 900);
       }
 
       return {
@@ -251,7 +251,7 @@
             const cam = camera(yaw, pitch, k.w, k.h, scale()), s = 0.006;
             n = unit(n.map((x, i) => x + (cam.right[i] * p.dx - cam.up[i] * p.dy) * s));
             turned += Math.hypot(p.dx, p.dy);
-            if (k.stage === 0 && turned > 120) k.reach(0);
+            if (!k.did(0) && turned > 120) k.reach(0);
           } else {
             yaw += p.dx * 0.006; pitch = clamp(pitch + p.dy * 0.006, -1.3, 1.3);
           }
@@ -262,7 +262,7 @@
           if (id === 'beta') {
             if (v > 1.2) sawUp = true;
             if (v < -1.2) sawDown = true;
-            if (k.stage === 4 && sawUp && sawDown && Math.abs(dot(n, REF)) > 0.9) k.reach(4);
+            if (!k.did(4) && sawUp && sawDown && Math.abs(dot(n, REF)) > 0.9) k.reach(4);
           }
           if (id === 'find') {
             // the difference between the mean refused and mean answered activation, from the ORIGINAL points
@@ -274,6 +274,18 @@
           }
           if (id === 'up') { target = [0, 1, 0]; if (dot(target, n) < 0) n = n.map(x => -x); }
           if (id === 'restore') { k.set('alpha', 0); k.set('beta', 0); for (const q of pts) q.p = [...q.x]; }
+        },
+
+        async demo(i) {
+          const s = k.show, full = async () => { if (k.values.alpha < 0.95) await s.slide('alpha', 1, 1500); else check(); };
+          if (i === 0) await s.drag([[tip[0], tip[1]], [tip[0] + 90, tip[1] + 50], [tip[0] + 10, tip[1] + 110]], 2400);
+          if (i === 1) await s.slide('alpha', 1, 1800);
+          if (i === 2) { await s.press('find'); await s.wait(1300); await full(); await s.wait(1000); }
+          if (i === 3) { await s.press('up'); await s.wait(1300); await full(); await s.wait(1000); }
+          if (i === 4) {
+            await s.press('restore'); await s.press('find'); await s.wait(1300);
+            await s.slide('beta', 2.5, 1800); await s.wait(700); await s.slide('beta', -2.5, 2400); await s.wait(700); await s.slide('beta', 0, 1000);
+          }
         },
         maths() {
           const a = k.values.alpha, refS = Math.abs(separation(pts, REF, 'harmful')), topS = Math.abs(separation(pts, TOP, 'code'));

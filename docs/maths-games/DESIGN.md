@@ -18,7 +18,7 @@ So the success test for each piece is, in order:
 4. **Truthful.** What moves on screen is computed by the real operation (matrix product, ReLU, softmax, gradient step, rotation, projection). Synthetic data is labelled synthetic.
 5. **Educational, quietly.** A one-line caption, a live equation with the viewer's own numbers, and a short "where this happens in the model" note. All optional, none blocking.
 
-No levels, scores, chambers, trials, win conditions or hint systems.
+No levels, scores, chambers, trials, win conditions or hint systems. (Amended 13 Nov 2026 at the user's request: discoveries may be made in any order, and after twenty seconds on one prompt the room offers **Show me**, which performs that prompt with a ghost hand. It is an offer, never automatic, and any touch takes the room back.)
 
 ## 2. Framing: you are a token
 
@@ -88,6 +88,8 @@ The **index** (`#maths/play`) is a dark gallery: seven large live thumbnails (ea
 **Interaction.** Drag a crease's dot to move it and its arrow to turn it. Point at a word for its worked example (each neuron's z → h, then y) and its dots on the hinge graph. Dock: **Keep only the** Places / People / Animals, **Neurons** 1–6, **Activation** ReLU / GELU / None, **Contour lines**, **Show one answer**.
 
 **Discoveries.** (1) one crease keeps the places: a neuron is silent on one side and a ramp on the other; (2) read the hinge graph for words on both sides; (3) the people stand in the middle, and one crease cannot keep only them (provably: other words lie inside their convex hull's line of sight on three sides); (4) three or more creases close a shape with corners; (5) activation off: the sum of linear pieces is one flat sheet and a single straight cut; (6) GELU: the same shape with rounded corners.
+
+**Depth.** **Fold the sheet first** (0–3) adds an earlier layer: each fold is x′ = x + 2·max(0, −z)·n, a reflection of the far side onto the near side. The creases are made on the folded sheet, so unfolded each appears once per layer of paper: up to 2ᵏ times for k folds. Folds are dashed ivory lines with their own handles. Two discoveries: one fold doubles a crease; three folds and one neuron cut the sheet in eight places (depth multiplies, width adds).
 
 **Maths drawer.** zᵢ = nᵢ·x − bᵢ, hᵢ = max(0, zᵢ), y = max(0, 1 − Σ hᵢ); live table of every neuron's n and b and the pointed word's z → h; the at-most 1 + k + k(k−1)/2 facets of one layer.
 

@@ -354,8 +354,8 @@
         drone.set(110 + 300 / Math.sqrt(H.dims), 0.02);
         voices.forEach((v, i) => v.set(i === 0 ? 392 : i === 1 ? 392 * 1.035 : 196, i === 0 ? 0.035 : i === 1 ? 0.05 * Math.min(1, B.ghosts / 200) : 0));
         if (B.ghosts) manyGhosted = true;
-        if (k.stage === 5 && manyGhosted && !bad) k.reach(5);
-        if (k.stage === 6 && litMoved && B.ghosts) k.reach(6);
+        if (!k.did(5) && manyGhosted && !bad) k.reach(5);
+        if (!k.did(6) && litMoved && B.ghosts) k.reach(6);
         k.over.style.cursor = 'pointer';
       }
 
@@ -456,7 +456,7 @@
           drone.set(98, 0.012 + meanAbs * 0.03);
           // lit concepts sing in tune; ghosts sing faintly and a little sharp
           voices.forEach((v, i) => { const st = state[i]; v.set(k.sound.note(i, 196) * (st && st.ghost ? 1.035 : 1), st && st.on ? 0.045 : st && st.ghost ? 0.03 : 0); });
-          if (k.stage === 3 && state.some(s => s.ghost) && active.size >= 3) k.reach(3);
+          if (!k.did(3) && state.some(s => s.ghost) && active.size >= 3) k.reach(3);
           k.over.style.cursor = drag ? 'grabbing' : 'pointer';
         },
         get tips() { return tips; },
@@ -479,11 +479,11 @@
           said = null;
           active.has(best) ? active.delete(best) : active.add(best);
           k.sound.tone(330 * 2 ** (best / 12), 0.4, 0.04);
-          if (k.stage === 1 && active.size === 1) k.reach(1);
-          else if (k.stage === 2 && active.size === 2) k.reach(2);
+          if (!k.did(1) && active.size === 1) k.reach(1);
+          else if (!k.did(2) && active.size === 2) k.reach(2);
         },
         control(id, v) {
-          if (id === 'n') { setN(v); if (k.stage === 0 && v > 6) k.reach(0); }
+          if (id === 'n') { setN(v); if (!k.did(0) && v > 6) k.reach(0); }
           if (id === 'space') { setD(v); active.clear(); said = null; if (k.values.stream) k.set('stream', false); }
           if (id === 'stream') { active.clear(); said = null; }
           if (id === 'say' && k.values.space !== 1000) {
@@ -501,11 +501,33 @@
           if (id === 'p' || id === 'stream') {
             if (k.values.p < 0.1) sawLo = true;
             if (k.values.p > 0.35) sawHi = true;
-            if (k.stage === 4 && k.values.stream && sawLo && sawHi) k.reach(4);
+            if (!k.did(4) && k.values.stream && sawLo && sawHi) k.reach(4);
             stream.log = []; stream.solo = [];
           }
           if (id === 'again') { manyDraw(true); k.sound.pluck(392, 0.05, 0.6); }
-          if (id === 'lit' && k.stage === 6) litMoved = true;
+          if (id === 'lit' && big && !(big.ghosts || big.missed)) litMoved = true; // raised from a clean readback
+        },
+
+        async demo(i) {
+          const s = k.show, tipOf = n => [tips[n][0], tips[n][1]];
+          const toSphere = async () => { if (k.values.space === 1000) { await s.press('space', 3); await s.wait(600); } if (k.values.stream) await s.press('stream', false); };
+          const toMany = async () => { if (k.values.space !== 1000) { await s.press('space', 1000); await s.wait(500); } };
+          const front = () => tips.map((tp, n) => [tp[2], n]).sort((a, b) => b[0] - a[0]).map(q => q[1]); // nearest stars first
+          if (i === 0) { await toSphere(); await s.slide('n', 9, 1400); }
+          if (i === 1) { await toSphere(); active.clear(); said = null; await s.tap(...tipOf(front()[0])); }
+          if (i === 2) {
+            await toSphere();
+            if (active.size !== 1) { active.clear(); said = null; await s.tap(...tipOf(front()[0])); }
+            await s.tap(...tipOf(front().find(n => !active.has(n))));
+          }
+          if (i === 3) {
+            await toSphere();
+            if (V.length < 10) { await s.slide('n', 10, 1200); await s.wait(1500); }
+            for (let n = 0; n < 5 && !k.did(3); n++) { await s.press('near'); await s.wait(700); }
+          }
+          if (i === 4) { await toSphere(); await s.press('stream', true); await s.slide('p', 0.05, 800); await s.wait(2500); await s.slide('p', 0.5, 2200); await s.wait(2500); }
+          if (i === 5) { await toMany(); if (k.values.lit > 8) await s.slide('lit', 5); await s.slide('hd', 0.6, 600); await s.wait(900); await s.slide('hd', 2.6, 3200); }
+          if (i === 6) { await toMany(); if (k.values.lit > 8) await s.slide('lit', 5); if (k.values.hd < 2.4) await s.slide('hd', 2.6, 1500); await s.wait(600); await s.slide('lit', 55, 2600); }
         },
         maths() {
           if (k.values.space === 1000) {

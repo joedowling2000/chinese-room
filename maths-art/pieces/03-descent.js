@@ -187,7 +187,7 @@
         last = seeds[seeds.length - 1];
         if (!quiet) k.sound.tone(660, 0.25, 0.03);
         if (seeds.length > 260) seeds.splice(0, seeds.length - 260);
-        if (k.stage === 3 && k.values.mu >= 0.8) setTimeout(() => k.reach(3), 1500);
+        if (!k.did(3) && k.values.mu >= 0.8) setTimeout(() => k.reach(3), 1500);
       }
       function step() {
         const eta = k.values.eta, mu = k.values.mu;
@@ -204,7 +204,7 @@
           if (!Number.isFinite(s.x) || Math.abs(s.x) > EXTENT * 1.5 || Math.abs(s.y) > EXTENT * 1.5) {
             s.state = 'gone'; s.goneAt = k.t;
             k.sound.noise(0.6, 0.05, 1400);
-            if (k.stage === 1 && eta > 0.2) k.reach(1);
+            if (!k.did(1) && eta > 0.2) k.reach(1);
             continue;
           }
           s.still = speed < 0.0015 ? s.still + 1 : 0;
@@ -212,14 +212,14 @@
             s.state = 'settled';
             const depth = (surf.L(s.x, s.y) - surf.lo) / (surf.hi - surf.lo);
             k.sound.pluck(110 * 2 ** (depth * 2.5), 0.05, 2.2);
-            if (k.stage === 2 && mu < 0.3 && eta < 0.04 && depth > 0.12) k.reach(2);
+            if (!k.did(2) && mu < 0.3 && eta < 0.04 && depth > 0.12) k.reach(2);
             if (surf.model && surf.L(s.x, s.y) < 0.05) {
               valleys.add(Math.sign(s.x));
-              if (k.stage === 5) k.reach(5);
-              if (k.stage === 6 && valleys.size > 1) k.reach(6);
+              if (!k.did(5)) k.reach(5);
+              if (!k.did(6) && valleys.size > 1) k.reach(6);
             }
           }
-          if (k.stage === 1 && eta > 0.2 && s.hops > 6) k.reach(1);
+          if (!k.did(1) && eta > 0.2 && s.hops > 6) k.reach(1);
         }
       }
 
@@ -308,7 +308,7 @@
           const lz = last && last.state === 'run' ? clamp((surf.Z(last.x, last.y) - surf.zlo) / (surf.zhi - surf.zlo), 0, 1) : 0;
           voice.set(110 * 2 ** (lz * 2.5), last && last.state === 'run' ? 0.05 : 0);
         },
-        down(p) { const q = unproject(p); if (q) { drop(q[0], q[1]); dragTrail = [p.x, p.y]; if (k.stage === 0) setTimeout(() => k.reach(0), 1200); } },
+        down(p) { const q = unproject(p); if (q) { drop(q[0], q[1]); dragTrail = [p.x, p.y]; if (!k.did(0)) setTimeout(() => k.reach(0), 1200); } },
         move(p) {
           if (!p.dragging || !dragTrail) return;
           if (Math.hypot(p.x - dragTrail[0], p.y - dragTrail[1]) > 22) { const q = unproject(p); if (q) drop(q[0], q[1], true); dragTrail = [p.x, p.y]; }
@@ -320,13 +320,54 @@
             const r = rng(Math.floor(k.t * 1000) + 1);
             for (let i = 0; i < 120; i++) drop((r() - 0.5) * 2 * EXTENT * 0.95, (r() - 0.5) * 2 * EXTENT * 0.95, true);
             k.sound.tone(523, 1, 0.04);
-            if (k.stage === 4) k.reach(4);
+            if (!k.did(4)) k.reach(4);
           }
           if (id === 'reshape') { seedNo++; k.set('world', 'sculpted'); surf = makeSurface(seedNo); seeds.length = 0; last = null; bake(); }
           if (id === 'world') {
             surf = v === 'model' ? makeModelSurface() : makeSurface(seedNo);
             seeds.length = 0; last = null; valleys.clear(); bake();
             k.sound.tone(v === 'model' ? 330 : 262, 0.6, 0.04);
+          }
+        },
+
+        async demo(i) {
+          const s = k.show;
+          // where would a seed dropped here end up, with these settings?
+          const fate = (x, y, eta, mu) => {
+            let vx = 0, vy = 0, still = 0;
+            for (let n = 0; n < 4000; n++) {
+              const [gx, gy] = surf.grad(x, y);
+              vx = mu * vx - eta * gx; vy = mu * vy - eta * gy; x += vx; y += vy;
+              if (!Number.isFinite(x) || Math.abs(x) > EXTENT * 1.5 || Math.abs(y) > EXTENT * 1.5) return null;
+              still = Math.hypot(vx, vy) < 0.0015 ? still + 1 : 0;
+              if (still > 30) return { x, y, depth: (surf.L(x, y) - surf.lo) / (surf.hi - surf.lo), L: surf.L(x, y) };
+            }
+            return null;
+          };
+          const at = (x, y) => { const q = cam.proj(x, y, surf.Z(x, y)); return [q[0], q[1]]; };
+          // the first start on a coarse grid whose fate passes the test
+          const find = test => {
+            for (let a = -2.4; a <= 2.4; a += 0.4) for (let b = -2.4; b <= 2.4; b += 0.4) {
+              const end = fate(a, b, k.values.eta, k.values.mu);
+              if (end && test(end, a, b)) return at(a, b);
+            }
+            return null;
+          };
+          const model = async () => { if (!surf.model) await s.press('world', 'model'); if (Math.abs(k.values.eta - 0.05) > 0.02) await s.slide('eta', 0.05); if (k.values.mu > 0.5) await s.slide('mu', 0); };
+          if (i === 0) await s.tap(...at(1.2, -0.8));
+          if (i === 1) { await s.slide('eta', 0.3); for (const q of [[1.4, 1.0], [-1.2, 0.6], [0.4, -1.5]]) await s.tap(...at(...q)); }
+          if (i === 2) {
+            await s.slide('eta', 0.02); await s.slide('mu', 0);
+            const spot = find(e => e.depth > 0.16);
+            if (spot) await s.tap(...spot); else for (const q of [[1.6, 1.4], [-1.6, 1.2], [-1.2, -1.6], [1.8, -1.2]]) await s.tap(...at(...q));
+          }
+          if (i === 3) { await s.slide('mu', 0.9); for (const q of [[1.5, 1.2], [-1.4, -0.8]]) await s.tap(...at(...q)); }
+          if (i === 4) await s.press('rain');
+          if (i === 5) { await model(); const spot = find(e => e.L < 0.05 && e.x > 0); await s.tap(...(spot || at(1.5, 1.5))); }
+          if (i === 6) {
+            await model();
+            const side = valleys.has(1) ? -1 : 1;
+            for (const sg of valleys.size ? [side] : [1, -1]) { const spot = find(e => e.L < 0.05 && Math.sign(e.x) === sg); if (spot) await s.tap(...spot); }
           }
         },
         maths() {

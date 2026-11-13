@@ -242,7 +242,7 @@
           offset = clamp(drag.off0 + (p.x - drag.x0) / rail.sp * 1.5, 0, 400);
         },
         up() {
-          if (drag && Math.abs(offset - drag.off0) >= 2 && k.stage === 0) k.reach(0);
+          if (drag && Math.abs(offset - drag.off0) >= 2 && !k.did(0)) k.reach(0);
           if (drag && drag.word === -1 && Math.abs(offset - drag.off0) > 0.5) k.sound.tone(294, 0.4, 0.03);
           drag = null;
         },
@@ -251,12 +251,12 @@
           if (i < 0 || i === A) return;
           B = i;
           k.sound.tone(262 * 2 ** (Math.abs(B - A) / 12), 0.6, 0.05);
-          if (k.stage === 1) k.reach(1);
-          if (k.stage === 2 && Math.abs(B - A) >= 6) k.reach(2);
+          if (!k.did(1)) k.reach(1);
+          if (!k.did(2) && Math.abs(B - A) >= 6) k.reach(2);
         },
         control(id, v) {
-          if (id === 'base' && v >= Math.log10(3000) && k.stage === 3) k.reach(3);
-          if (id === 'head') { MODE.head = v; if (k.stage === 4 && v === 'prev') k.reach(4); k.sound.pluck(k.sound.note(v === 'word' ? 0 : v === 'prev' ? 2 : 4, 220), 0.05); }
+          if (id === 'base' && v >= Math.log10(3000) && !k.did(3)) k.reach(3);
+          if (id === 'head') { MODE.head = v; if (!k.did(4) && v === 'prev') k.reach(4); k.sound.pluck(k.sound.note(v === 'word' ? 0 : v === 'prev' ? 2 : 4, 220), 0.05); }
           if (id === 'rot') { MODE.rot = v; shuffledOff = false; }
           if (id === 'shuffle') {
             const a = WORDS[A], b = WORDS[B];
@@ -266,12 +266,23 @@
             A = WORDS.indexOf(a); B = WORDS.indexOf(b);
             k.sound.noise(0.25, 0.03, 2400);
             if (!MODE.rot) shuffledOff = true;
-            if (k.stage === 5 && shuffledOff) k.reach(5);
+            if (!k.did(5) && shuffledOff) k.reach(5);
           }
         },
         key(e) {
           if (e.key === 'ArrowLeft') { offset = Math.max(0, offset - 1); e.preventDefault(); }
           if (e.key === 'ArrowRight') { offset += 1; e.preventDefault(); }
+        },
+
+        async demo(i) {
+          const s = k.show, at = n => [rail.x0 + n * rail.sp, rail.y];
+          const far = d => { const n = A - d >= 0 ? A - d : A + d; return at(clamp(n, 0, WORDS.length - 1)); };
+          if (i === 0) await s.drag([[k.w * 0.4, rail.y], [k.w * 0.64, rail.y]], 2000);
+          if (i === 1) await s.tap(...far(Math.abs(B - A) === 3 ? 2 : 3));
+          if (i === 2) await s.tap(...far(7));
+          if (i === 3) await s.slide('base', 3.7, 1800);
+          if (i === 4) await s.press('head', 'prev');
+          if (i === 5) { if (k.values.rot) await s.press('rot', false); await s.wait(500); await s.press('shuffle'); }
         },
         maths() {
           const K = k.values.pairs, base = 10 ** k.values.base, th = thetas(K, base), m = Math.round(pos(A)), n = Math.round(pos(B));

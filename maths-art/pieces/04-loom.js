@@ -183,10 +183,10 @@
       function select(i) {
         query = i;
         const word = toks[i][0];
-        if (k.stage === 0 && sentence === 'tired' && word === 'tired') k.reach(0);
-        if (k.stage === 1 && sentence === 'wide' && word === 'wide') k.reach(1);
-        if (k.stage === 2 && word === 'it') k.reach(2);
-        if (k.stage === 4 && sentence === 'copy' && i === toks.length - 1) k.reach(4);
+        if (!k.did(0) && sentence === 'tired' && word === 'tired') k.reach(0);
+        if (!k.did(1) && sentence === 'wide' && word === 'wide') k.reach(1);
+        if (!k.did(2) && word === 'it') k.reach(2);
+        if (!k.did(4) && sentence === 'copy' && i === toks.length - 1) k.reach(4);
         k.sound.pluck(k.sound.note(i), 0.06);
       }
       function mix(i) {
@@ -313,12 +313,24 @@
           if (id === 'tau') {
             if (v < 0.4) sawLow = true;
             if (v > 2.2) sawHigh = true;
-            if (k.stage === 3 && sawLow && sawHigh) k.reach(3);
+            if (!k.did(3) && sawLow && sawHigh) k.reach(3);
           }
         },
         key(e) {
           if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { select((query + 1) % toks.length); e.preventDefault(); }
           if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { select((query + toks.length - 1) % toks.length); e.preventDefault(); }
+        },
+
+        async demo(i) {
+          const s = k.show, pin = n => [L.pins[n].x, L.pins[n].y], idx = w => toks.findIndex(x => x[0] === w);
+          if (i === 0 || i === 1) {
+            if (sentence !== 'tired') await s.press('sentence', 'tired');
+            if (i === 1 && query !== idx('tired')) await s.tap(...pin(idx('tired')));
+            await s.tap(...pin(idx('tired')));
+          }
+          if (i === 2) { if (idx('it') < 0) await s.press('sentence', 'tired'); await s.tap(...pin(idx('it'))); }
+          if (i === 3) { await s.slide('tau', 0.15, 1400); await s.wait(700); await s.slide('tau', 3, 1800); await s.wait(700); await s.slide('tau', 1, 900); }
+          if (i === 4) { if (sentence !== 'copy') await s.press('sentence', 'copy'); await s.wait(400); await s.tap(...pin(toks.length - 1)); }
         },
         maths() {
           const hs = heads(), tau = k.values.tau;

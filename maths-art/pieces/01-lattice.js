@@ -255,15 +255,15 @@
         return null;
       }
       function sawAnalogy() {
-        if (k.stage !== 5 || !analogy(hover)) return;
+        if (k.did(5) || !analogy(hover)) return;
         const D = det(target), bent = target.some((v, i) => Math.abs(v - [1, 0, 0, 1][i]) > 0.2);
         if (bent && Math.abs(D) > 0.06) k.reach(5);
       }
       function check() {
         const D = det(target);
-        if (k.stage === 0 && Math.hypot(target[0] - 1, target[2]) > 0.3) k.reach(0);
-        if (k.stage === 2 && Math.abs(D) < 0.06 && Math.hypot(target[1], target[3]) > 0.3 && Math.hypot(target[0], target[2]) > 0.3) k.reach(2);
-        if (k.stage === 3 && D < -0.3) k.reach(3);
+        if (!k.did(0) && Math.hypot(target[0] - 1, target[2]) > 0.3) k.reach(0);
+        if (!k.did(2) && Math.abs(D) < 0.06 && Math.hypot(target[1], target[3]) > 0.3 && Math.hypot(target[0], target[2]) > 0.3) k.reach(2);
+        if (!k.did(3) && D < -0.3) k.reach(3);
       }
 
       return {
@@ -329,7 +329,7 @@
         },
         down(p) {
           drag = nearestHandle(p);
-          if (!drag) { const wi = nearestWord(p); if (wi >= 0) { hover = wi; if (k.stage === 1) k.reach(1); sawAnalogy(); } }
+          if (!drag) { const wi = nearestWord(p); if (wi >= 0) { hover = wi; if (!k.did(1)) k.reach(1); sawAnalogy(); } }
           if (drag && k.values.breathe) { k.set('breathe', false); }
         },
         move(p) {
@@ -342,7 +342,7 @@
           } else if (!p.dragging) {
             hoverHandle = nearestHandle(p);
             hover = hoverHandle ? -1 : nearestWord(p);
-            if (hover >= 0 && k.stage === 1) k.reach(1);
+            if (hover >= 0 && !k.did(1)) k.reach(1);
             sawAnalogy();
           }
         },
@@ -359,7 +359,7 @@
             const L = [s * Math.cos(a), -Math.sin(a) * 0.9 + (r() - 0.5) * 0.6, Math.sin(a) * 0.9, s * Math.cos(a)];
             target = mul(L, target).map(v => clamp(v, -4, 4));
             k.set('preset', '');
-            if (k.stage === 4) k.reach(4);
+            if (!k.did(4)) k.reach(4);
             k.sound.tone(262, 0.6, 0.05); k.sound.tone(392, 0.6, 0.03);
           }
           if (id === 'breathe') breathe = 0;
@@ -371,6 +371,23 @@
           if (e.shiftKey) { target[1] += d[0]; target[3] += d[1]; } else { target[0] += d[0]; target[2] += d[1]; }
           target = target.map(v => clamp(v, -4, 4));
           check();
+        },
+
+        async demo(i) {
+          const s = k.show, P = (x, y) => [cx + x * u, cy - y * u], M = () => shownMatrix();
+          if (k.values.breathe) await s.press('breathe', false);
+          const tipI = () => P(M()[0], M()[2]), tipJ = () => P(M()[1], M()[3]);
+          const word = name => { const [, x, y] = WORDS.find(w => w[0] === name), m = M(); return P(m[0] * x + m[1] * y, m[2] * x + m[3] * y); };
+          if (i === 0) await s.drag([tipI(), P(1.25, 0.5), P(0.75, 0.75)], 2000);
+          if (i === 1) await s.hover(...word('queen'), 1800);
+          if (i === 2) { const m = M(); await s.drag([tipJ(), P(m[0] * 0.75, m[2] * 0.75)], 1800); }
+          if (i === 3) { const m = M(), L = Math.hypot(m[0], m[2]) || 1; await s.drag([tipJ(), P(m[2] / L * 1.25, -m[0] / L * 1.25)], 2000); }
+          if (i === 4) await s.press('layer');
+          if (i === 5) {
+            const m = target, flat = Math.abs(det(m)) < 0.2, plain = m.every((v, q) => Math.abs(v - [1, 0, 0, 1][q]) < 0.25);
+            if (flat || plain) { await s.press('preset', 'shear'); await s.wait(1000); }
+            await s.hover(...word('queen'), 2000);
+          }
         },
         maths() {
           const M = shownMatrix(), D = det(M);
