@@ -54,8 +54,9 @@ const FieldStream = (() => {
       w = b.width; h = b.height; dpr = Math.min(2, devicePixelRatio || 1);
       canvas.width = Math.max(1, Math.round(w * dpr)); canvas.height = Math.max(1, Math.round(h * dpr));
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      // the whole study fits inside the box, as the SVG does under object-fit: contain
-      sc = Math.min(w / 1000, h / 700); ox = (w - 1000 * sc) / 2; oy = (h - 700 * sc) / 2;
+      // large enough to fill the hero from behind the heading to the right-hand edge, a little inside
+      // the SVG's object-fit: cover framing so that the last layer plane is not cut off
+      sc = Math.max(w / 1000, h / 700) * 0.88; ox = (w - 1000 * sc) / 2; oy = (h - 700 * sc) / 2;
       // a trace of blue where the stream enters, fading to the ink colour where it leaves
       wash = ctx.createLinearGradient(ox + 120 * sc, 0, ox + 900 * sc, 0);
       wash.addColorStop(0, 'rgba(150,198,255,.46)'); wash.addColorStop(1, 'rgba(232,232,232,.42)');
