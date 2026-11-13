@@ -112,6 +112,9 @@ const Field = (() => {
       },{signal});
     });
 
+    // the home hero: the static study comes alive where a canvas is available
+    if (typeof FieldStream !== 'undefined') FieldStream.mount(app.querySelector('.field-hero-art'), signal);
+
     app.querySelectorAll('.cube-glyph').forEach(el=>{el.innerHTML=art('lattice','dark');});
     app.querySelectorAll('.quant-glyph').forEach(el=>{el.innerHTML=art('signal','dark');});
   }
