@@ -1,15 +1,15 @@
 /* FieldStream — the home hero, alive.
    The same study as assets/field-stream-dark.svg (strands threading through
    34 layer planes: a residual stream), drawn on a canvas so that it can move:
-   the strands sway and slowly twist, pulses of colour travel along them from
-   the first layer to the last, and each plane lights briefly as a pulse
+   the strands sway and slowly twist, a few pale pulses travel along them from
+   the first layer to the last, and each plane brightens a little as a pulse
    crosses it. Decorative procedural geometry only — not measured data.
    The static SVG stays underneath as the fallback and the reduced-motion view. */
 const FieldStream = (() => {
   const L = 34, LO = -2.35, HI = 2.35, STRANDS = 56, HALF = 0.6, SUB = 6;
   const INK = '232,232,232';
-  // a small palette borrowed from the Interiors rooms
-  const HUES = ['110,196,255', '196,178,255', '255,138,208', '255,196,92', '140,230,214'];
+  // one quiet accent: a pale blue, with the occasional pulse left white
+  const HUES = ['140,196,255', '140,196,255', '226,232,240'];
 
   function rng(seed) {
     let a = seed >>> 0;
@@ -45,7 +45,7 @@ const FieldStream = (() => {
 
     const strands = build(), r = rng(29);
     const energy = new Float32Array(L), planeHue = new Array(L).fill(HUES[0]);
-    const pulses = Array.from({ length: 22 }, (_, i) => ({ s: Math.floor(r() * STRANDS), u: r() * 1.1 - 0.1, v: 0.05 + r() * 0.06, hue: HUES[i % HUES.length], layer: -1 }));
+    const pulses = Array.from({ length: 6 }, (_, i) => ({ s: Math.floor(r() * STRANDS), u: r() * 1.1 - 0.1, v: 0.028 + r() * 0.024, hue: HUES[i % HUES.length], layer: -1 }));
     let w = 0, h = 0, dpr = 1, sc = 1, ox = 0, oy = 0, raf = 0, alive = true, visible = true, t = 0, last = 0, born = 0;
     let mx = 0, my = 0, px = 0, py = 0, wash = null;
 
@@ -54,18 +54,18 @@ const FieldStream = (() => {
       w = b.width; h = b.height; dpr = Math.min(2, devicePixelRatio || 1);
       canvas.width = Math.max(1, Math.round(w * dpr)); canvas.height = Math.max(1, Math.round(h * dpr));
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      // the same framing as the SVG under object-fit: cover
-      sc = Math.max(w / 1000, h / 700); ox = (w - 1000 * sc) / 2; oy = (h - 700 * sc) / 2;
-      // cool where the stream enters, warm where it leaves
+      // the whole study fits inside the box, as the SVG does under object-fit: contain
+      sc = Math.min(w / 1000, h / 700); ox = (w - 1000 * sc) / 2; oy = (h - 700 * sc) / 2;
+      // a trace of blue where the stream enters, fading to the ink colour where it leaves
       wash = ctx.createLinearGradient(ox + 120 * sc, 0, ox + 900 * sc, 0);
-      wash.addColorStop(0, 'rgba(120,200,255,.5)'); wash.addColorStop(0.5, 'rgba(200,182,255,.5)'); wash.addColorStop(1, 'rgba(255,186,130,.55)');
+      wash.addColorStop(0, 'rgba(150,198,255,.46)'); wash.addColorStop(1, 'rgba(232,232,232,.42)');
       if (reduced) draw(6, 0);
     }
 
     function draw(time, dt) {
       // the camera drifts a little, and leans towards the pointer
       px += (mx - px) * Math.min(1, dt * 2.5); py += (my - py) * Math.min(1, dt * 2.5);
-      const a = -0.55 + 0.03 * Math.sin(time * 0.11) + px * 0.05, b = 0.65 + 0.018 * Math.sin(time * 0.073 + 1) + py * 0.03;
+      const a = -0.55 + 0.03 * Math.sin(time * 0.11) + px * 0.025, b = 0.65 + 0.018 * Math.sin(time * 0.073 + 1) + py * 0.015;
       const ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(b), sb = Math.sin(b);
       const P = (x, y, z) => { const Xr = x * ca - z * sa, Zr = x * sa + z * ca; return [ox + (500 + Xr * 200) * sc, oy + (350 + (y * cb - Zr * sb) * 200) * sc]; };
       const grow = reduced ? 1 : Math.min(1, (time - born) / 2.6); // the stream draws itself in from the first layer
@@ -75,7 +75,7 @@ const FieldStream = (() => {
 
       // a breath of colour in the air behind the stream
       ctx.globalCompositeOperation = 'lighter';
-      for (const [x, hue, al, ph] of [[-1.5, '90,150,255', 0.075, 0], [1.6, '255,150,110', 0.06, 2.1], [0.1, '190,140,255', 0.05, 4]]) {
+      for (const [x, hue, al, ph] of [[-0.6, '90,150,255', 0.045, 0]]) {
         const [gx, gy] = P(x, 0.1 * Math.sin(time * 0.13 + ph), 0), rad = 300 * sc * (1 + 0.08 * Math.sin(time * 0.17 + ph));
         const g = ctx.createRadialGradient(gx, gy, 0, gx, gy, rad);
         g.addColorStop(0, `rgba(${hue},${al})`); g.addColorStop(1, `rgba(${hue},0)`);
@@ -89,9 +89,8 @@ const FieldStream = (() => {
         if (l / (L - 1) > grow) break;
         const x = X(l), e = energy[l], c = [[-HALF, -HALF], [HALF, -HALF], [HALF, HALF], [-HALF, HALF]].map(([y, z]) => P(x, y, z));
         ctx.beginPath(); c.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath();
-        if (e > 0.02) { ctx.fillStyle = `rgba(${planeHue[l]},${Math.min(0.14, e * 0.1)})`; ctx.fill(); }
-        ctx.strokeStyle = e > 0.02 ? `rgba(${planeHue[l]},${Math.min(0.7, 0.26 + e * 0.45)})` : `rgba(${INK},${l % 8 === 0 ? 0.5 : 0.26})`;
-        ctx.lineWidth = (0.6 + Math.min(1, e) * 0.9) * sc;
+        ctx.strokeStyle = e > 0.02 ? `rgba(${planeHue[l]},${Math.min(0.55, 0.26 + e * 0.3)})` : `rgba(${INK},${l % 8 === 0 ? 0.5 : 0.26})`;
+        ctx.lineWidth = (0.6 + Math.min(1, e) * 0.3) * sc;
         ctx.stroke();
       }
 
@@ -100,7 +99,7 @@ const FieldStream = (() => {
       const pts = new Array(L);
       for (const S of strands) {
         for (let l = 0; l < L; l++) {
-          const [y0, z0] = S.walk[l], sway = (0.012 + 0.022 * l / L) * Math.sin(time * S.rate + l * 0.33 + S.phase);
+          const [y0, z0] = S.walk[l], sway = (0.01 + 0.016 * l / L) * Math.sin(time * S.rate + l * 0.33 + S.phase);
           const y = y0 + sway, z = z0 + sway * 0.6 * Math.cos(time * 0.2 + S.phase);
           const an = l * twist, cy = y * Math.cos(an) - z * Math.sin(an), cz = y * Math.sin(an) + z * Math.cos(an);
           pts[l] = [X(l), HALF * 0.9 * Math.tanh(cy / (HALF * 0.9)), HALF * 0.9 * Math.tanh(cz / (HALF * 0.9))];
@@ -133,15 +132,15 @@ const FieldStream = (() => {
         if (p.u < 0 || p.u > grow) continue;
         const line = strands[p.s].line, f = p.u * (n - 1), i = Math.min(n - 2, Math.floor(f)), v = f - i;
         const hx = line[i * 2] + (line[i * 2 + 2] - line[i * 2]) * v, hy = line[i * 2 + 1] + (line[i * 2 + 3] - line[i * 2 + 1]) * v;
-        const fade = Math.min(1, p.u * 12, (1 - p.u) * 10), tail = 34;
+        const fade = Math.min(1, p.u * 12, (1 - p.u) * 10), tail = 26;
         for (let q = 0; q < tail && i - q > 0; q++) {
-          ctx.strokeStyle = `rgba(${p.hue},${(1 - q / tail) ** 2 * 0.9 * fade})`; ctx.lineWidth = (2 - q / tail) * sc;
+          ctx.strokeStyle = `rgba(${p.hue},${(1 - q / tail) ** 2 * 0.5 * fade})`; ctx.lineWidth = (1.4 - 0.6 * q / tail) * sc;
           ctx.beginPath(); ctx.moveTo(line[(i - q) * 2], line[(i - q) * 2 + 1]); ctx.lineTo(line[(i - q - 1) * 2], line[(i - q - 1) * 2 + 1]); ctx.stroke();
         }
-        const rad = 22 * sc, g = ctx.createRadialGradient(hx, hy, 0, hx, hy, rad);
-        g.addColorStop(0, `rgba(${p.hue},${0.85 * fade})`); g.addColorStop(0.25, `rgba(${p.hue},${0.28 * fade})`); g.addColorStop(1, `rgba(${p.hue},0)`);
+        const rad = 11 * sc, g = ctx.createRadialGradient(hx, hy, 0, hx, hy, rad);
+        g.addColorStop(0, `rgba(${p.hue},${0.5 * fade})`); g.addColorStop(0.3, `rgba(${p.hue},${0.14 * fade})`); g.addColorStop(1, `rgba(${p.hue},0)`);
         ctx.fillStyle = g; ctx.fillRect(hx - rad, hy - rad, rad * 2, rad * 2);
-        ctx.fillStyle = `rgba(255,255,255,${0.9 * fade})`; ctx.beginPath(); ctx.arc(hx, hy, 1.3 * sc, 0, 7); ctx.fill();
+        ctx.fillStyle = `rgba(255,255,255,${0.75 * fade})`; ctx.beginPath(); ctx.arc(hx, hy, 1.1 * sc, 0, 7); ctx.fill();
       }
       ctx.globalCompositeOperation = 'source-over';
     }
@@ -151,8 +150,8 @@ const FieldStream = (() => {
       for (const p of pulses) {
         p.u += p.v * dt;
         const layer = Math.floor(p.u * (L - 1));
-        if (p.u >= 0 && layer !== p.layer && layer >= 0 && layer < L) { p.layer = layer; energy[layer] = Math.min(1.2, energy[layer] + 0.5); planeHue[layer] = p.hue; }
-        if (p.u > 1) { p.u = -r() * 0.5; p.s = Math.floor(r() * STRANDS); p.v = 0.05 + r() * 0.06; p.layer = -1; }
+        if (p.u >= 0 && layer !== p.layer && layer >= 0 && layer < L) { p.layer = layer; energy[layer] = Math.min(1, energy[layer] + 0.6); planeHue[layer] = p.hue; }
+        if (p.u > 1) { p.u = -r() * 0.5; p.s = Math.floor(r() * STRANDS); p.v = 0.028 + r() * 0.024; p.layer = -1; }
       }
     }
 
